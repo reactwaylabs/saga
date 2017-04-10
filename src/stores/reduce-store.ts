@@ -13,7 +13,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} dispatcher - Dispatcher instance.
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
