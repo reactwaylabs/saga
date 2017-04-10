@@ -11,7 +11,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param dispatcher {Flux.Dispatcher<DispatcherMessage<any>>} Dispatcher instance.
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} dispatcher - Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
@@ -33,8 +33,8 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param state {TState} Current store state.
-     * @param payload {DispatcherMessage<any>} Disaptched payload message.
+     * @param {TState} state - Current store state.
+     * @param {DispatcherMessage<any>} payload - Disaptched payload message.
      */
     reduce(state: TState, payload: DispatcherMessage<any>): TState {
         this.actionHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
@@ -53,8 +53,8 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * Checks if two versions of state are the same.
      * You do not need to override.
      *
-     * @param startingState {TState} Starting state (current)
-     * @param endingState {TState} Ending state (updated)
+     * @param {TState} startingState - Starting state (current).
+     * @param {TState} endingState - Ending state (updated).
      */
     areEqual(startingState: TState, endingState: TState): boolean {
         if (startingState != null &&
@@ -85,8 +85,8 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * Check if action should handled.
      * By default always return true.
      *
-     * @param action {Object} Action payload data.
-     * @param state {TState} Updated store state.
+     * @param {Object} action - Action payload data.
+     * @param {TState} state - Updated store state.
      */
     protected shouldHandleAction(action: Object, state: TState): boolean {
         return true;
@@ -96,15 +96,22 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Register specified action handler in this store.
      *
-     * @param action {Function} Action class function.
-     * @param handler {ActionHandler<TClass, TState>} Action handler function.
+     * @param {Function} action - Action class function.
+     * @param {ActionHandler<TClass, TState>} handler - Action handler function.
      */
     protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
-        if (action != null) {
-            this.actionHandlers = this.actionHandlers.set(action, handler);
-        } else {
+        let actionType = typeof action;
+        if (actionType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action of '${action}'.`);
+                `cannot register action with 'action' type of '${actionType}'.`);
         }
+
+        let handlerType = typeof handler;
+        if (handlerType !== "function") {
+            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
+                `cannot register action with 'handler' type of '${handlerType}'.`);
+        }
+
+        this.actionHandlers = this.actionHandlers.set(action, handler);
     }
 }
