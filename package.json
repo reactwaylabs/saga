@@ -11,7 +11,6 @@
     "release": "npm run build && npm run uglifyjs"
   },
   "devDependencies": {
-    "@types/flux": "^3.0.1",
     "ts-loader": "^2.0.3",
     "tslint": "^5.0.0",
     "typescript": "^2.2.2",
@@ -20,6 +19,7 @@
   },
   "dependencies": {
     "flux": "^3.1.2",
+    "@types/flux": "^3.0.1",
     "immutable": "^3.8.1"
   }
 }
