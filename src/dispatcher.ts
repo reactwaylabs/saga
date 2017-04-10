@@ -1,4 +1,4 @@
-﻿import * as flux from "flux";
+import * as flux from "flux";
 
 export interface DispatcherMessage<TAction> {
     action: TAction;
