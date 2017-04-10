@@ -36,7 +36,7 @@ export class QueuesHandler<TValue> {
      * Set item data by specified key.
      *
      * @param key {string} - Item key.
-     * @param value {TValue | undefined} - Item value.
+     * @param value {(TValue | undefined)} - Item value.
      * @param status {ItemStatus} - Item status.
      */
     public Set(key: string, value: TValue | undefined, status: ItemStatus): void {
