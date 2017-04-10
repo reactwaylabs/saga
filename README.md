@@ -1,0 +1,2 @@
+# simplr-flux
+Flux architecture.
