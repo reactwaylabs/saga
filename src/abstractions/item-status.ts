@@ -1,4 +1,3 @@
-
 /**
  * Available item status.
  *

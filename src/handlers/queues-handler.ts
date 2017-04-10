@@ -7,17 +7,15 @@ const OBJECT_FREEZE_EXIST = Object != null && Object.freeze != null;
 
 
 export class QueuesHandler<TValue> {
-
     constructor() {
         this.queues = Immutable.Map<string, Item<TValue>>();
     }
 
     /**
      * Queues list.
-     * 
+     *
      */
     private queues: Immutable.Map<string, Item<TValue>>;
-
 
     /**
      * Freeze specified object if global function exists.
@@ -30,7 +28,6 @@ export class QueuesHandler<TValue> {
         }
         return Object.freeze(obj);
     }
-
 
     /**
      * Set item data by specified key.
@@ -45,7 +42,6 @@ export class QueuesHandler<TValue> {
         this.queues = this.queues.set(key, newValue);
     }
 
-
     /**
      * Create new initial item with specified key.
      *
@@ -57,7 +53,6 @@ export class QueuesHandler<TValue> {
         this.queues = this.queues.set(key, newValue);
         return newValue;
     }
-
 
     /**
      * Set spcified status for item by key.
@@ -74,7 +69,6 @@ export class QueuesHandler<TValue> {
             return this.tryToFreezeObject(newValue);
         });
     }
-
 
     /**
      * Set specified status for multiple items by keys.
@@ -97,7 +91,6 @@ export class QueuesHandler<TValue> {
         });
     }
 
-
     /**
      * Returns filtered items by specified item status.
      *
@@ -106,7 +99,6 @@ export class QueuesHandler<TValue> {
     public GetItemsByStatus(status: ItemStatus): Immutable.Map<string, Item<TValue>> {
         return this.queues.filter(x => x != null && x.Status === status).toMap();
     }
-
 
     /**
      * Returns the value with specified key from queues list.
@@ -118,7 +110,6 @@ export class QueuesHandler<TValue> {
         return this.queues.get(key);
     }
 
-
     /**
      * Return true if item with specified key exists in queues list.
      *
@@ -128,7 +119,6 @@ export class QueuesHandler<TValue> {
         return this.queues.has(key);
     }
 
-
     /**
      * Remove specified item by key from queues list.
      *
@@ -137,7 +127,6 @@ export class QueuesHandler<TValue> {
     public Remove(key: string): void {
         this.queues = this.queues.remove(key);
     }
-
 
     /**
      * Remove multiple items by keys from queues list.
@@ -152,7 +141,6 @@ export class QueuesHandler<TValue> {
             }
         });
     }
-
 
     /**
      * Remove all items from queues list.

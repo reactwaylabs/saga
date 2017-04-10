@@ -47,7 +47,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         this.inCleanUpState = false;
     }
 
-
     /**
      * Generate new initial state start new session.
      *
@@ -91,7 +90,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         return state;
     }
 
-
     /**
      * Checks if two versions of state are the same.
      * You do not need to override.
@@ -123,14 +121,12 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         }
     }
 
-
     /**
      * Constructs the initial state for this store.
      * This is called once during construction of the store.
      *
      */
     abstract getInitialState(): TState;
-
 
     /**
      * Method is invoked immediately before a store began to clean the state.
@@ -139,7 +135,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      *
      */
     protected storeWillCleanUp: undefined | StoreWillCleanup<TState>;
-
 
     /**
      * Check if action should handled.
@@ -151,7 +146,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     protected shouldHandleAction(action: Object, state: TState): boolean {
         return true;
     }
-
 
     /**
      * Clean up all store data.
@@ -166,7 +160,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         }
         this.inCleanUpState = true;
     }
-
 
     /**
      * Register specified action handler in this store.

@@ -1,7 +1,6 @@
 import { ItemStatus } from "./item-status";
 
 export class Item<T> {
-
     /**
      * Construct new item.
      *
