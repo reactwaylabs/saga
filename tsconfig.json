@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "es5",
+        "noImplicitAny": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "outDir": "dist",
+        "rootDir": "src",
+        "sourceMap": false,
+        "noUnusedLocals": true,
+        "noImplicitThis": true,
+        "noImplicitUseStrict": true,
+        "strictNullChecks": true,
+        "skipDefaultLibCheck": true,
+        "declaration": true,
+        "declarationDir": "@types",
+        "lib": [
+            "dom",
+            "dom.iterable",
+            "es2015"
+        ]
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "@types"
+    ]
+}
