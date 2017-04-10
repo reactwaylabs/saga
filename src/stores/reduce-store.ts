@@ -22,21 +22,25 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
 
     /**
      * Actions handlers list.
+     * 
      */
     private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState>>();
 
     /**
      * Is store in clean up state.
+     * 
      */
     private inCleanUpState: boolean;
 
     /**
      * Session start in timestamp.
+     * 
      */
     private session: number;
 
     /**
      * Start a new session.
+     * 
      */
     private startNewSession() {
         this.session = +new Date();
