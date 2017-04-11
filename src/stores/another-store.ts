@@ -2,7 +2,7 @@ import * as Flux from "flux";
 import * as Immutable from "immutable";
 import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
-export abstract class ReduceStore extends FluxReduceStore<TState, DispatcherMessage<any>> {
+export abstract class ReduceStore extends FluxReduceStore {
     /**
      * Creates an instance of ReduceStore.
      *
