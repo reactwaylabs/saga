@@ -4,7 +4,7 @@ import * as Immutable from "immutable";
 import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
 export type ActionHandler<TClass, TMyState> = (action: TClass, state: TMyState) => TMyState | void;
-export type StoreWillCleanup<TState> = () => void | TState;
+export type StoreWillCleanup<TMyState> = () => void | TMyState;
 
 export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
     /**
