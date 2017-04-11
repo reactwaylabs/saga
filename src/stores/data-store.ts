@@ -108,7 +108,6 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
         return Immutable.Map<string, Item<any>>({});
     }
 
-
     /**
      * Reduces the current state, and an action to the new state of this store.
      * All subclasses must implement this method.
