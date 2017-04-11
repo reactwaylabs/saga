@@ -1,7 +1,7 @@
 import * as Flux from "flux";
 import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
-import { Dispatcher, DispatcherMessage } from "../dispatcher";
+import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
 
 export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
@@ -37,6 +37,13 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      *
      */
     private session: number;
+
+    /**
+     * Return current session timestamp.
+     */
+    protected get currentSession(): number {
+        return this.session;
+    }
 
     /**
      * Start a new session.
@@ -119,6 +126,14 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         } else {
             return startingState === endingState;
         }
+    }
+
+    /**
+     * This method will return the dispatcher for this store.
+     *
+     */
+    getDispatcher(): DispatcherBuilder {
+        return super.getDispatcher();
     }
 
     /**

@@ -10,9 +10,9 @@ export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>> {
      *
      * @param dispatcherMessage {TAction} Instance of class.
      */
-    public dispatch<TAction>(dispatcherMessage: TAction): void {
+    public dispatch<TAction>(actionClass: TAction): void {
         let payload: DispatcherMessage<TAction> = {
-            action: dispatcherMessage
+            action: actionClass
         };
         try {
             if (!this.isDispatching()) {

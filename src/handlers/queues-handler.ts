@@ -36,10 +36,11 @@ export class QueuesHandler<TValue> {
      * @param value {(TValue | undefined)} - Item value.
      * @param status {ItemStatus} - Item status.
      */
-    public Set(key: string, value: TValue | undefined, status: ItemStatus): void {
+    public Set(key: string, value: TValue | undefined, status: ItemStatus): Item<TValue> {
         let newValue = new Item<TValue>(status, value);
         newValue = this.tryToFreezeObject(newValue);
         this.queues = this.queues.set(key, newValue);
+        return newValue;
     }
 
     /**
@@ -60,14 +61,17 @@ export class QueuesHandler<TValue> {
      * @param key {string} - Item key.
      * @param status {ItemStatus} - Item status.
      */
-    public SetItemStatus(key: string, status: ItemStatus): void {
+    public SetItemStatus(key: string, status: ItemStatus): Item<TValue> {
         if (!this.queues.has(key)) {
-            return;
+            return this.Set(key, undefined, status);
         }
+
         this.queues = this.queues.update(key, oldValue => {
             let newValue = new Item<TValue>(status, oldValue.Value);
             return this.tryToFreezeObject(newValue);
         });
+
+        return this.queues.get(key)!;
     }
 
     /**
@@ -76,7 +80,7 @@ export class QueuesHandler<TValue> {
      * @param keys {Array<string>} - List of items keys.
      * @param status {ItemStatus} - Item status.
      */
-    public SetItemsStatus(keys: Array<string>, status: ItemStatus): void {
+    public SetMultipleItemsStatus(keys: Array<string>, status: ItemStatus): void {
         this.queues = this.queues.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
@@ -96,8 +100,8 @@ export class QueuesHandler<TValue> {
      *
      * @param status {ItemStatus} - Item status.
      */
-    public GetItemsByStatus(status: ItemStatus): Immutable.Map<string, Item<TValue>> {
-        return this.queues.filter(x => x != null && x.Status === status).toMap();
+    public GetFilteredItems(statusCheck: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
+        return this.queues.filter(x => x != null && statusCheck(x)).toMap();
     }
 
     /**
@@ -133,10 +137,13 @@ export class QueuesHandler<TValue> {
      *
      * @param keys {Array<string>} - Items keys list.
      */
-    public RemoveMulti(keys: Array<string>): void {
+    public RemoveMultiple(keys: Array<string>): void {
         this.queues.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
+                if (key == null) {
+                    continue;
+                }
                 mutableQueues = mutableQueues.remove(key);
             }
         });
