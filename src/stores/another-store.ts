@@ -3,7 +3,7 @@ import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
 import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
-export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
+export class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
         this.startNewSession();
