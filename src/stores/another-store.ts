@@ -151,28 +151,5 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         }
         this.inCleanUpState = true;
     }
-    /**
-     * Register specified action handler in this store.
-     *
-     * @param {Function} action - Action class function.
-     * @param {ActionHandler<TClass, TState>} handler - Action handler function.
-     */
-    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
-        let actionType = typeof action;
-        if (actionType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'action' type of '${actionType}'.`);
-        }
-        let handlerType = typeof handler;
-        if (handlerType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'handler' type of '${handlerType}'.`);
-        }
-        if (this.actionsHandlers.has(action)) {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `Handler for action '${action.name}' has already been registered.`);
-        }
-        this.actionsHandlers = this.actionsHandlers.set(action, handler);
-    }
 }
 
