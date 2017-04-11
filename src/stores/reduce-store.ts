@@ -3,10 +3,10 @@ import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
 import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
-export type ActionHandler<TClass, any> = (action: TClass, state: any) => any | void;
-export type StoreWillCleanup<any> = () => void | any;
+export type ActionHandler<TClass, TMyState> = (action: TClass, state: TMyState) => TMyState | void;
+export type StoreWillCleanup<TMyState> = () => void | TMyState;
 
-export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMessage<any>> {
+export abstract class ReduceStore<TMyState> extends FluxReduceStore<TMyState, DispatcherMessage<any>> {
     /**
      * Creates an instance of ReduceStore.
      *
@@ -20,7 +20,7 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
      * Actions handlers list.
      *
      */
-    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, any>>();
+    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TMyState>>();
     /**
      * Is store in clean up state.
      *
@@ -48,10 +48,10 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
     /**
      * Generate new initial state start new session.
      *
-     * @param {any} state - Current store state.
+     * @param {TMyState} state - Current store state.
      */
-    private getCleanStateAndStartNewSession(state: any): any {
-        let newState: any | void;
+    private getCleanStateAndStartNewSession(state: TMyState): TMyState {
+        let newState: TMyState | void;
         if (this.storeWillCleanUp != null) {
             newState = this.storeWillCleanUp();
         }
@@ -66,14 +66,14 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {any} state - Current store state.
+     * @param {TMyState} state - Current store state.
      * @param {DispatcherMessage<any>} payload - Disaptched payload message.
      */
-    reduce(state: any, payload: DispatcherMessage<any>): any {
+    reduce(state: TMyState, payload: DispatcherMessage<any>): TMyState {
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, any>, action: Function) => {
+        this.actionsHandlers.forEach((handler: ActionHandler<Function, TMyState>, action: Function) => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 let newState = handler(payload.action, state);
                 if (newState != null) {
@@ -90,10 +90,10 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
      * Checks if two versions of state are the same.
      * You do not need to override.
      *
-     * @param {any} startingState - Starting state (current).
-     * @param {any} endingState - Ending state (updated).
+     * @param {TMyState} startingState - Starting state (current).
+     * @param {TMyState} endingState - Ending state (updated).
      */
-    areEqual(startingState: any, endingState: any): boolean {
+    areEqual(startingState: TMyState, endingState: TMyState): boolean {
         if (startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
@@ -127,23 +127,23 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
      * This is called once during construction of the store.
      *
      */
-    abstract getInitialState(): any;
+    abstract getInitialState(): TMyState;
     /**
      * Method is invoked immediately before a store began to clean the state.
      * It's called in the middle of a dispatch cycle.
      * If state returned in this method, it's used for initial state.
      *
      */
-    protected storeWillCleanUp: undefined | StoreWillCleanup<any>;
+    protected storeWillCleanUp: undefined | StoreWillCleanup<TMyState>;
 
     /**
      * Check if action should handled.
      * By default always return true.
      *
      * @param {Object} action - Action payload data.
-     * @param {any} state - Updated store state.
+     * @param {TMyState} state - Updated store state.
      */
-    protected shouldHandleAction(action: Object, state: any): boolean {
+    protected shouldHandleAction(action: Object, state: TMyState): boolean {
         return true;
     }
     /**
@@ -163,9 +163,9 @@ export abstract class ReduceStore<any> extends FluxReduceStore<any, DispatcherMe
      * Register specified action handler in this store.
      *
      * @param {Function} action - Action class function.
-     * @param {ActionHandler<TClass, any>} handler - Action handler function.
+     * @param {ActionHandler<TClass, TMyState>} handler - Action handler function.
      */
-    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, any>): void {
+    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TMyState>): void {
         let actionType = typeof action;
         if (actionType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
