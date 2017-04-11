@@ -1,74 +1,111 @@
-import * as Flux from "flux";
-import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
-import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
+import * as Flux from "flux";
+
+import { DispatcherMessage } from "../dispatcher";
+import { ReduceStore } from "./reduce-store";
+import { QueuesHandler } from "../handlers/queues-handler";
+
+import { Item } from "../abstractions/item";
+import { ItemStatus } from "../abstractions/item-status";
+import { Items } from "../contracts/items";
+import { StoreUpdateAction } from "../actions/data-store-actions";
 
 
-export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
-
-export type StoreWillCleanup<TState> = () => void | TState;
-
-
-export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
-    /**
-     * Creates an instance of ReduceStore.
-     *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
-     */
+export abstract class DataStore extends ReduceStore<Items<any>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
-        super(dispatcher || Dispatcher);
-        this.startNewSession();
+        super(dispatcher);
+        this.queues = new QueuesHandler<any>();
     }
 
     /**
-     * Actions handlers list.
+     * Queues list.
      *
      */
-    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState>>();
+    private queues: QueuesHandler<any>;
 
     /**
-     * Is store in clean up state.
+     * Start resolving promise and resolving item by key.
      *
+     * @param key {string} - Item key.
+     * @param promiseFactory {()=> Promise<TValue>} - Function which return a promise.
      */
-    private inCleanUpState: boolean;
-
-    /**
-     * Session start in timestamp.
-     *
-     */
-    private session: number;
-
-    /**
-     * Return current session timestamp.
-     */
-    protected get currentSession(): number {
-        return this.session;
-    }
-
-    /**
-     * Start a new session.
-     *
-     */
-    private startNewSession() {
-        this.session = +new Date();
-        this.inCleanUpState = false;
-    }
-
-    /**
-     * Generate new initial state start new session.
-     *
-     * @param {TState} state - Current store state.
-     */
-    private getCleanStateAndStartNewSession(state: TState): TState {
-        let newState: TState | void;
-        if (this.storeWillCleanUp != null) {
-            newState = this.storeWillCleanUp();
+    private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>) {
+        try {
+            let response = await promiseFactory();
+            let status = (response != null) ? ItemStatus.Loaded : ItemStatus.NoData;
+            this.queues.Set(key, response || undefined, status);
+        } catch (error) {
+            this.queues.SetItemStatus(key, ItemStatus.Failed);
         }
-        if (newState == null) {
-            newState = this.getInitialState();
+        this.getDispatcher().dispatch(new StoreUpdateAction(this.getDispatchToken()));
+    }
+
+    /**
+     * Return specified item value.
+     * Create new item in queues if not exists in store state.
+     *
+     * @param key {string} - Item key.
+     * @param noCache {boolean} - Update cached item from the server.
+     */
+    private getItem<TValue>(key: string, noCache: boolean): Item<TValue> {
+        if (key != null && this.has(key) && !noCache) {
+            return this.getState().get(key);
         }
-        this.startNewSession();
+        if (this.queues.Has(key)) {
+            return this.queues.Get(key)!;
+        }
+        return this.queues.Create(key);
+    }
+
+    /**
+     * Move completed items from queues to state.
+     *
+     * @param state {Item<any>} - Current store state.
+     */
+    private moveFromQueuesToState(state: Items<any>): Items<any> | undefined {
+        let moveList = this.queues.GetFilteredItems(x => x.Status >= ItemStatus.Loaded);
+        if (moveList.size === 0) {
+            return;
+        }
+        let keysForRemove = new Array<string>(moveList.size);
+        let newState = state.withMutations(mutableState => {
+            moveList.forEach((item, key) => {
+                if (item == null || key == null) {
+                    return;
+                }
+                mutableState.set(key, item);
+                keysForRemove.push(key);
+            });
+        });
+
+        this.queues.RemoveMultiple(keysForRemove);
         return newState;
+    }
+
+    /**
+     * Return specified item value.
+     * Start resolving data with `promiseFactory`.
+     *
+     * @param {string} key - Item key.
+     * @param {() => Promise<TValue>} promiseFactory - Function which return promise with value resolver.
+     * @param {boolean} [noCache=false] - Use data without cache.
+     */
+    protected GetValueFromState<TValue>(
+        key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue> {
+        let value = this.getItem<TValue>(key, noCache);
+        if (value.Status === ItemStatus.Init) {
+            value = this.queues.SetItemStatus(key, ItemStatus.Pending);
+            this.startRequestingData(key, promiseFactory);
+        }
+        return value;
+    }
+
+    /**
+     * Constructs the initial state for this store.
+     * This is called once during construction of the store.
+     */
+    getInitialState(): Items<any> {
+        return Immutable.Map<string, Item<any>>({});
     }
 
     /**
@@ -76,130 +113,29 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {TState} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Disaptched payload message.
+     * @param state {Items<any>} - Current store state.
+     * @param payload {DispatcherMessage<any>} - Dispatched message from dispatcher.
      */
-    reduce(state: TState, payload: DispatcherMessage<any>): TState {
-        if (this.inCleanUpState) {
-            state = this.getCleanStateAndStartNewSession(state);
-        }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
-            if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
-                let newState = handler(payload.action, state);
+    reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
+        if (payload.action instanceof StoreUpdateAction) {
+            if (this.getDispatchToken() === payload.action.DispatchToken) {
+                let newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
                     state = newState;
                 }
             }
-        });
-        if (this.inCleanUpState) {
-            state = this.getCleanStateAndStartNewSession(state);
+        } else {
+            state = super.reduce(state, payload);
         }
         return state;
     }
 
     /**
-     * Checks if two versions of state are the same.
-     * You do not need to override.
+     * Check if the cache has a particular key.
      *
-     * @param {TState} startingState - Starting state (current).
-     * @param {TState} endingState - Ending state (updated).
+     * @param key {string} - Item key.
      */
-    areEqual(startingState: TState, endingState: TState): boolean {
-        if (startingState != null &&
-            endingState != null &&
-            typeof startingState === "object" &&
-            !Immutable.Iterable.isIterable(startingState)) {
-
-            let keys = Object.keys(startingState);
-            if (keys.length === 0) {
-                return startingState === endingState;
-            }
-            let areEqual = true;
-            for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
-                if ((startingState as { [key: string]: any })[key] !== (endingState as { [key: string]: any })[key]) {
-                    areEqual = false;
-                    break;
-                }
-            }
-            return areEqual;
-        } else {
-            return startingState === endingState;
-        }
-    }
-
-    /**
-     * This method will return the dispatcher for this store.
-     *
-     */
-    getDispatcher(): DispatcherBuilder {
-        return super.getDispatcher();
-    }
-
-    /**
-     * Constructs the initial state for this store.
-     * This is called once during construction of the store.
-     *
-     */
-    abstract getInitialState(): TState;
-
-    /**
-     * Method is invoked immediately before a store began to clean the state.
-     * It's called in the middle of a dispatch cycle.
-     * If state returned in this method, it's used for initial state.
-     *
-     */
-    protected storeWillCleanUp: undefined | StoreWillCleanup<TState>;
-
-    /**
-     * Check if action should handled.
-     * By default always return true.
-     *
-     * @param {Object} action - Action payload data.
-     * @param {TState} state - Updated store state.
-     */
-    protected shouldHandleAction(action: Object, state: TState): boolean {
-        return true;
-    }
-
-    /**
-     * Clean up all store data.
-     * This method is only available in the middle of a dispatch!
-     *
-     * @return {Immutable.Map<string, T>} - Initial empty state.
-     */
-    protected cleanUpStore(): void {
-        if (!Dispatcher.isDispatching()) {
-            throw new Error(`SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
-                "Cannot clean up store when dispatch is not in the middle of a dispatch.");
-        }
-        this.inCleanUpState = true;
-    }
-
-    /**
-     * Register specified action handler in this store.
-     *
-     * @param {Function} action - Action class function.
-     * @param {ActionHandler<TClass, TState>} handler - Action handler function.
-     */
-    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
-        let actionType = typeof action;
-        if (actionType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'action' type of '${actionType}'.`);
-        }
-
-        let handlerType = typeof handler;
-        if (handlerType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'handler' type of '${handlerType}'.`);
-        }
-
-        if (this.actionsHandlers.has(action)) {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `Handler for action '${action.name}' has already been registered.`);
-        }
-
-        this.actionsHandlers = this.actionsHandlers.set(action, handler);
+    protected has(key: string): boolean {
+        return this.getState().has(key);
     }
 }
