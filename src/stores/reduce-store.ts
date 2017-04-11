@@ -6,7 +6,7 @@ import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher"
 export type ActionHandler<TClass, TMyState> = (action: TClass, state: TMyState) => TMyState | void;
 export type StoreWillCleanup<TMyState> = () => void | TMyState;
 
-export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, DispatcherMessage<any>> {
+export abstract class ReduceStore<TMyState> extends FluxReduceStore<TMyState, DispatcherMessage<any>> {
     /**
      * Creates an instance of ReduceStore.
      *
@@ -20,7 +20,7 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * Actions handlers list.
      *
      */
-    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState2>>();
+    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TMyState>>();
     /**
      * Is store in clean up state.
      *
@@ -50,8 +50,8 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      *
      * @param {TState} state - Current store state.
      */
-    private getCleanStateAndStartNewSession(state: TState2): TState2 {
-        let newState: TState2 | void;
+    private getCleanStateAndStartNewSession(state: TMyState): TMyState {
+        let newState: TMyState | void;
         if (this.storeWillCleanUp != null) {
             newState = this.storeWillCleanUp();
         }
@@ -69,11 +69,11 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * @param {TState} state - Current store state.
      * @param {DispatcherMessage<any>} payload - Disaptched payload message.
      */
-    reduce(state: TState2, payload: DispatcherMessage<any>): TState2 {
+    reduce(state: TMyState, payload: DispatcherMessage<any>): TMyState {
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState2>, action: Function) => {
+        this.actionsHandlers.forEach((handler: ActionHandler<Function, TMyState>, action: Function) => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 let newState = handler(payload.action, state);
                 if (newState != null) {
@@ -93,7 +93,7 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * @param {TState} startingState - Starting state (current).
      * @param {TState} endingState - Ending state (updated).
      */
-    areEqual(startingState: TState2, endingState: TState2): boolean {
+    areEqual(startingState: TMyState, endingState: TMyState): boolean {
         if (startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
@@ -127,14 +127,14 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * This is called once during construction of the store.
      *
      */
-    abstract getInitialState(): TState2;
+    abstract getInitialState(): TMyState;
     /**
      * Method is invoked immediately before a store began to clean the state.
      * It's called in the middle of a dispatch cycle.
      * If state returned in this method, it's used for initial state.
      *
      */
-    protected storeWillCleanUp: undefined | StoreWillCleanup<TState2>;
+    protected storeWillCleanUp: undefined | StoreWillCleanup<TMyState>;
 
     /**
      * Check if action should handled.
@@ -143,7 +143,7 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * @param {Object} action - Action payload data.
      * @param {TState} state - Updated store state.
      */
-    protected shouldHandleAction(action: Object, state: TState2): boolean {
+    protected shouldHandleAction(action: Object, state: TMyState): boolean {
         return true;
     }
     /**
@@ -165,7 +165,7 @@ export abstract class ReduceStore<TState2> extends FluxReduceStore<TState2, Disp
      * @param {Function} action - Action class function.
      * @param {ActionHandler<TClass, TState>} handler - Action handler function.
      */
-    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState2>): void {
+    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TMyState>): void {
         let actionType = typeof action;
         if (actionType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
