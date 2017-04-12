@@ -138,7 +138,7 @@ export class QueuesHandler<TValue> {
      * @param keys {Array<string>} - Items keys list.
      */
     public RemoveMultiple(keys: Array<string>): void {
-        this.queues.withMutations(mutableQueues => {
+        this.queues = this.queues.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
                 if (key == null) {
