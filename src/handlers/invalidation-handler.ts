@@ -5,10 +5,18 @@ export class InvalidationHandler<TValue> {
 
     private pendingDeletionItems = Immutable.List<string>();
 
+    /**
+     * Handler has keys to invalidate and waiting for start.
+     */
     public get IsWaiting(): boolean {
         return this.pendingDeletionItems.size > 0;
     }
 
+    /**
+     * Set keys for invalidation.
+     *
+     * @param keys {Array<string>} - List of keys.
+     */
     public Prepare(keys: Array<string>): void {
         if (keys.length === 0) {
             return;
@@ -23,6 +31,11 @@ export class InvalidationHandler<TValue> {
         });
     }
 
+    /**
+     * Start invalidating pending keys and return new state with list of removed keys.
+     *
+     * @param state {Items<TValue>} - Store state.
+     */
     public Start(state: Items<TValue>): { State: Items<TValue>, RemovedKeys: Array<string> } {
         let removed = new Array<string>(this.pendingDeletionItems.size);
         state = state.withMutations(mutableState => {
@@ -43,5 +56,4 @@ export class InvalidationHandler<TValue> {
             State: state
         };
     }
-
 }
