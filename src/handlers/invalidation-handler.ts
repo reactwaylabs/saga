@@ -1,5 +1,6 @@
 import * as Immutable from "immutable";
 import { Items } from "../contracts/items";
+import { QueuesHandler } from "./queues-handler";
 
 
 export class InvalidationHandler<TValue> {
@@ -24,16 +25,25 @@ export class InvalidationHandler<TValue> {
         });
     }
 
-    public Start(state: Items<TValue>): Items<TValue> {
+    public Start(state: Items<TValue>): { State: Items<TValue>, RemovedKeys: Array<string> } {
+        let removed = new Array<string>(this.pendingDeletionItems.size);
         state = state.withMutations(mutableState => {
+            let index = 0;
             this.pendingDeletionItems.forEach(key => {
-                if (key != null && mutableState.has(key)) {
+                if (key == null) {
+                    return;
+                }
+                if (mutableState.has(key)) {
                     mutableState = mutableState.delete(key);
                 }
+                removed[index++] = key;
             });
         });
         this.pendingDeletionItems = Immutable.List<string>();
-        return state;
+        return {
+            RemovedKeys: removed,
+            State: state
+        };
     }
 
 }

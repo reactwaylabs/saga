@@ -98,15 +98,15 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
         }
         let keysForRemove = new Array<string>(moveList.size);
         let newState = state.withMutations(mutableState => {
+            let index = 0;
             moveList.forEach((item, key) => {
                 if (item == null || key == null) {
                     return;
                 }
                 mutableState.set(key, item);
-                keysForRemove.push(key);
+                keysForRemove[index++] = key;
             });
         });
-
         this.queuesHandler.RemoveMultiple(keysForRemove);
         return newState;
     }
@@ -141,9 +141,10 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
         }
 
         if (this.invalidationHandler.IsWaiting) {
-            state = this.invalidationHandler.Start(state);
+            let result = this.invalidationHandler.Start(state);
+            this.queuesHandler.RemoveMultiple(result.RemovedKeys);
+            state = result.State;
         }
-
         return state;
     }
 
