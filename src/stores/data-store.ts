@@ -16,6 +16,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
         this.queuesHandler = new QueuesHandler<any>();
+        this.invalidationHandler = new InvalidationHandler<string>();
     }
 
     /**
