@@ -8,15 +8,8 @@ export class Item<T> {
      * @param value {T} [value=undefined] - Initial item value.
      */
     constructor(status?: ItemStatus, value?: T) {
-        if (status != null) {
-            this.Status = status;
-        } else {
-            this.Status = ItemStatus.Init;
-        }
-
-        if (value != null) {
-            this.Value = value;
-        }
+        this.Status = (status != null) ? status : ItemStatus.Init;
+        this.Value = (value != null) ? value : undefined;
     }
 
     /**
