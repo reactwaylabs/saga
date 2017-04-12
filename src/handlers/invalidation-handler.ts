@@ -1,7 +1,5 @@
 import * as Immutable from "immutable";
 import { Items } from "../contracts/items";
-import { QueuesHandler } from "./queues-handler";
-
 
 export class InvalidationHandler<TValue> {
 
