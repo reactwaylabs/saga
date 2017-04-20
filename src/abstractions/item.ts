@@ -24,4 +24,3 @@ export class Item<T> {
      */
     public readonly Value: Readonly<T> | undefined;
 }
-
