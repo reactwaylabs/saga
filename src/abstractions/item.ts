@@ -1,5 +1,12 @@
 import { ItemStatus } from "./item-status";
 
+/**
+ * Item class in map store state.
+ *
+ * @export
+ * @class Item
+ * @template T
+ */
 export class Item<T> {
     /**
      * Construct new item.

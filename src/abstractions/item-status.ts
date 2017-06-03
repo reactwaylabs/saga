@@ -1,6 +1,8 @@
 /**
- * Available item status.
+ * Item status in map store state.
  *
+ * @export
+ * @enum {number}
  */
 export const enum ItemStatus {
     Init = 0,

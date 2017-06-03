@@ -16,7 +16,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
         this.queuesHandler = new QueuesHandler<any>();
-        this.invalidationHandler = new InvalidationHandler<string>();
+        this.invalidationHandler = new InvalidationHandler<any>();
     }
 
     /**
@@ -29,7 +29,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * State cache invalidation handler.
      *
      */
-    private invalidationHandler: InvalidationHandler<string>;
+    private invalidationHandler: InvalidationHandler<any>;
 
     /**
      * Dispatch action that this store has changed.
@@ -136,9 +136,9 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
                     state = newState;
                 }
             }
-        } else {
-            state = super.reduce(state, payload);
         }
+
+        state = super.reduce(state, payload);
 
         if (this.invalidationHandler.IsWaiting) {
             let result = this.invalidationHandler.Start(state);

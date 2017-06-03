@@ -11,6 +11,12 @@ module.exports = {
                 loader: "ts-loader",
                 options: {
                 }
+            },
+            {
+                test: /\.ts$/,
+                enforce: 'pre',
+                loader: "tslint-loader",
+                options: {}
             }
         ]
     },
@@ -20,6 +26,7 @@ module.exports = {
     externals: {
         "flux": "flux",
         "flux/utils": "flux/utils",
-        "immutable": "immutable"
+        "immutable": "immutable",
+        "action-emitter": "action-emitter"
     }
 };

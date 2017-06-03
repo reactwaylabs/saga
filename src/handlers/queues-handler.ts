@@ -2,9 +2,7 @@ import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import * as Immutable from "immutable";
 
-
 const OBJECT_FREEZE_EXIST = Object != null && Object.freeze != null;
-
 
 export class QueuesHandler<TValue> {
     constructor() {
@@ -100,8 +98,20 @@ export class QueuesHandler<TValue> {
      *
      * @param status {ItemStatus} - Item status.
      */
-    public GetFilteredItems(statusCheck: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
-        return this.queues.filter(x => x != null && statusCheck(x)).toMap();
+    public GetFilteredItems(filter: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
+        return this.queues.filter(x => x != null && filter(x)).toMap();
+    }
+
+    /**
+     * Returns filtered items keys by specified item status.
+     *
+     * @param status {ItemStatus} - Item status.
+     */
+    public GetFilteredItemsKeys(filter: (item: Item<TValue>, key: string) => boolean): string[] {
+        return this.queues
+            .filter((value, key) => (key != null && value != null && filter(value, key)))
+            .map((value, key) => key)
+            .toArray() as string[];
     }
 
     /**

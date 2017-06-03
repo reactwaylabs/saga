@@ -3,11 +3,9 @@ import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
 import { Dispatcher, DispatcherMessage, DispatcherBuilder } from "../dispatcher";
 
-
 export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
 
 export type StoreWillCleanup<TState> = () => void | TState;
-
 
 export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
     /**
@@ -60,9 +58,12 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param {TState} state - Current store state.
      */
     private getCleanStateAndStartNewSession(state: TState): TState {
-        let newState: TState | void;
+        let newState: TState | undefined;
         if (this.storeWillCleanUp != null) {
-            newState = this.storeWillCleanUp();
+            const cleanupState = this.storeWillCleanUp();
+            if (cleanupState != null && cleanupState) {
+                newState = cleanupState;
+            }
         }
         if (newState == null) {
             newState = this.getInitialState();
@@ -86,7 +87,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 let newState = handler(payload.action, state);
-                if (newState != null) {
+                if (newState != null && newState) {
                     state = newState;
                 }
             }
