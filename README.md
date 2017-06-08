@@ -171,13 +171,15 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 `MapStore` is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
 
-To get values from `MapStore` you should use public methods `get(key: string, noCache?: boolean): Item<TValue>` for single `Item` or
-`getAll(keys: any, prev?: Items<TValue>, noCache?: boolean): Items<TValue>` for multiple `Items`.
+To get values from `MapStore` you should use public methods `get(key: string, noCache?: boolean): Item<TValue>` for single item or
+`getAll(keys: any, prev?: Items<TValue>, noCache?: boolean): Items<TValue>` for multiple items.
 
-Values from `MapStore` are returned in an `Item` object with:
+Values from `MapStore` are returned in an [`Item`](#item-class) object with:
 
-- `Status` property for item loading status (check `API` for `ItemStatus`) and
-- `Value` for actual value of requested item.
+- `Status` property for item loading status (check [`API`](#api) for [`ItemStatus`](#item-status)) and
+- `Value` for actual value of requested item
+
+If values requested with `getAll` items will be returned in an [`Immutable.Map<string, Items>`](#items).
 
 Once `get` or `getAll` is called, `MapStore` invokes method `requestData(keys: string[]): Promise<{[key: string]: TValue }>` passing all not cached keys as an argument.
 
@@ -274,6 +276,8 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 
 ```
 
+<a name="api"></a>
+
 ## API
 
 
@@ -301,6 +305,8 @@ Dispatches a payload to all registered callbacks.
 
 ### `Abstractions`
 
+<a name="item-status"></a>
+
 #### ItemStatus
 
 Item status in `MapStore` and `DataStore` state.
@@ -314,6 +320,8 @@ export const enum ItemStatus {
     Failed = 128
 }
 ```
+
+<a name="item-class"></a>
 
 #### `export class Item<T>`
 
@@ -335,6 +343,8 @@ Item status.
 ##### `public readonly Value: Readonly<T> | undefined`
 
 Item value.
+
+<a name="items-type"></a>
 
 #### `export type Items<T> = Immutable.Map<string, Item<T>>`
 
