@@ -100,10 +100,10 @@ In accordance with your data structure you may choose type of store that best fi
 Reduce store `state` can be any `object` and have no structure constraints.
 
 Only way to change `state` of `ReduceStore` is actions `handlers`.
-Actions are registered in store's `constructor` using protected method `registerAction` which takes `action` class and `handler` function as arguments.
+Actions are registered in store's `constructor` using protected method `registerAction` which takes `action` class and `handler` function as arguments (check `API` section).
 Changed store state should be returned as a result of `handler` function.
 
-Accessing data can be accomplished using public method `getState()` or you may implement additional public getters by yourself (e. g. public getter `Count()`).
+Accessing data can be accomplished using public method `getState(): StoreState` or you may implement additional public getters by yourself (e. g. public getter `Count()`).
 
 ```ts
 import { ReduceStore } from "simplr-flux";
@@ -165,6 +165,58 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 ### MapStore
 
+`MapStore` is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
+
+To get values from `MapStore` you should use public methods `get(key: string, noCache?: boolean): Item<TValue>` for single `Item` or
+`getAll(keys: any, prev?: Items<TValue>, noCache?: boolean): Items<TValue>` for multiple `Items`.
+
+Values from `MapStore` are returned in an `Item` object with:
+
+- `Status` property for item loading status (check `API` for `ItemStatus`) and
+- `Value` for actual value of requested item.
+
+Once `get` or `getAll` is called, `MapStore` invokes method `requestData(keys: string[]): Promise<{[key: string]: TValue }>` passing all not cached keys as an argument.
+
+`requestData` is an abstract method that must be implemented when creating a `MapStore`. It fetches data from data source and place it into a `MapStore`.
+
+```ts
+import { MapStore } from "simplr-flux";
+
+export interface Post {
+    userId: number;
+    id: number;
+    title: string;
+    body: string;
+}
+
+type PostsDictionary = { [key: string]: Post };
+
+class PostsStoreClass extends MapStore<Post> {
+    protected async requestData(keys: string[]): Promise<PostsDictionary> {
+        let promises: Promise<void>[] = [];
+        let postsDictionary: PostsDictionary = {};
+
+        for (let key of keys) {
+            const promise = fetch(`https://jsonplaceholder.typicode.com/posts/${key}`)
+                .then(data => data.json())
+                .then((data: Post) => {
+                    postsDictionary[key] = data;
+                });
+            promises.push(promise);
+        }
+        await Promise.all(promises);
+
+        return postsDictionary;
+    }
+}
+
+export const PostsStore = new PostsStoreClass();
+```
+
 ### DataStore
 
 ## Container
+
+
+
+## API
