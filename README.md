@@ -297,6 +297,55 @@ Dispatches a payload to all registered callbacks.
 
 ----------------------------------------------------------------------------------------------------------
 
+<a name="abstractions"></a>
+
+### `Abstractions`
+
+#### ItemStatus
+
+Item status in `MapStore` and `DataStore` state.
+
+```ts
+export const enum ItemStatus {
+    Init = 0,
+    Pending = 8,
+    Loaded = 16,
+    NoData = 64,
+    Failed = 128
+}
+```
+
+#### `export class Item<T>`
+
+`T` - item type.
+
+##### `constructor(status?: ItemStatus, value?: T)`
+
+Creates an instance of Item.
+
+| Argument      | Type          | Initial value         | Description           |
+|---------------|---------------|-----------------------|-----------------------|
+| `status`      | ItemStatus    | ItemStatus.Init       | Item status.          |
+| `value`       | T             | undefined             | Item value.           |
+
+##### `public readonly Status: ItemStatus`
+
+Item status.
+
+##### `public readonly Value: Readonly<T> | undefined`
+
+Item value.
+
+#### `export type Items<T> = Immutable.Map<string, Item<T>>`
+
+`T` - item type.
+
+Type of items in `MapStore` state.
+
+Documentation of [`Immutable.Map`](https://facebook.github.io/immutable-js/docs/#/Map).
+
+----------------------------------------------------------------------------------------------------------
+
 <a name="reduce-store-api"></a>
 
 ### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
@@ -381,8 +430,6 @@ Checks if action should handled. By default always returns true.
 
 
 ----------------------------------------------------------------------------------------------------------
-
-### Abstractions
 
 ### Actions emitter
 
