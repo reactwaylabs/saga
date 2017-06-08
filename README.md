@@ -274,11 +274,7 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 ## API
 
 
-### class DispatcherBuilder
-
-```ts
-export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>
-```
+### `export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>`
 
 Documentation of [`flux.Dispatcher`](https://facebook.github.io/flux/docs/dispatcher.html).
 
@@ -298,7 +294,9 @@ Dispatches a payload to all registered callbacks.
 
 ----------------------------------------------------------------------------------------------------------
 
-### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>` {#reduce-store}
+### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
+
+<a name="reduce-store"></a>
 
 Documentation of [`FluxReduceStore`](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
 
