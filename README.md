@@ -1,6 +1,7 @@
 # simplr-flux
 
 Flux implementation that enables you to handle actions by their type, without nasty and never ending if or switch trees.
+
 The package is most useful when used with [TypeScript](https://www.typescriptlang.org/) and [React](https://www.typescriptlang.org/).
 
 ## Get started
@@ -11,7 +12,7 @@ npm install simplr-flux --save
 
 ## Concepts
 
-Basic concepts of simplr-flux are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
+Basic concepts of SimplrFlux are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
 
 We also recommend you to follow [best practices](https://facebook.github.io/flux/docs/flux-utils.html#best-practices) original flux is proposing.
 
@@ -41,7 +42,7 @@ export class CountChangedAction {
 
 Every store will receive actions that were registered in specific store.
 
-Dispatching is usually performed in ActionCreators.
+Dispatching is usually performed in [ActionCreators](#action-creators).
 
 ```ts
 import { Dispatcher } from "simplr-flux";
@@ -53,6 +54,8 @@ export function CountChanged(count: number) {
     Dispatcher.dispatch(new CountChangedAction(count));
 }
 ```
+
+<a name="action-creators"></a>
 
 ## Action creators
 
@@ -101,10 +104,10 @@ In accordance with your data structure you may choose type of store that best fi
 ReduceStore `state` can be any `object` and have no structure constraints.
 
 Only way to change `state` of `ReduceStore` is actions `handlers`.
-Actions are registered in store's `constructor` using protected method `registerAction` which takes `action` class and `handler` function as arguments (check `API` section).
+Actions are registered in store's `constructor` using protected method [`registerAction`](#register-action) which takes `action` class and `handler` function as arguments (check [`API`](#reduce-store-api) section).
 Changed store state should be returned as a result of `handler` function.
 
-Accessing data can be accomplished using public method `getState(): StoreState` or you may implement additional public getters by yourself (e. g. public getter `Count()`).
+Accessing data can be accomplished using public method [`getState(): StoreState`](#get-state) or you may implement additional public getters by yourself (e. g. public getter `Count()` in example bellow).
 
 ```ts
 import { ReduceStore } from "simplr-flux";
@@ -294,9 +297,9 @@ Dispatches a payload to all registered callbacks.
 
 ----------------------------------------------------------------------------------------------------------
 
-### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
+<a name="reduce-store-api"></a>
 
-<a name="reduce-store"></a>
+### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
 
 Documentation of [`FluxReduceStore`](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
 
@@ -309,6 +312,8 @@ Creates an instance of ReduceStore.
 | Argument            | Type                                        | Description                 |
 |---------------------|---------------------------------------------|-----------------------------|
 | `dispatcher`        | `Flux.Dispatcher<DispatcherMessage<any>>`   | Dispatcher instance.        |
+
+<a name="register-action"></a>
 
 #### `protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void`
 
@@ -333,6 +338,8 @@ export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => T
 
 Constructs the initial state for this store.
 This is called once during construction of the store.
+
+<a name="get-state"></a>
 
 #### `getState(): TState`
 
@@ -380,9 +387,6 @@ Checks if action should handled. By default always returns true.
 ### Actions emitter
 
 ### Actions
-
-[check this](#reduce-store)
-
 
 ## License
 
