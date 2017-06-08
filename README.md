@@ -216,6 +216,8 @@ export const PostsStore = new PostsStoreClass();
 
 ### DataStore
 
+Coming soon...
+
 ## Container
 
 To keep `Views` up to date with the latest data from stores we recommend you to use `flux/utils` [Container](https://facebook.github.io/flux/docs/flux-utils.html#container).
@@ -270,6 +272,113 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 ```
 
 ## API
+
+### `export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>`
+
+Documentation of [`flux.Dispatcher`](https://facebook.github.io/flux/docs/dispatcher.html).
+
+```ts
+export interface DispatcherMessage<TAction> {
+    action: TAction;
+}
+```
+
+#### `public dispatch<TAction>(dispatcherMessage: TAction): void`
+
+Dispatches a payload to all registered callbacks.
+
+| Argument            | Type                        | Description                 |
+|---------------------|-----------------------------|-----------------------------|
+| `dispatcherMessage` | `TAction`                   | Instance of class.          |
+
+----------------------------------------------------------------------------------------------------------
+
+### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>` {#reduce-store}
+
+Documentation of [`FluxReduceStore`](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
+
+`TState` - store state.
+
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
+
+Creates an instance of ReduceStore.
+
+| Argument            | Type                                        | Description                 |
+|---------------------|---------------------------------------------|-----------------------------|
+| `dispatcher`        | `Flux.Dispatcher<DispatcherMessage<any>>`   | Dispatcher instance.        |
+
+#### `protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void`
+
+Registers specified action handler in this store.
+
+`TClass` - action class.
+`TState` - store state.
+
+```ts
+    export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
+```
+
+| Argument      | Type                              | Description                                                   |
+|---------------|-----------------------------------|---------------------------------------------------------------|
+| `action`      | Function                          | Action class function (in TypeScript - class itself).         |
+| `handler`     | ActionHandler<TClass, TState>     | Action handler function.                                      |
+
+#### `abstract getInitialState(): TState;`
+
+`TState` - store state.
+
+Constructs the initial state for this store.
+This is called once during construction of the store.
+
+#### `getState(): TState`
+
+Getter that exposes the entire state of this store.
+
+#### `protected cleanUpStore(): void`
+
+Cleans up all store data.
+This method is only available in the middle of a dispatch!
+
+#### `protected get currentSession(): number`
+
+Return current session timestamp.
+
+#### `getDispatcher(): DispatcherBuilder`
+
+Return the dispatcher for this store.
+
+#### `protected storeWillCleanUp: undefined | StoreWillCleanup<TState>`
+
+```ts
+export type StoreWillCleanup<TState> = () => void | TState;
+```
+
+`TState` - store state.
+
+Method is invoked immediately before a store began to clean the state.
+It's called in the middle of a dispatch cycle.
+If state returned in this method, it's used for initial state.
+
+#### `protected shouldHandleAction(action: Object, state: TState): boolean`
+
+Checks if action should handled. By default always returns true.
+
+| Argument      | Type     | Description                 |
+|---------------|----------|-----------------------------|
+| `action`      | Object   | Action payload data.        |
+| `state`       | TState   | Updated store state.        |
+
+
+----------------------------------------------------------------------------------------------------------
+
+### Abstractions
+
+### Actions emitter
+
+### Actions
+
+[check this](#reduce-store)
+
 
 ## License
 
