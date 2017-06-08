@@ -273,7 +273,12 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 
 ## API
 
-### `export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>`
+
+### class DispatcherBuilder
+
+```ts
+export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>
+```
 
 Documentation of [`flux.Dispatcher`](https://facebook.github.io/flux/docs/dispatcher.html).
 
@@ -312,10 +317,11 @@ Creates an instance of ReduceStore.
 Registers specified action handler in this store.
 
 `TClass` - action class.
+
 `TState` - store state.
 
 ```ts
-    export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
+export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
 ```
 
 | Argument      | Type                              | Description                                                   |
