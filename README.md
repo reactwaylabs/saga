@@ -11,7 +11,9 @@ npm install simplr-flux --save
 
 ## Concepts
 
-Basic concepts of simplr-flux are no different from [original flux concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
+Basic concepts of simplr-flux are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
+
+We also recommend you to follow [best practices](https://facebook.github.io/flux/docs/flux-utils.html#best-practices) original flux is proposing.
 
 ## Actions
 
@@ -24,7 +26,7 @@ In SimplrFlux action is basically a class with all necessary data provided.
 export class ResetCountAction { }
 
 // action with additional data provided
-export class SetCountAction {
+export class CountChangedAction {
     constructor(private count: number) {}
 
     public get Count() {
@@ -44,11 +46,11 @@ Dispatching is usually performed in ActionCreators.
 ```ts
 import { Dispatcher } from "simplr-flux";
 import {
-    SetCountAction
+    CountChangedAction
 } from "./counter-actions";
 
-export function SetCount(count: number) {
-    Dispatcher.dispatch(new SetCountAction(count));
+export function CountChanged(count: number) {
+    Dispatcher.dispatch(new CountChangedAction(count));
 }
 ```
 
@@ -64,7 +66,7 @@ import {
     CountUpAction,
     CountDownAction,
     ResetCountAction,
-    SetCountAction
+    CountChangedAction
 } from "./counter-actions";
 
 export namespace CounterActionsCreators {
@@ -80,11 +82,10 @@ export namespace CounterActionsCreators {
         Dispatcher.dispatch(new ResetCountAction);
     }
 
-    export function SetCount(count: number) {
-        Dispatcher.dispatch(new SetCountAction(count));
+    export function CountChanged(count: number) {
+        Dispatcher.dispatch(new CountChangedAction(count));
     }
 }
-
 ```
 
 ## Stores
@@ -97,7 +98,7 @@ In accordance with your data structure you may choose type of store that best fi
 
 ### ReduceStore
 
-Reduce store `state` can be any `object` and have no structure constraints.
+ReduceStore `state` can be any `object` and have no structure constraints.
 
 Only way to change `state` of `ReduceStore` is actions `handlers`.
 Actions are registered in store's `constructor` using protected method `registerAction` which takes `action` class and `handler` function as arguments (check `API` section).
@@ -111,7 +112,7 @@ import {
     CountDownAction,
     CountUpAction,
     ResetCountAction,
-    SetCountAction
+    CountChangedAction
 } from "./counter-actions";
 
 interface StoreState {
@@ -124,7 +125,29 @@ class CounterReduceStoreClass extends ReduceStore<StoreState> {
         this.registerAction(CountDownAction, this.onCountDown.bind(this));
         this.registerAction(CountUpAction, this.onCountUp.bind(this));
         this.registerAction(ResetCountAction, this.onResetCount.bind(this));
-        this.registerAction(SetCountAction, this.onSetCount.bind(this));
+        this.registerAction(CountChangedAction, this.onCountChanged.bind(this));
+    }
+
+    private onCountDown(action: CountDownAction, state: StoreState): StoreState {
+        return {
+            Count: state.Count - 1
+        };
+    }
+
+    private onCountUp(action: CountUpAction, state: StoreState): StoreState {
+        return {
+            Count: state.Count + 1
+        };
+    }
+
+    private onResetCount(action: ResetCountAction, state: StoreState): StoreState {
+        return this.getInitialState();
+    }
+
+    private onCountChanged(action: CountChangedAction, state: StoreState): StoreState {
+        return {
+            Count: action.Count
+        };
     }
 
     getInitialState(): StoreState {
@@ -133,29 +156,7 @@ class CounterReduceStoreClass extends ReduceStore<StoreState> {
         };
     }
 
-    private onCountDown(action: CountDownAction, state: StoreState) {
-        return {
-            Count: state.Count - 1
-        };
-    }
-
-    private onCountUp(action: CountUpAction, state: StoreState) {
-        return {
-            Count: state.Count + 1
-        };
-    }
-
-    private onResetCount(action: ResetCountAction, state: StoreState) {
-        return this.getInitialState();
-    }
-
-    private onSetCount(action: SetCountAction, state: StoreState) {
-        return {
-            Count: action.Count
-        };
-    }
-
-    public get Count() {
+    public get Count(): number {
         return this.getState().Count;
     }
 }
@@ -217,6 +218,59 @@ export const PostsStore = new PostsStoreClass();
 
 ## Container
 
+To keep `Views` up to date with the latest data from stores we recommend you to use `flux/utils` [Container](https://facebook.github.io/flux/docs/flux-utils.html#container).
 
+```ts
+import * as React from "react";
+import { Item, ItemStatus } from "simplr-flux/abstractions";
+import { Container } from "flux/utils";
+
+import { PostsStore, Post } from "./posts-store";
+
+import { PostView } from "./post-view";
+
+interface State {
+    Post: Item<Post>;
+}
+
+interface Props {
+    id: string;
+}
+
+class PostsContainerClass extends React.Component<Props, State> {
+    static getStores() {
+        return [PostsStore];
+    }
+
+    static calculateState(state: State, props: Props): State {
+        return {
+            Post: PostsStore.get(props.id)
+        };
+    }
+
+    render() {
+        switch (this.state.Post.Status) {
+            case ItemStatus.Init: return <div>Post loading initialized.</div>;
+            case ItemStatus.Pending: return <div>Post loading pending.</div>;
+            case ItemStatus.Loaded: {
+                return <PostView
+                    id={this.state.Post.Value!.id}
+                    title={this.state.Post.Value!.title}
+                    body={this.state.Post.Value!.body}
+                />;
+            }
+            case ItemStatus.NoData: return <div>No post found.</div>;
+            case ItemStatus.Failed: return <div>Failed to load post.</div>;
+        }
+    }
+}
+
+export const PostsContainer = Container.create(PostsContainerClass, { withProps: true });
+
+```
 
 ## API
+
+## License
+
+Released under the [AGPL-3.0](./LICENSE).
