@@ -283,6 +283,11 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 
 ### `export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>`
 
+```ts
+import { Dispatcher } from "simplr-flux";               // Builded dispatcher instance
+import { DispatcherBuilder } from "simplr-flux";        // Class of a dispatcher
+```
+
 Documentation of [`flux.Dispatcher`](https://facebook.github.io/flux/docs/dispatcher.html).
 
 ```ts
@@ -304,6 +309,14 @@ Dispatches a payload to all registered callbacks.
 <a name="abstractions"></a>
 
 ### `Abstractions`
+
+```ts
+import {
+    ItemStatus,
+    Item,
+    Items
+} from "simplr-flux/abstractions";
+```
 
 <a name="item-status"></a>
 
@@ -359,6 +372,10 @@ Documentation of [`Immutable.Map`](https://facebook.github.io/immutable-js/docs/
 <a name="reduce-store-api"></a>
 
 ### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
+
+```ts
+import { ReduceStore } from "simplr-flux";
+```
 
 Documentation of [`FluxReduceStore`](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
 
@@ -443,6 +460,10 @@ Checks if action should handled. By default always returns true.
 <a name="map-store"></a>
 
 ### `export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>>`
+
+```ts
+import { MapStore } from "simplr-flux";
+```
 
 Documentation of [ReduceStore](#reduce-store-api).
 
@@ -585,6 +606,10 @@ With a large amount of requests `MapStore` throttles them. This property defines
 
 ### `export abstract class DataStore extends ReduceStore<Items<any>>`
 
+```ts
+import { DataStore } from "simplr-flux";
+```
+
 Documentation of [ReduceStore](#reduce-store-api).
 
 `Items` - check API section [`Abstractions Items`](#items-type).
@@ -635,43 +660,11 @@ Remove multiple items from cache, if they exist.
 
 ----------------------------------------------------------------------------------------------------------
 
-### `Actions`
-
-#### `export class DataMapStoreUpdatedAction`
-
-Action that informs about `MapStore` update.
-
-##### `constructor(private storeId: string)`
-
-Creates instance of `DataMapStoreUpdateAction` class.
-
-| Argument          | Type                        | Description                                                 |
-|-------------------|-----------------------------|-------------------------------------------------------------|
-| `storeId`         | string                      | Id of updated store.                                        |
-
-##### `get StoreId()`
-
-Returns id of updated store.
-
-#### `export class DataMapStoreCleanUpAction`
-
-Action that informs about initialized `MapStore` clean up.
-
-##### `constructor(private storeId: string)`
-
-Creates instance of `DataMapStoreCleanUpAction` class.
-
-| Argument          | Type                        | Description                                                 |
-|-------------------|-----------------------------|-------------------------------------------------------------|
-| `storeId`         | string                      | Id of cleaned store.                                        |
-
-##### `get StoreId()`
-
-Returns id of cleaned store.
-
-----------------------------------------------------------------------------------------------------------
-
 ### Actions emitter
+
+```ts
+import { Emitter } from "simplr-flux";
+```
 
 SimplrFlux use [`action-emitter`](https://github.com/SimplrJS/action-emitter) to emit and handle actions.
 
