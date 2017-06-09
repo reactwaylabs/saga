@@ -169,7 +169,7 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 ### MapStore
 
-`MapStore` is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
+[`MapStore`]  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
 
 To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
 [`getAll`](#map-store-getAll) for multiple items.
@@ -476,6 +476,8 @@ Returns dictionary of resolved values.
 | `onSuccess`   | (values: { [id: string]: TValue }) => void                    | Success callback with items that succeeded.   |
 | `onFailed`    | (values?: { [id: string]: ItemStatus } \| string[]) => void   | Failure callback with items statuses.         |
 
+<a name="map-store-get"></a>
+
 #### `public get(key: string, noCache: boolean = false): Item<TValue>`
 
 `TValue` - type of `MapStore` item value.
@@ -537,7 +539,7 @@ Prefetch all items by keys.
 
 #### `public InvalidateCache(key: string): void`
 
-Removes item from cache, if it exist.
+Removes item from cache, if it exists.
 
 | Argument      | Type                        | Description                                                 |
 |---------------|-----------------------------|-------------------------------------------------------------|
@@ -575,17 +577,65 @@ Returns undefined if the key does not exist in the cache.
 
 With a large amount of requests `MapStore` throttles them. This property defines interval between portions of requests.
 
-<a name="map-store-get"></a>
-
 #### `protected storeWillCleanUp: () => void`
 
 `storeWillCleanUp` property holds a function that will be invoked before store cleanup.
 
 ----------------------------------------------------------------------------------------------------------
 
-### Actions emitter
+### `export abstract class DataStore extends ReduceStore<Items<any>>`
 
-### Actions
+Documentation of [ReduceStore](#reduce-store-api).
+
+`Items` - check API section [`Abstractions Items`](#items-type).
+
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>): void`
+
+Creates an instance of DataStore.
+
+#### `getInitialState(): Items<any>`
+
+Constructs the initial state for this store. This is called once during construction of the store.
+
+#### `protected getValueFromState<TValue>(key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue>`
+
+`TValue` - type of specific `DataStore` item value.
+
+Returns specified item value. Starts resolving data with `promiseFactory`.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `key`             | string                      | Item key.                                                   |
+| `promiseFactory`  | () => Promise\<TValue>      | Function that returns promise of value to be resolved.      |
+| `noCache`         | boolean                     | Update cached item from the server or other data source.    |
+
+#### `protected has(key: string): boolean`
+
+Checks if the cache has a particular key.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `key`             | string                      | Item key.                                                   |
+
+#### `protected invalidateCache(key: string): void`
+
+Removes item from cache, if it exists.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `key`             | string                      | Item key.                                                   |
+
+#### `protected invalidateCacheMultiple(keys: string[]): void`
+
+Remove multiple items from cache, if they exist.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `keys`            | string[]                    | Items keys.                                                 |
+
+----------------------------------------------------------------------------------------------------------
+
+### Actions emitter
 
 ## License
 
