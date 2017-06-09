@@ -171,8 +171,8 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 `MapStore` is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
 
-To get values from `MapStore` you should use public methods `get(key: string, noCache?: boolean): Item<TValue>` for single item or
-`getAll(keys: any, prev?: Items<TValue>, noCache?: boolean): Items<TValue>` for multiple items.
+To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
+[`getAll`](#map-store-getAll) for multiple items.
 
 Values from `MapStore` are returned in an [`Item`](#item-class) object with:
 
@@ -181,9 +181,9 @@ Values from `MapStore` are returned in an [`Item`](#item-class) object with:
 
 If values requested with `getAll` items will be returned in an [`Immutable.Map<string, Items>`](#items).
 
-Once `get` or `getAll` is called, `MapStore` invokes method `requestData(keys: string[]): Promise<{[key: string]: TValue }>` passing all not cached keys as an argument.
+Once `get` or `getAll` is called, `MapStore` invokes method [`requestData`](#map-store-requestData) where pass all not cached keys as an argument.
 
-`requestData` is an abstract method that must be implemented when creating a `MapStore`. It fetches data from data source and place it into a `MapStore`.
+[`requestData`](#map-store-requestData) is an abstract method that must be implemented when creating a `MapStore`. It fetches data from server or other data source and place it into a `MapStore`.
 
 ```ts
 import { MapStore } from "simplr-flux";
@@ -440,6 +440,8 @@ Checks if action should handled. By default always returns true.
 
 ----------------------------------------------------------------------------------------------------------
 
+<a name="map-store"></a>
+
 ### `export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>>`
 
 Documentation of [ReduceStore](#reduce-store-api).
@@ -451,6 +453,8 @@ Documentation of [ReduceStore](#reduce-store-api).
 #### `constructor(): void`
 
 Creates an instance of MapStore.
+
+<a name="map-store-requestData"></a>
 
 #### protected abstract requestData
 
@@ -472,11 +476,6 @@ Returns dictionary of resolved values.
 | `onSuccess`   | (values: { [id: string]: TValue }) => void                    | Success callback with items that succeeded.   |
 | `onFailed`    | (values?: { [id: string]: ItemStatus } \| string[]) => void   | Failure callback with items statuses.         |
 
-
-#### `protected RequestsIntervalInMs: number`
-
-With a large amount of requests `MapStore` throttles them. This property defines interval between portions of requests.
-
 #### `public get(key: string, noCache: boolean = false): Item<TValue>`
 
 `TValue` - type of `MapStore` item value.
@@ -490,6 +489,8 @@ Returns undefined `Value` and status if the key does not exist in the cache (che
 | `key`         | string                      | Requested item key.                                         |
 | `noCache`     | boolean                     | Update cached item from the server or other data source.    |
 
+<a name="map-store-getAll"></a>
+
 #### `public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue>`
 
 `TValue` - type of `MapStore` item value.
@@ -502,9 +503,19 @@ Returns requested data map.
 
 | Argument      | Type                                          | Description                                                 |
 |---------------|-----------------------------------------------|-------------------------------------------------------------|
-| `keys`        | Array\<string\> \| Immutable.List\<string\>   | Requested keys list in an `Array` or an `ImmutableList`.    |
+| `keys`        | string[] \| Immutable.List\<string\>          | Requested keys list in an `Array` or an `ImmutableList`.    |
 | `prev`        | Items\<TValue>                                | Previous data map merged with new data map.                 |
 | `noCache`     | Items\<TValue>                                | Update cached item from the server or other data source.    |
+
+#### `public has(key: string): boolean`
+
+Checks if the cache has a particular key.
+
+Returns boolean value that defines whether cache has a particular key.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
 
 #### `public Prefetch(key: string, noCache: boolean = false): void`
 
@@ -515,7 +526,7 @@ Prefetch item by key.
 | `key`         | string                      | Requested item key.                                         |
 | `noCache`     | boolean                     | Update cached item from the server or other data source.    |
 
-#### `public PrefetchAll(keys: Array<string>, noCache: boolean = false): void`
+#### `public PrefetchAll(keys: string[], noCache: boolean = false): void`
 
 Prefetch all items by keys.
 
@@ -548,32 +559,27 @@ Constructs the initial state for this store. This is called once during construc
 
 Returns initial empty state.
 
-#### `protected storeWillCleanUp: () => void`
-
-`storeWillCleanUp` property holds a function that will be invoked before store cleanup.
-
 #### `public at(key: string): Item<TValue> | undefined`
 
 `TValue` - type of `MapStore` item value.
 
 Access the value at the given key.
 
-Return undefined if the key does not exist in the cache.
+Returns undefined if the key does not exist in the cache.
 
 | Argument      | Type                        | Description                                                 |
 |---------------|-----------------------------|-------------------------------------------------------------|
 | `key`         | string                      | Requested item key.                                         |
 
+#### `protected RequestsIntervalInMs: number`
 
-#### `public has(key: string): boolean`
+With a large amount of requests `MapStore` throttles them. This property defines interval between portions of requests.
 
-Checks if the cache has a particular key.
+<a name="map-store-get"></a>
 
-Returns boolean value that defines whether cache has a particular key.
+#### `protected storeWillCleanUp: () => void`
 
-| Argument      | Type                        | Description                                                 |
-|---------------|-----------------------------|-------------------------------------------------------------|
-| `key`         | string                      | Requested item key.                                         |
+`storeWillCleanUp` property holds a function that will be invoked before store cleanup.
 
 ----------------------------------------------------------------------------------------------------------
 
