@@ -309,7 +309,7 @@ Dispatches a payload to all registered callbacks.
 
 #### ItemStatus
 
-Item status in `MapStore` and `DataStore` state.
+Item status in `MapStore` and `DataStore` states.
 
 ```ts
 export const enum ItemStatus {
@@ -411,11 +411,11 @@ This method is only available in the middle of a dispatch!
 
 #### `protected get currentSession(): number`
 
-Return current session timestamp.
+Returns current session timestamp.
 
 #### `getDispatcher(): DispatcherBuilder`
 
-Return the dispatcher for this store.
+Returns the dispatcher for this store.
 
 #### `protected storeWillCleanUp: undefined | StoreWillCleanup<TState>`
 
@@ -438,6 +438,142 @@ Checks if action should handled. By default always returns true.
 | `action`      | Object   | Action payload data.        |
 | `state`       | TState   | Updated store state.        |
 
+----------------------------------------------------------------------------------------------------------
+
+### `export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>>`
+
+Documentation of [ReduceStore](#reduce-store-api).
+
+`TValue` - type of `MapStore` item value.
+
+`Items` - check API section [`Abstractions Items`](#items-type).
+
+#### `constructor(): void`
+
+Creates an instance of MapStore.
+
+#### protected abstract requestData
+
+```ts
+protected abstract requestData(
+    ids: string[],
+    onSuccess?: (values: { [id: string]: TValue }) => void,
+    onFailed?: (values?: { [id: string]: ItemStatus } | string[]) => void
+): Promise<{ [id: string]: TValue }> | void;
+```
+
+API call to get data from server or other data source.
+
+Returns dictionary of resolved values.
+
+| Argument      | Type                                                          | Description                                   |
+|---------------|---------------------------------------------------------------|-----------------------------------------------|
+| `ids`         | string[]                                                      | List of requesting ids.                       |
+| `onSuccess`   | (values: { [id: string]: TValue }) => void                    | Success callback with items that succeeded.   |
+| `onFailed`    | (values?: { [id: string]: ItemStatus } \| string[]) => void   | Failure callback with items statuses.         |
+
+
+#### `protected RequestsIntervalInMs: number`
+
+With a large amount of requests `MapStore` throttles them. This property defines interval between portions of requests.
+
+#### `public get(key: string, noCache: boolean = false): Item<TValue>`
+
+`TValue` - type of `MapStore` item value.
+
+Get the value of a particular key.
+
+Returns undefined `Value` and status if the key does not exist in the cache (check [`Item`](#item-class)).
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
+| `noCache`     | boolean                     | Update cached item from the server or other data source.    |
+
+#### `public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue>`
+
+`TValue` - type of `MapStore` item value.
+
+Gets an array of keys and puts the values in a map if they exist, it allows providing a previous result to update instead of generating a new map.
+
+Providing a previous result allows the possibility of keeping the same reference if the keys did not change.
+
+Returns requested data map.
+
+| Argument      | Type                                          | Description                                                 |
+|---------------|-----------------------------------------------|-------------------------------------------------------------|
+| `keys`        | Array\<string\> \| Immutable.List\<string\>   | Requested keys list in an `Array` or an `ImmutableList`.    |
+| `prev`        | Items\<TValue>                                | Previous data map merged with new data map.                 |
+| `noCache`     | Items\<TValue>                                | Update cached item from the server or other data source.    |
+
+#### `public Prefetch(key: string, noCache: boolean = false): void`
+
+Prefetch item by key.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
+| `noCache`     | boolean                     | Update cached item from the server or other data source.    |
+
+#### `public PrefetchAll(keys: Array<string>, noCache: boolean = false): void`
+
+Prefetch all items by keys.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `keys`        | string[]                    | Requested items keys.                                       |
+| `noCache`     | boolean                     | Update cached item from the server or other data source.    |
+
+#### `public InvalidateCache(key: string): void`
+
+Removes item from cache, if it exist.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
+
+#### `public InvalidateCacheMultiple(keys: string[]): void`
+
+Removes multiple items from cache, if they exist.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `keys`        | string[]                    | Requested items key.                                         |
+
+#### `public getInitialState(): Items<TValue>`
+
+`TValue` - type of `MapStore` item value.
+
+Constructs the initial state for this store. This is called once during construction of the store.
+
+Returns initial empty state.
+
+#### `protected storeWillCleanUp: () => void`
+
+`storeWillCleanUp` property holds a function that will be invoked before store cleanup.
+
+#### `public at(key: string): Item<TValue> | undefined`
+
+`TValue` - type of `MapStore` item value.
+
+Access the value at the given key.
+
+Return undefined if the key does not exist in the cache.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
+
+
+#### `public has(key: string): boolean`
+
+Checks if the cache has a particular key.
+
+Returns boolean value that defines whether cache has a particular key.
+
+| Argument      | Type                        | Description                                                 |
+|---------------|-----------------------------|-------------------------------------------------------------|
+| `key`         | string                      | Requested item key.                                         |
 
 ----------------------------------------------------------------------------------------------------------
 
