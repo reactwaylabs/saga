@@ -579,7 +579,7 @@ With a large amount of requests `MapStore` throttles them. This property defines
 
 #### `protected storeWillCleanUp: () => void`
 
-`storeWillCleanUp` property holds a function that will be invoked before store cleanup.
+`storeWillCleanUp` property holds a function that will be invoked before store clean up.
 
 ----------------------------------------------------------------------------------------------------------
 
@@ -632,6 +632,42 @@ Remove multiple items from cache, if they exist.
 | Argument          | Type                        | Description                                                 |
 |-------------------|-----------------------------|-------------------------------------------------------------|
 | `keys`            | string[]                    | Items keys.                                                 |
+
+----------------------------------------------------------------------------------------------------------
+
+### `Actions`
+
+#### `export class DataMapStoreUpdatedAction`
+
+Action that informs about `MapStore` update.
+
+##### `constructor(private storeId: string)`
+
+Creates instance of `DataMapStoreUpdateAction` class.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `storeId`         | string                      | Id of updated store.                                        |
+
+##### `get StoreId()`
+
+Returns id of updated store.
+
+#### `export class DataMapStoreCleanUpAction`
+
+Action that informs about initialized `MapStore` clean up.
+
+##### `constructor(private storeId: string)`
+
+Creates instance of `DataMapStoreCleanUpAction` class.
+
+| Argument          | Type                        | Description                                                 |
+|-------------------|-----------------------------|-------------------------------------------------------------|
+| `storeId`         | string                      | Id of cleaned store.                                        |
+
+##### `get StoreId()`
+
+Returns id of cleaned store.
 
 ----------------------------------------------------------------------------------------------------------
 
