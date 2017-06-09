@@ -307,7 +307,7 @@ Dispatches a payload to all registered callbacks.
 
 <a name="item-status"></a>
 
-#### ItemStatus
+#### `export const enum ItemStatus`
 
 Item status in `MapStore` and `DataStore` states.
 
@@ -672,6 +672,8 @@ Returns id of cleaned store.
 ----------------------------------------------------------------------------------------------------------
 
 ### Actions emitter
+
+SimplrFlux use [`action-emitter`](https://github.com/SimplrJS/action-emitter) to emit and handle actions.
 
 ## License
 
