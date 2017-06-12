@@ -12,7 +12,7 @@ npm install simplr-flux --save
 
 ## Concepts
 
-Basic concepts of SimplrFlux are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
+Basic concepts of `SimplrFlux` are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
 
 We also recommend you to follow [best practices](https://facebook.github.io/flux/docs/flux-utils.html#best-practices) original flux is proposing.
 
@@ -20,7 +20,7 @@ We also recommend you to follow [best practices](https://facebook.github.io/flux
 
 > Actions define the internal API of your application. They capture the ways in which anything might interact with your application.
 
-In SimplrFlux action is basically a class with all necessary data provided.
+In `SimplrFlux` action is basically a class with all necessary data provided.
 
 ```ts
 // action with no data provided
@@ -95,7 +95,7 @@ export namespace CounterActionsCreators {
 
 > A store is what holds the data of an application. Stores will register with the application's dispatcher so that they can receive actions.
 
-Main difference between store types in SimplrFlux is state management.
+Main difference between store types in `SimplrFlux` is state management.
 
 In accordance with your data structure you may choose type of store that best fits your data structure.
 
@@ -176,14 +176,16 @@ To get values from `MapStore` you should use public methods [`get`](#map-store-g
 
 Values from `MapStore` are returned in an [`Item`](#item-class) object with:
 
-- `Status` property for item loading status (check [`API`](#api) for [`ItemStatus`](#item-status)) and
-- `Value` for actual value of requested item
+- `Status` property for item loading status (check [`API`](#api) for [`ItemStatus`](#item-status));
+- `Value` for actual value of requested item.
 
 If values requested with `getAll` items will be returned in an [`Immutable.Map<string, Items>`](#items).
 
 Once `get` or `getAll` is called, `MapStore` invokes method [`requestData`](#map-store-requestData) where pass all not cached keys as an argument.
 
 [`requestData`](#map-store-requestData) is an abstract method that must be implemented when creating a `MapStore`. It fetches data from server or other data source and place it into a `MapStore`.
+
+Be aware that `requestData` is always called asynchronously. `MapStore` throttles requests to avoid large amount of requests at a single moment of time. Time between portion of requests can be set using protected property [`RequestsIntervalInMs`](#map-store-request-interval-in-ms).
 
 ```ts
 import { MapStore } from "simplr-flux";
@@ -346,21 +348,15 @@ export const PostsContainer = Container.create(PostsContainerClass, { withProps:
 
 ## API
 
+### `class DispatcherBuilder`
 
-### `export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>>`
-
-```ts
-import { Dispatcher } from "simplr-flux";               // Builded dispatcher instance
-import { DispatcherBuilder } from "simplr-flux";        // Class of a dispatcher
-```
-
-Documentation of [`flux.Dispatcher`](https://facebook.github.io/flux/docs/dispatcher.html).
+A class to create `Dispatcher` instances.
 
 ```ts
-export interface DispatcherMessage<TAction> {
-    action: TAction;
-}
+import { DispatcherBuilder } from "simplr-flux";
 ```
+
+`DispatcherBuilder` extends `flux.Dispatcher`. You can check it's documentation [here](https://facebook.github.io/flux/docs/dispatcher.html).
 
 #### `public dispatch<TAction>(dispatcherMessage: TAction): void`
 
@@ -369,6 +365,49 @@ Dispatches a payload to all registered callbacks.
 | Argument            | Type                        | Description                 |
 |---------------------|-----------------------------|-----------------------------|
 | `dispatcherMessage` | `TAction`                   | Instance of class.          |
+
+#### `register(callback: (payload: TPayload) => void): string`
+
+Registers a callback that will be invoked with every payload sent to the dispatcher.
+
+Returns a string token to identify the callback to be used with waitFor() or unregister.
+
+| Argument            | Type                        | Description                                               |
+|---------------------|-----------------------------|-----------------------------------------------------------|
+| `callback`          | `TPayload`                  | A callback to be invoked with every dispatched payload.   |
+
+#### `unregister(id: string): void`
+
+Unregisters a callback with the given ID token.
+
+| Argument      | Type             | Description        |
+|---------------|------------------|--------------------|
+| `id`          | `string`         | Callback token.    |
+
+#### `waitFor(IDs: string[]): void`
+
+Waits for the callbacks with the specified IDs to be invoked before continuing execution of the current callback.
+
+This method should only be used by a callback in response to a dispatched payload.
+
+| Argument      | Type             | Description                                                                                                |
+|---------------|------------------|------------------------------------------------------------------------------------------------------------|
+| `ids`         | `string[]`       | Array of callbacks tokens specified to be invoked before continuing execution of the current callback.     |
+
+#### `isDispatching(): boolean`
+
+Returns boolean value that defines if this dispatcher is currently dispatching.
+
+### Dispatcher instance
+
+`SimplrFlux` exports instance of a dispatcher:
+
+```ts
+import { Dispatcher } from "simplr-flux";
+```
+
+It is recommended to have only one `Dispatcher` instance per app, so you don't need to create `Dispatcher` instance yourself,
+it's already created by `SimplrFlux`.
 
 ----------------------------------------------------------------------------------------------------------
 
@@ -386,7 +425,7 @@ import {
 
 <a name="item-status"></a>
 
-#### `export const enum ItemStatus`
+#### `enum ItemStatus`
 
 Item status in `MapStore` and `DataStore` states.
 
@@ -402,7 +441,7 @@ export const enum ItemStatus {
 
 <a name="item-class"></a>
 
-#### `export class Item<T>`
+#### `class Item<T>`
 
 `T` - item type.
 
@@ -437,15 +476,16 @@ Documentation of [`Immutable.Map`](https://facebook.github.io/immutable-js/docs/
 
 <a name="reduce-store-api"></a>
 
-### `export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>>`
+### `abstract class ReduceStore<TState>`
+
+`TState` - store state.
 
 ```ts
 import { ReduceStore } from "simplr-flux";
 ```
 
-Documentation of [`FluxReduceStore`](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
-
-`TState` - store state.
+`ReduceStore` extends FluxReduceStore from `Facebook Flux`.
+Documentation of `FluxReduceStore` can be found [here](https://facebook.github.io/flux/docs/flux-utils.html#reducestore-t).
 
 #### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
 
@@ -525,17 +565,18 @@ Checks if action should handled. By default always returns true.
 
 <a name="map-store"></a>
 
-### `export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>>`
+### `abstract class MapStore<TValue>`
 
 ```ts
 import { MapStore } from "simplr-flux";
 ```
 
-Documentation of [ReduceStore](#reduce-store-api).
+`MapStore` extends `ReduceStore` of `SimplrFlux`.
+Documentation of ReduceStore can be found [here](#reduce-store-api).
+
+State of `MapStore` is a `Items` of type TValue. Check API section for [`Abstractions Items`](#items-type).
 
 `TValue` - type of `MapStore` item value.
-
-`Items` - check API section [`Abstractions Items`](#items-type).
 
 #### `constructor(): void`
 
@@ -583,6 +624,8 @@ Returns undefined `Value` and status if the key does not exist in the cache (che
 #### `public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue>`
 
 `TValue` - type of `MapStore` item value.
+
+`Items` - check API section [`Abstractions Items`](#items-type).
 
 Gets an array of keys and puts the values in a map if they exist, it allows providing a previous result to update instead of generating a new map.
 
@@ -638,7 +681,7 @@ Removes multiple items from cache, if they exist.
 
 | Argument      | Type                        | Description                                                 |
 |---------------|-----------------------------|-------------------------------------------------------------|
-| `keys`        | string[]                    | Requested items key.                                         |
+| `keys`        | string[]                    | Requested items key.                                        |
 
 #### `public getInitialState(): Items<TValue>`
 
@@ -660,9 +703,13 @@ Returns undefined if the key does not exist in the cache.
 |---------------|-----------------------------|-------------------------------------------------------------|
 | `key`         | string                      | Requested item key.                                         |
 
+<a name="map-store-request-interval-in-ms"></a>
+
 #### `protected RequestsIntervalInMs: number`
 
 With a large amount of requests `MapStore` throttles them. This property defines interval between portions of requests.
+
+Default value is `50` ms.
 
 #### `protected storeWillCleanUp: () => void`
 
@@ -672,15 +719,15 @@ With a large amount of requests `MapStore` throttles them. This property defines
 
 <a name="data-store"></a>
 
-### `export abstract class DataStore extends ReduceStore<Items<any>>`
+### `abstract class DataStore`
 
 ```ts
 import { DataStore } from "simplr-flux";
 ```
 
-Documentation of [ReduceStore](#reduce-store-api).
+`DataStore` extends `ReduceStore` of `SimplrFlux`. Documentation of `ReduceStore` can be found [here](#reduce-store-api).
 
-`Items` - check API section [`Abstractions Items`](#items-type).
+State of `DataStore` is a `Items` of `any` value type. Check API section for [`Abstractions Items`](#items-type).
 
 #### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>): void`
 
