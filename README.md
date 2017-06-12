@@ -169,7 +169,7 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 ### MapStore
 
-[`MapStore`]  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of same value type.
+[`MapStore`](#map-store)  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of same value type.
 
 To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
 [`getAll`](#map-store-getAll) for multiple items.
@@ -221,7 +221,7 @@ export const PostsStore = new PostsStoreClass();
 
 ### DataStore
 
-DataStore is another key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map). Not like `MapStore` it can hold values of different types.
+[`DataStore`](#data-store) is another key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map). Not like `MapStore` it can hold values of different types.
 
 To get values from `DataStore` you should use protected method [`getValueFromState`](#data-store-getValueFromState) in public getters of your own implementation.
 
@@ -670,6 +670,8 @@ With a large amount of requests `MapStore` throttles them. This property defines
 
 ----------------------------------------------------------------------------------------------------------
 
+<a name="data-store"></a>
+
 ### `export abstract class DataStore extends ReduceStore<Items<any>>`
 
 ```ts
@@ -728,13 +730,11 @@ Remove multiple items from cache, if they exist.
 
 ----------------------------------------------------------------------------------------------------------
 
-### Actions emitter
+## References
 
-```ts
-import { Emitter } from "simplr-flux";
-```
-
-SimplrFlux use [`action-emitter`](https://github.com/SimplrJS/action-emitter) to emit and handle actions.
+- [`Action-emitter`](https://github.com/SimplrJS/action-emitter).
+- [`Immutable`](https://facebook.github.io/immutable-js/).
+- [`Flux`](https://facebook.github.io/flux/).
 
 ## License
 
