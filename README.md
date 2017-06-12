@@ -169,7 +169,7 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 ### MapStore
 
-[`MapStore`]  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map).
+[`MapStore`]  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of same value type.
 
 To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
 [`getAll`](#map-store-getAll) for multiple items.
@@ -221,7 +221,73 @@ export const PostsStore = new PostsStoreClass();
 
 ### DataStore
 
-Coming soon...
+DataStore is another key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map). Not like `MapStore` it can hold values of different types.
+
+To get values from `DataStore` you should use protected method [`getValueFromState`](#data-store-getValueFromState) in public getters of your own implementation.
+
+[`getValueFromState`](#data-store-getValueFromState) is a helper method that takes a unique key of a value to hold and `promiseFactory` - function to resolve this value.
+
+Values resolved by `getValueFromState` are returned in an [`Item`](#item-class) object with.
+
+```ts
+import { DataStore } from "simplr-flux";
+import { Item } from "simplr-flux/abstractions";
+
+import * as path from "path";
+
+export interface Address {
+    HouseNumber: string;
+    City: string;
+    Country: string;
+    PostCode: string;
+    Street: string;
+}
+
+export interface PersonalData {
+    Name: string;
+    LastName: string;
+    PhoneNumber: string;
+}
+
+const JSONS_FOLDER_NAME = "assets";
+const ADDRESS_KEY = "address";
+const PERSONAL_DATA_KEY = "personal-data";
+
+class ContactDataStoreClass extends DataStore {
+
+    private constructPath(fileName: string) {
+        return path.join(__dirname, JSONS_FOLDER_NAME, fileName);
+    }
+
+    private getAddress = async () => {
+        try {
+            return await System.import(this.constructPath("address.json!"));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public GetAddress(noCache?: boolean): Item<Address> {
+        return this.getValueFromState<Address>(ADDRESS_KEY, this.getAddress, noCache);
+    }
+
+
+    private getPersonalData = async () => {
+        try {
+            return await System.import(this.constructPath("personal-data.json!"));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public GetPersonalData(noCache?: boolean): Item<PersonalData> {
+        return this.getValueFromState<PersonalData>(PERSONAL_DATA_KEY, this.getPersonalData, noCache);
+    }
+
+}
+
+export const ContactDataStore = new ContactDataStoreClass();
+```
 
 ## Container
 
@@ -621,6 +687,8 @@ Creates an instance of DataStore.
 #### `getInitialState(): Items<any>`
 
 Constructs the initial state for this store. This is called once during construction of the store.
+
+<a name="data-store-getValueFromState"></a>
 
 #### `protected getValueFromState<TValue>(key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue>`
 
