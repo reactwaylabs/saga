@@ -234,7 +234,7 @@ Values resolved by `getValueFromState` are returned in an [`Item`](#item-class) 
 
 ```ts
 import { DataStore } from "simplr-flux";
-import { Item } from "simplr-flux/abstractions";
+import { Abstractions } from "simplr-flux";
 
 import * as path from "path";
 
@@ -264,29 +264,31 @@ class ContactDataStoreClass extends DataStore {
 
     private getAddress = async () => {
         try {
-            return await System.import(this.constructPath("address.json!"));
+            return await SystemJS.import(this.constructPath("address.json!"));
         } catch (error) {
             console.error(error);
         }
     }
 
-    public GetAddress(noCache?: boolean): Item<Address> {
+    public GetAddress(noCache?: boolean): Abstractions.Item<Address> {
         return this.getValueFromState<Address>(ADDRESS_KEY, this.getAddress, noCache);
     }
 
-
     private getPersonalData = async () => {
         try {
-            return await System.import(this.constructPath("personal-data.json!"));
+            return await SystemJS.import(this.constructPath("personal-data.json!"));
         } catch (error) {
             console.error(error);
         }
     }
 
-    public GetPersonalData(noCache?: boolean): Item<PersonalData> {
-        return this.getValueFromState<PersonalData>(PERSONAL_DATA_KEY, this.getPersonalData, noCache);
+    public get PersonalData(): Abstractions.Item<PersonalData> {
+        return this.getValueFromState<PersonalData>(PERSONAL_DATA_KEY, this.getPersonalData);
     }
 
+    public InvalidatePersonalData() {
+        this.invalidateCache(PERSONAL_DATA_KEY);
+    }
 }
 
 export const ContactDataStore = new ContactDataStoreClass();
@@ -417,11 +419,7 @@ it's already created by `SimplrFlux`.
 ### `Abstractions`
 
 ```ts
-import {
-    ItemStatus,
-    Item,
-    Items
-} from "simplr-flux/abstractions";
+import { Abstractions } from "simplr-flux";
 ```
 
 <a name="item-status"></a>
