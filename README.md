@@ -14,7 +14,7 @@ npm install simplr-flux --save
 
 Basic concepts of `SimplrFlux` are no different from [original flux](https://facebook.github.io/flux/) [concepts](https://github.com/facebook/flux/tree/master/examples/flux-concepts).
 
-We also recommend you to follow [best practices](https://facebook.github.io/flux/docs/flux-utils.html#best-practices) original flux is proposing.
+We also recommend to follow [the best practises](https://facebook.github.io/flux/docs/flux-utils.html#best-practices) proposed by original flux.
 
 ## Actions
 
@@ -40,7 +40,7 @@ export class CountChangedAction {
 
 > The dispatcher receives actions and dispatches them to stores that have registered with the dispatcher.
 
-Every store will receive actions that were registered in specific store.
+To receive the actions you have to register them specifically.
 
 Dispatching is usually performed in [ActionCreators](#action-creators).
 
@@ -101,13 +101,14 @@ In accordance with your data structure you may choose type of store that best fi
 
 ### ReduceStore
 
-ReduceStore `state` can be any `object` and have no structure constraints.
+ReduceStore `state` can be any `object` and has no structure constraints.
 
-Only way to change `state` of `ReduceStore` is actions `handlers`.
-Actions are registered in store's `constructor` using protected method [`registerAction`](#register-action) which takes `action` class and `handler` function as arguments (check [`API`](#reduce-store-api) section).
-Changed store state should be returned as a result of `handler` function.
+The only way to change `state` of `ReduceStore` is actions `handlers`.
+Actions are registered in store's `constructor` using protected method [`registerAction`](#register-action) which takes an `action` class and a `handler` function as arguments (check [`API`](#reduce-store-api) section).
 
-Accessing data can be accomplished using public method [`getState(): StoreState`](#get-state) or you may implement additional public getters by yourself (e. g. public getter `Count()` in example bellow).
+Updated store state should be returned as a result of a `handler` function.
+
+Accessing data can be accomplished using public method [`getState(): StoreState`](#get-state) or you may implement additional public getters by yourself (e. g. public getter `Count()` in an example bellow).
 
 ```ts
 import { ReduceStore } from "simplr-flux";
@@ -169,7 +170,7 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 ### MapStore
 
-[`MapStore`](#map-store)  is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of same value type.
+[`MapStore`](#map-store) is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of the same value type.
 
 To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
 [`getAll`](#map-store-getAll) for multiple items.
@@ -398,7 +399,7 @@ This method should only be used by a callback in response to a dispatched payloa
 
 Returns boolean value that defines if this dispatcher is currently dispatching.
 
-### Dispatcher instance
+### `Dispatcher instance`
 
 `SimplrFlux` exports instance of a dispatcher:
 
