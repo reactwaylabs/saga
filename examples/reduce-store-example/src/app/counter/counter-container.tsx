@@ -21,11 +21,11 @@ class CounterContainerClass extends React.Component<{}, State> {
 
     private input: HTMLInputElement;
 
-    private onUpClick: React.MouseEventHandler<HTMLButtonElement> = () => {
+    private onIncrementClick: React.MouseEventHandler<HTMLButtonElement> = () => {
         CounterActionsCreators.CountIncremented();
     }
 
-    private onDownClick: React.MouseEventHandler<HTMLButtonElement> = () => {
+    private onDecrementClick: React.MouseEventHandler<HTMLButtonElement> = () => {
         CounterActionsCreators.CountDecremented();
     }
 
@@ -49,8 +49,8 @@ class CounterContainerClass extends React.Component<{}, State> {
                 <span>{`Count is: ${this.state.Count} `}</span>
             </div>
             <div>
-                <button onClick={this.onUpClick}>Up</button>
-                <button onClick={this.onDownClick}>Down</button>
+                <button onClick={this.onIncrementClick}>Increment</button>
+                <button onClick={this.onDecrementClick}>Decrement</button>
                 <button onClick={this.onResetClick}>Reset</button>
             </div>
             <div>
