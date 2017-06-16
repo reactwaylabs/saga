@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "setup": "npm install && jspm install",
-    "build": "gulp build",
+    "build": "gulp Build",
     "start": "gulp"
   },
   "devDependencies": {
