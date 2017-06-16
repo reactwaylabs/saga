@@ -1,0 +1,35 @@
+{
+  "Directories": {
+    "Source": "src",
+    "Build": "wwwroot",
+    "App": "app"
+  },
+  "TypeScriptConfig": {
+    "Development": "tsconfig.json",
+    "Production": "tsconfig.production.json"
+  },
+  "ServerConfig": {
+    "Ip": "127.0.0.1",
+    "Port": 4040,
+    "LiveReloadPort": 4004
+  },
+  "BundleConfig": {
+    "AppFile": "app.js",
+    "BuildFile": "app/build.js",
+    "Include": [
+      "css"
+    ],
+    "Exclude": [
+      "core-js",
+      "flux",
+      "immutable",
+      "react",
+      "react-dom",
+      "simplr-flux",
+      "[simplr-flux/**/*]",
+      "path"
+    ]
+  },
+  "WebConfig": null,
+  "CfgVersion": 2.02
+}
