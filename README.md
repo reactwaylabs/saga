@@ -24,7 +24,7 @@ In `SimplrFlux` action is basically a class with all necessary data provided.
 
 ```ts
 // action with no data provided
-export class ResetCountAction { }
+export class CountIncrementedAction { }
 
 // action with additional data provided
 export class CountChangedAction {
@@ -61,28 +61,28 @@ export function CountChanged(count: number) {
 
 An action creator is a set of functions to dispatch actions.
 You may choose the way to aggregate these functions,
-but we recommend you to use exported functions within single namespace when using TypeScript.
+but we recommend you to use exported functions within a single namespace when using `TypeScript`.
 
 ```ts
 import { Dispatcher } from "simplr-flux";
 import {
-    CountUpAction,
-    CountDownAction,
-    ResetCountAction,
+    CountIncrementedAction,
+    CountDecrementedAction,
+    CountResetAction,
     CountChangedAction
 } from "./counter-actions";
 
 export namespace CounterActionsCreators {
-    export function CountUp() {
-        Dispatcher.dispatch(new CountUpAction);
+    export function CountIncremented() {
+        Dispatcher.dispatch(new CountIncrementedAction);
     }
 
-    export function CountDown() {
-        Dispatcher.dispatch(new CountDownAction);
+    export function CountDecremented() {
+        Dispatcher.dispatch(new CountDecrementedAction);
     }
 
-    export function ResetCount() {
-        Dispatcher.dispatch(new ResetCountAction);
+    export function CountReset() {
+        Dispatcher.dispatch(new CountResetAction);
     }
 
     export function CountChanged(count: number) {
@@ -113,9 +113,9 @@ Accessing data can be accomplished using public method [`getState(): StoreState`
 ```ts
 import { ReduceStore } from "simplr-flux";
 import {
-    CountDownAction,
-    CountUpAction,
-    ResetCountAction,
+    CountDecrementedAction,
+    CountIncrementedAction,
+    CountResetAction,
     CountChangedAction
 } from "./counter-actions";
 
@@ -126,25 +126,25 @@ interface StoreState {
 class CounterReduceStoreClass extends ReduceStore<StoreState> {
     constructor() {
         super();
-        this.registerAction(CountDownAction, this.onCountDown.bind(this));
-        this.registerAction(CountUpAction, this.onCountUp.bind(this));
-        this.registerAction(ResetCountAction, this.onResetCount.bind(this));
+        this.registerAction(CountDecrementedAction, this.onCountDecremented.bind(this));
+        this.registerAction(CountIncrementedAction, this.onCountIncremented.bind(this));
+        this.registerAction(CountResetAction, this.onCountReset.bind(this));
         this.registerAction(CountChangedAction, this.onCountChanged.bind(this));
     }
 
-    private onCountDown(action: CountDownAction, state: StoreState): StoreState {
+    private onCountDecremented(action: CountDecrementedAction, state: StoreState): StoreState {
         return {
             Count: state.Count - 1
         };
     }
 
-    private onCountUp(action: CountUpAction, state: StoreState): StoreState {
+    private onCountIncremented(action: CountIncrementedAction, state: StoreState): StoreState {
         return {
             Count: state.Count + 1
         };
     }
 
-    private onResetCount(action: ResetCountAction, state: StoreState): StoreState {
+    private onCountReset(action: CountResetAction, state: StoreState): StoreState {
         return this.getInitialState();
     }
 
