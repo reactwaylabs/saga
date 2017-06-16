@@ -1,22 +1,22 @@
 import { Dispatcher } from "simplr-flux";
 import {
-    CountUpAction,
-    CountDownAction,
-    ResetCountAction,
+    CountIncrementedAction,
+    CountDecrementedAction,
+    CountResetAction,
     CountChangedAction
 } from "./counter-actions";
 
 export namespace CounterActionsCreators {
-    export function CountUp() {
-        Dispatcher.dispatch(new CountUpAction);
+    export function CountIncremented() {
+        Dispatcher.dispatch(new CountIncrementedAction);
     }
 
-    export function CountDown() {
-        Dispatcher.dispatch(new CountDownAction);
+    export function CountDecremented() {
+        Dispatcher.dispatch(new CountDecrementedAction);
     }
 
-    export function ResetCount() {
-        Dispatcher.dispatch(new ResetCountAction);
+    export function CountReset() {
+        Dispatcher.dispatch(new CountResetAction);
     }
 
     export function CountChanged(count: number) {

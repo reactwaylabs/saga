@@ -1,8 +1,8 @@
 import { ReduceStore } from "simplr-flux";
 import {
-    CountDownAction,
-    CountUpAction,
-    ResetCountAction,
+    CountDecrementedAction,
+    CountIncrementedAction,
+    CountResetAction,
     CountChangedAction
 } from "./counter-actions";
 
@@ -13,25 +13,25 @@ interface StoreState {
 class CounterReduceStoreClass extends ReduceStore<StoreState> {
     constructor() {
         super();
-        this.registerAction(CountDownAction, this.onCountDown.bind(this));
-        this.registerAction(CountUpAction, this.onCountUp.bind(this));
-        this.registerAction(ResetCountAction, this.onResetCount.bind(this));
+        this.registerAction(CountDecrementedAction, this.onCountDecremented.bind(this));
+        this.registerAction(CountIncrementedAction, this.onCountIncremented.bind(this));
+        this.registerAction(CountResetAction, this.onCountReset.bind(this));
         this.registerAction(CountChangedAction, this.onCountChanged.bind(this));
     }
 
-    private onCountDown(action: CountDownAction, state: StoreState): StoreState {
+    private onCountDecremented(action: CountDecrementedAction, state: StoreState): StoreState {
         return {
             Count: state.Count - 1
         };
     }
 
-    private onCountUp(action: CountUpAction, state: StoreState): StoreState {
+    private onCountIncremented(action: CountIncrementedAction, state: StoreState): StoreState {
         return {
             Count: state.Count + 1
         };
     }
 
-    private onResetCount(action: ResetCountAction, state: StoreState): StoreState {
+    private onCountReset(action: CountResetAction, state: StoreState): StoreState {
         return this.getInitialState();
     }
 

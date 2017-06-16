@@ -22,15 +22,15 @@ class CounterContainerClass extends React.Component<{}, State> {
     private input: HTMLInputElement;
 
     private onUpClick: React.MouseEventHandler<HTMLButtonElement> = () => {
-        CounterActionsCreators.CountUp();
+        CounterActionsCreators.CountIncremented();
     }
 
     private onDownClick: React.MouseEventHandler<HTMLButtonElement> = () => {
-        CounterActionsCreators.CountDown();
+        CounterActionsCreators.CountDecremented();
     }
 
     private onResetClick: React.MouseEventHandler<HTMLButtonElement> = () => {
-        CounterActionsCreators.ResetCount();
+        CounterActionsCreators.CountReset();
     }
 
     private onChangeClick: React.MouseEventHandler<HTMLButtonElement> = () => {

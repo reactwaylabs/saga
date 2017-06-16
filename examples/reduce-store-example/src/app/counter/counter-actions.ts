@@ -1,9 +1,9 @@
-export class CountUpAction { }
+// actions with no data provided
+export class CountIncrementedAction { }
 
-export class CountDownAction { }
+export class CountDecrementedAction { }
 
-// action with no data provided
-export class ResetCountAction { }
+export class CountResetAction { }
 
 // action with additional data provided
 export class CountChangedAction {
