@@ -16,11 +16,16 @@
     "noUnusedLocals": true,
     "skipDefaultLibCheck": true,
     "types": [
+      "core-js",
       "node",
       "systemjs"
     ],
     "typeRoots": [
       "node_modules/@types/"
     ]
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
 }
