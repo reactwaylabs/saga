@@ -9,11 +9,6 @@
     "start": "gulp"
   },
   "devDependencies": {
-    "@types/core-js": "^0.9.41",
-    "@types/node": "^7.0.28",
-    "@types/react": "^15.0.28",
-    "@types/react-dom": "^15.5.0",
-    "@types/systemjs": "^0.19.32",
     "gulp": "gulpjs/gulp#4.0",
     "jspm": "^0.17.0-beta.32",
     "simplr-gulp": "^2.4.0",
@@ -22,9 +17,12 @@
   },
   "dependencies": {
     "@types/flux": "^3.1.0",
+    "simplr-flux": "^2.0.1",
+    "@types/core-js": "^0.9.41",
+    "@types/node": "^7.0.28",
     "@types/react": "^15.0.28",
     "@types/react-dom": "^15.5.0",
-    "simplr-flux": "^2.0.1"
+    "@types/systemjs": "^0.19.32"
   },
   "jspm": {
     "name": "data-store-example",
