@@ -15,7 +15,7 @@ Built example will be available on `http://localhost:4040`.
 
 ## Brief
 
-This example contains a [`posts-store.ts`] that fetches posts from an `API` and stores them. Post is fetched with a change of [`post-container.tsx`](./src/app/posts/post-container.tsx) `props` in a method `calculateState` using `MapStore's` method `get`. Every post is fetched once. Whenever `post-container.tsx` receives an `id` of the post that was previously fetched, it returns a value from a `PostsStore`.
+This example contains a [`posts-store.ts`](./src/app/posts/posts-store.ts) that fetches posts from an `API` and stores them. Post is fetched with a change of [`post-container.tsx`](./src/app/posts/post-container.tsx) `props` in a method `calculateState` using `MapStore's` method `get`. Every post is fetched once. Whenever [`post-container.tsx`](./src/app/posts/post-container.tsx) receives an `id` of the post that was previously fetched, it returns a value from a `PostsStore`.
 
 ## Dependencies
 
