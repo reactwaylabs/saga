@@ -8,11 +8,11 @@ export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>> {
     /**
      * Dispatches a payload to all registered callbacks.
      *
-     * @param dispatcherMessage {TAction} Instance of class.
+     * @param {TAction} dispatcherMessage - Instance of a class.
      */
-    public dispatch<TAction>(actionClass: TAction): void {
+    public dispatch<TAction>(dispatcherMessage: TAction): void {
         let payload: DispatcherMessage<TAction> = {
-            action: actionClass
+            action: dispatcherMessage
         };
         try {
             if (!this.isDispatching()) {

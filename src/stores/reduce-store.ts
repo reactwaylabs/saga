@@ -11,7 +11,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher = Dispatcher] - Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
@@ -78,7 +78,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * This method should be pure and have no side-effects.
      *
      * @param {TState} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Disaptched payload message.
+     * @param {DispatcherMessage<any>} payload - Dispatched payload message.
      */
     reduce(state: TState, payload: DispatcherMessage<any>): TState {
         if (this.inCleanUpState) {
@@ -166,8 +166,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Clean up all store data.
      * This method is only available in the middle of a dispatch!
-     *
-     * @return {Immutable.Map<string, T>} - Initial empty state.
      */
     protected cleanUpStore(): void {
         if (!Dispatcher.isDispatching()) {

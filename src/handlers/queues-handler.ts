@@ -18,7 +18,7 @@ export class QueuesHandler<TValue> {
     /**
      * Freeze specified object if global function exists.
      *
-     * @param obj {TObject} - Object to freeze.
+     * @param {TObject} obj - Object to freeze.
      */
     protected tryToFreezeObject<TObject>(obj: TObject): TObject {
         if (!OBJECT_FREEZE_EXIST) {
@@ -30,9 +30,9 @@ export class QueuesHandler<TValue> {
     /**
      * Set item data by specified key.
      *
-     * @param key {string} - Item key.
-     * @param value {(TValue | undefined)} - Item value.
-     * @param status {ItemStatus} - Item status.
+     * @param {string} key - Item key.
+     * @param {(TValue | undefined)} value - Item value.
+     * @param {ItemStatus} status - Item status.
      */
     public Set(key: string, value: TValue | undefined, status: ItemStatus): Item<TValue> {
         let newValue = new Item<TValue>(status, value);
@@ -44,7 +44,7 @@ export class QueuesHandler<TValue> {
     /**
      * Create new initial item with specified key.
      *
-     * @param key {string} - Item key.
+     * @param {string} key - Item key.
      */
     public Create(key: string): Item<TValue> {
         let newValue = new Item<TValue>(ItemStatus.Init);
@@ -54,10 +54,10 @@ export class QueuesHandler<TValue> {
     }
 
     /**
-     * Set spcified status for item by key.
+     * Set specified status for item by key.
      *
-     * @param key {string} - Item key.
-     * @param status {ItemStatus} - Item status.
+     * @param {string} key - Item key.
+     * @param {ItemStatus} status - Item status.
      */
     public SetItemStatus(key: string, status: ItemStatus): Item<TValue> {
         if (!this.queues.has(key)) {
@@ -75,8 +75,8 @@ export class QueuesHandler<TValue> {
     /**
      * Set specified status for multiple items by keys.
      *
-     * @param keys {Array<string>} - List of items keys.
-     * @param status {ItemStatus} - Item status.
+     * @param {Array<string>} keys - List of items keys.
+     * @param {ItemStatus} status - Item status.
      */
     public SetMultipleItemsStatus(keys: Array<string>, status: ItemStatus): void {
         this.queues = this.queues.withMutations(mutableQueues => {
@@ -96,7 +96,7 @@ export class QueuesHandler<TValue> {
     /**
      * Returns filtered items by specified item status.
      *
-     * @param status {ItemStatus} - Item status.
+     * @param {ItemStatus} status - Item status.
      */
     public GetFilteredItems(filter: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
         return this.queues.filter(x => x != null && filter(x)).toMap();
@@ -105,7 +105,8 @@ export class QueuesHandler<TValue> {
     /**
      * Returns filtered items keys by specified item status.
      *
-     * @param status {ItemStatus} - Item status.
+     * @param {ItemStatus} status - Item status.
+     * @returns {string[]}
      */
     public GetFilteredItemsKeys(filter: (item: Item<TValue>, key: string) => boolean): string[] {
         return this.queues
@@ -118,7 +119,8 @@ export class QueuesHandler<TValue> {
      * Returns the value with specified key from queues list.
      * Or `undefined` if item with specified key doesn't exist in queues list.
      *
-     * @param key {string} - Item key.
+     * @param {string} key - Item key.
+     * @returns {Item<TValue> | undefined}
      */
     public Get(key: string): Item<TValue> | undefined {
         return this.queues.get(key);
@@ -127,7 +129,8 @@ export class QueuesHandler<TValue> {
     /**
      * Return true if item with specified key exists in queues list.
      *
-     * @param key {string} - Item key.
+     * @param {string} key - Item key.
+     * @returns {boolean}
      */
     public Has(key: string): boolean {
         return this.queues.has(key);
@@ -136,7 +139,7 @@ export class QueuesHandler<TValue> {
     /**
      * Remove specified item by key from queues list.
      *
-     * @param key {string} - Item key.
+     * @param {string} key - Item key.
      */
     public Remove(key: string): void {
         this.queues = this.queues.remove(key);
@@ -145,7 +148,7 @@ export class QueuesHandler<TValue> {
     /**
      * Remove multiple items by keys from queues list.
      *
-     * @param keys {Array<string>} - Items keys list.
+     * @param {Array<string>} keys - Items keys list.
      */
     public RemoveMultiple(keys: Array<string>): void {
         this.queues = this.queues.withMutations(mutableQueues => {

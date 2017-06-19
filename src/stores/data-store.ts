@@ -13,6 +13,11 @@ import { InvalidationHandler } from "../handlers/invalidation-handler";
 
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
+    /**
+     * Creates an instance of DataStore.
+     *
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
         this.queuesHandler = new QueuesHandler<any>();
@@ -21,13 +26,13 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
 
     /**
      * Queues list handler.
-     *
+     * @type {QueuesHandler<any>}
      */
     private queuesHandler: QueuesHandler<any>;
 
     /**
      * State cache invalidation handler.
-     *
+     * @type {InvalidationHandler<any>}
      */
     private invalidationHandler: InvalidationHandler<any>;
 
@@ -39,10 +44,10 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     }
 
     /**
-     * Asyncronously dispatch action that this store has changed.
+     * Asynchronously dispatch action that this store has changed.
      * Dispatch process will be cancelled if specified `stillValid` method return false.
      *
-     * @param {()=> void} stillValid - Is dispatch still valid.
+     * @param {() => boolean} stillValid - Is dispatch still valid.
      */
     private dispatchChangesAsync(stillValid?: () => boolean): void {
         setTimeout(() => {
@@ -56,7 +61,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Start resolving promise and resolving item by key.
      *
      * @param {string} key - Item key.
-     * @param {()=> Promise<TValue>} promiseFactory - Function which return a promise.
+     * @param {() => Promise<TValue>} promiseFactory - Function which return a promise.
      */
     private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>) {
         try {
@@ -115,6 +120,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Constructs the initial state for this store.
      * This is called once during construction of the store.
      *
+     * @returns {Items<any>}
      */
     getInitialState(): Items<any> {
         return Immutable.Map<string, Item<any>>({});
@@ -127,6 +133,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      *
      * @param {Items<any>} state - Current store state.
      * @param {DispatcherMessage<any>} payload - Dispatched message from dispatcher.
+     * @returns {Items<any>}
      */
     reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
         if (payload.action instanceof StoreUpdateAction) {
@@ -155,9 +162,13 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param {string} key - Item key.
      * @param {() => Promise<TValue>} promiseFactory - Function which return promise with value resolver.
      * @param {boolean} [noCache=false] - Use data without cache.
+     * @returns {Item<TValue>}
      */
     protected getValueFromState<TValue>(
-        key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue> {
+        key: string,
+        promiseFactory: () => Promise<TValue>,
+        noCache: boolean = false
+    ): Item<TValue> {
         let value = this.getItem<TValue>(key, noCache);
         if (value.Status === ItemStatus.Init) {
             value = this.queuesHandler.SetItemStatus(key, ItemStatus.Pending);
@@ -170,6 +181,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Check if the cache has a particular key.
      *
      * @param {string} key - Item key.
+     * @returns {boolean}
      */
     protected has(key: string): boolean {
         return this.getState().has(key);
@@ -187,9 +199,9 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Remove multiple items from cache, if exist.
      *
-     * @param {Array<string>} keys - Items keys.
+     * @param {string[]} keys - Items keys.
      */
-    protected invalidateCacheMultiple(keys: Array<string>): void {
+    protected invalidateCacheMultiple(keys: string[]): void {
         if (keys.length > 0) {
             this.invalidationHandler.Prepare(keys);
             this.dispatchChangesAsync(() => this.invalidationHandler.IsWaiting);
