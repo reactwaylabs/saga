@@ -1,5 +1,6 @@
-﻿import { ReduceStore } from "./reduce-store";
+﻿import * as Flux from "flux";
 import * as Immutable from "immutable";
+import { ReduceStore } from "./reduce-store";
 import { DispatcherMessage, Dispatcher } from "../dispatcher";
 import { DataMapStoreUpdatedAction } from "../actions/actions";
 
@@ -9,7 +10,7 @@ import { Item } from "../abstractions/item";
 import { Items } from "../abstractions/items";
 import { ItemStatus } from "../abstractions/item-status";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
-import { TransformArrayToImmutableSet, TransformImmutableListToImmutableSet } from "../utils/helpers";
+import { OnSuccess, OnFailure } from "../contracts/callbacks";
 
 
 const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " +
@@ -25,9 +26,13 @@ const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " +
  * @template TValue
  */
 export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
-
-    constructor() {
-        super();
+    /**
+     * Creates an instance of MapStore.
+     *
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     */
+    constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
+        super(dispatcher);
         this.queuesHandler = this.getInitialQueues();
         this.invalidationHandler = new InvalidationHandler<TValue>();
     }
@@ -42,11 +47,12 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * State cache invalidation handler.
      *
+     * @type {InvalidationHandler<TValue>}
      */
     private invalidationHandler: InvalidationHandler<TValue>;
 
     /**
-     * Build error with prefix and instace name.
+     * Build error with prefix and instance name.
      *
      * @private
      * @param {string} functionName
@@ -79,15 +85,15 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * API call to get data from server.
      *
-     * @param id {Array<string>} List of requesting ids.
-     * @param onSuccess {(values: { [id: string]: TValue }) => void} Resolve some values.
-     * @param onFailed {(values: { [id: string]: TValue }) => void} Reject some values.
+     * @param {string[]} ids - List of requesting ids.
+     * @param {OnSuccess} [onSuccess] - Resolve some values.
+     * @param {OnFailure} [onFailed] - Reject some values.
      * @return {Promise<Function>} Request response promise.
      */
     protected abstract requestData(
-        id: Array<string>,
-        onSuccess?: (values: { [id: string]: TValue }) => void,
-        onFailed?: (values?: { [id: string]: ItemStatus } | Array<string>) => void
+        ids: string[],
+        onSuccess?: OnSuccess<TValue>,
+        onFailed?: OnFailure
     ): Promise<{ [id: string]: TValue }> | void;
 
     /**
@@ -130,7 +136,14 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
     private requestIntervalTimer: undefined | number;
 
-    protected RequestsIntervalInMs = 50;
+    /**
+     * With a large amount of requests MapStore throttles them.
+     * This property defines interval between portions of requests.
+     * 
+     * @protected
+     * @type {number}
+     */
+    protected RequestsIntervalInMs: number = 50;
 
     private startRequestingData = (initial: boolean = false): void => {
         if (!initial) {
@@ -176,7 +189,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         this.dispatchChanges();
     }
 
-    private onRequestFailed = (currentSession: number, ids: Array<string>, values?: { [id: string]: ItemStatus } | Array<string>) => {
+    private onRequestFailed = (currentSession: number, ids: string[], values?: { [id: string]: ItemStatus } | string[]) => {
         if (currentSession !== this.currentSession) {
             console.warn(this.buildError(
                 "requestData",
@@ -219,18 +232,18 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Check if given function is Promise.
      *
-     * @param calback {void | Promise<TResult>} function
+     * @param {any} [func] - function
      */
-    private isPromise<TResult>(func: any): func is Promise<TResult> {
-        return func != null && func.then != null;
+    private isPromise<TResult>(func?: any): func is Promise<TResult> {
+        return func != null && func.then != null && func.catch != null;
     }
 
 
     /**
      * Get the value of a particular key. Returns Value undefined and status if the key does not exist in the cache.
      *
-     * @param key {string} Requested item key.
-     * @param noCache {boolean} Update cached item from the server.
+     * @param {string} key - Requested item key.
+     * @param {boolean} [noCache=false] - Update cached item from the server.
      */
     public get(key: string, noCache: boolean = false): Item<TValue> {
         let item = this.getItem(key, noCache);
@@ -241,7 +254,8 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
     /**
      * Prefetch item by key.
-     * @param key {string} Requested item key.
+     * @param {string} key - Requested item key.
+     * @param {boolean} [noCache=false] = Update cached item from the server.
      */
     public Prefetch(key: string, noCache: boolean = false): void {
         this.get(key, noCache);
@@ -250,9 +264,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
     /**
      * Prefetch all items by keys.
-     * @param key {string} Requested item key.
+     * @param {string[]} keys - Requested item key.
+     * @param {boolean} [noCache=false] - Update cached item from the server.
      */
-    public PrefetchAll(keys: Array<string>, noCache: boolean = false): void {
+    public PrefetchAll(keys: string[], noCache: boolean = false): void {
         this.getAll(keys, undefined, noCache);
     }
 
@@ -260,7 +275,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Remove item from cache, if exist.
      *
-     * @param {string} key Requested item key.
+     * @param {string} key - Requested item key.
      * @returns {void}
      */
     public InvalidateCache(key: string): void {
@@ -271,10 +286,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Remove multiple items from cache, if exist.
      *
-     * @param {Array<string>} keys Requested item key.
+     * @param {string[]} keys - Requested item key.
      * @returns {void}
      */
-    public InvalidateCacheMultiple(keys: Array<string>): void {
+    public InvalidateCacheMultiple(keys: string[]): void {
         this.invalidationHandler.Prepare(keys);
         this.dispatchChangesAsync();
     }
@@ -282,8 +297,8 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Get the item value from state or add to queue.
      *
-     * @param key {string} Requested item key.
-     * @param noCache {boolean} Update cached item from the server.
+     * @param {string} key - Requested item key.
+     * @param {boolean} noCache - Update cached item from the server.
      */
     private getItem(key: string, noCache: boolean): Item<TValue> {
         let item: Item<TValue>;
@@ -306,9 +321,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * Providing a previous result allows the possibility of keeping the same
      * reference if the keys did not change.
      *
-     * @param keys {Array<string> | Immutable.List<string>} Requested keys list in Array or Immutable List.
-     * @param prev {Immutable.Map<string, T>} Previouse data list merged with new data list.
-     * @param noCache {boolean} Update cached items from the server.
+     * @param {string[] | Immutable.List<string>} keys - Requested keys list in Array or Immutable List.
+     * @param {Immutable.Map<string, T>} [prev] - Previous data list merged with new data list.
+     * @param {boolean} [noCache=false] - Update cached items from the server.
      * @return {Immutable.Map<string,T>} Requested data list.
      */
     public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue> {
@@ -318,7 +333,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         if (keys != null) {
             if (keys instanceof Array) {
                 try {
-                    newKeys = TransformArrayToImmutableSet(keys);
+                    newKeys = Immutable.Set(keys);
                 } catch (error) {
                     console.error(this.buildError("getAll", ERROR_GET_ALL_WRONG_PARAM));
                     newKeys = Immutable.Set<string>();
@@ -329,7 +344,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 newKeys = keys as Immutable.OrderedSet<string>;
             } else if (Immutable.List.isList(keys)) {
                 try {
-                    newKeys = TransformImmutableListToImmutableSet(keys as Immutable.List<string>);
+                    newKeys = keys.toSet() as Immutable.Set<string>;
                 } catch (error) {
                     newKeys = Immutable.Set<string>();
                     console.error(this.buildError("getAll", ERROR_GET_ALL_WRONG_PARAM));
@@ -398,7 +413,13 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         return undefined;
     }
 
-    protected storeWillCleanUp = () => {
+    /**
+     * Holds a function that will be invoked before store clean up.
+     * 
+     * @protected
+     * @type {() => void}
+     */
+    protected storeWillCleanUp: () => void = () => {
         this.queuesHandler.RemoveAll();
     }
 
@@ -407,9 +428,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param state {Immutable.Map<string, T>} Store state.
-     * @param payload {DispatcherMessage} Dispatched message from simplr-dispatcher.
-     * @return {Immutable.Map<string, T>} Updated state with new data.
+     * @param {Items<TValue>} state - Store state.
+     * @param {DispatcherMessage<any>} payload - Dispatched message from simplr-dispatcher.
+     * @return {Items<TValue>} Updated state with new data.
      */
     public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
         if (payload.action instanceof DataMapStoreUpdatedAction) {
