@@ -31,4 +31,4 @@ This example uses:
 - [`path`](https://nodejs.org/api/path.html) polyfill that is supplied by [`JSPM`](http://jspm.io/) to handle paths to `JSON` files.
 
 <!--- TODO: add link to SimplrFlux README --->
-These dependencies are not necessary for `SimplrFlux`, it's just an example of it's capabilities in action.
+These dependencies are not necessary for `SimplrFlux`, it's just an example of its capabilities in action.
