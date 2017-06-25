@@ -59,9 +59,9 @@ export function CountChanged(count: number) {
 
 ## Action creators
 
-An action creator is a set of functions to dispatch actions.
+An action creator is a set of functions for dispatching actions.
 You may choose the way to aggregate these functions,
-but we recommend you to use exported functions within a single namespace when using `TypeScript`.
+but we recommend using exported functions within a single namespace when using `TypeScript`.
 
 ```ts
 import { Dispatcher } from "simplr-flux";
@@ -97,7 +97,7 @@ export namespace CounterActionsCreators {
 
 Main difference between store types in `SimplrFlux` is state management.
 
-In accordance with your data structure you may choose type of store that best fits your data structure.
+In accordance with your data structure you may choose a type of store that best fits your data structure.
 
 ### ReduceStore
 
@@ -108,7 +108,7 @@ Actions are registered in store's `constructor` using protected method [`registe
 
 Updated store state should be returned as a result of a `handler` function.
 
-Accessing data can be accomplished using public method [`getState(): StoreState`](#get-state) or you may implement additional public getters by yourself (e. g. public getter `Count()` in an example bellow).
+Accessing data can be accomplished using public method [`getState(): StoreState`](#get-state) or you may implement additional public getters yourself (e. g. public getter `Count()` in an example bellow).
 
 ```ts
 import { ReduceStore } from "simplr-flux";
@@ -172,13 +172,13 @@ export const CounterReduceStore = new CounterReduceStoreClass();
 
 [`MapStore`](#map-store) is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of the same value type.
 
-To get values from `MapStore` you should use public methods [`get`](#map-store-get) for single item or
-[`getAll`](#map-store-getAll) for multiple items.
+To get values from `MapStore` you should use public methods [`get`](#map-store-get) for a single item or
+[`getAll`](#map-store-getAll) for multiple ones.
 
 Values from `MapStore` are returned in an [`Item`](#item-class) object with:
 
 - `Status` property for item loading status (check [`API`](#api) for [`ItemStatus`](#item-status));
-- `Value` for actual value of requested item.
+- `Value` for actual value of a requested item.
 
 If values requested with `getAll` items will be returned in an [`Immutable.Map<string, Items>`](#items).
 
@@ -226,7 +226,7 @@ export const PostsStore = new PostsStoreClass();
 
 [`DataStore`](#data-store) is another key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map). Not like `MapStore` it can hold values of different types.
 
-To get values from `DataStore` you should use protected method [`getValueFromState`](#data-store-getValueFromState) in public getters of your own implementation.
+To get values from `DataStore` you should use a protected method [`getValueFromState`](#data-store-getValueFromState) in public getters of your own implementation.
 
 [`getValueFromState`](#data-store-getValueFromState) is a helper method that takes a unique key of a value to hold and `promiseFactory` - function to resolve this value.
 
@@ -547,13 +547,13 @@ export type StoreWillCleanup<TState> = () => void | TState;
 
 `TState` - store state.
 
-Method is invoked immediately before a store began to clean the state.
+Method is invoked immediately before a store begins to clean the state.
 It's called in the middle of a dispatch cycle.
 If state returned in this method, it's used for initial state.
 
 #### `protected shouldHandleAction(action: Object, state: TState): boolean`
 
-Checks if action should handled. By default always returns true.
+Checks if action should be handled. By default always returns true.
 
 | Argument      | Type     | Description                 |
 |---------------|----------|-----------------------------|
