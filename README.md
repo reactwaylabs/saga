@@ -620,7 +620,13 @@ Returns undefined `Value` and status if the key does not exist in the cache (che
 
 <a name="map-store-getAll"></a>
 
-#### `public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue>`
+#### `public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
 
 `TValue` - type of `MapStore` item value.
 
@@ -632,11 +638,11 @@ Providing a previous result allows the possibility of keeping the same reference
 
 Returns requested data map.
 
-| Argument      | Type                                          | Description                                                 |
-|---------------|-----------------------------------------------|-------------------------------------------------------------|
-| `keys`        | string[] \| Immutable.List\<string\>          | Requested keys list in an `Array` or an `ImmutableList`.    |
-| `prev`        | Items\<TValue>                                | Previous data map merged with new data map.                 |
-| `noCache`     | Items\<TValue>                                | Update cached item from the server or other data source.    |
+| Argument      | Type                                                                                                      | Description                                                 |
+|---------------|-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `keys`        | string[] \| Immutable.List\<string\> \| Immutable.Set\<string\> \| Immutable.OrderedSet\<string\>         | Requested keys list in an `Array` or an `ImmutableList`.    |
+| `prev`        | Items\<TValue>                                                                                            | Previous data map merged with new data map.                 |
+| `noCache`     | Items\<TValue>                                                                                            | Update cached item from the server or other data source.    |
 
 #### `public has(key: string): boolean`
 
@@ -659,12 +665,18 @@ Prefetch item by key.
 
 #### `public PrefetchAll(keys: string[], noCache: boolean = false): void`
 
+#### `public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void`
+
+#### `public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void`
+
+#### `public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void`
+
 Prefetch all items by keys.
 
-| Argument      | Type                        | Description                                                 |
-|---------------|-----------------------------|-------------------------------------------------------------|
-| `keys`        | string[]                    | Requested items keys.                                       |
-| `noCache`     | boolean                     | Update cached item from the server or other data source.    |
+| Argument      | Type                                                                                                  | Description                                                 |
+|---------------|-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `keys`        | string[] \| Immutable.List\<string\> \| Immutable.Set\<string\> \| Immutable.OrderedSet\<string\>     | Requested items keys.                                       |
+| `noCache`     | boolean                                                                                               | Update cached item from the server or other data source.    |
 
 #### `public InvalidateCache(key: string): void`
 
