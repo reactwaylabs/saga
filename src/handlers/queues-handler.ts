@@ -69,7 +69,7 @@ export class QueuesHandler<TValue> {
             return this.tryToFreezeObject(newValue);
         });
 
-        return this.queues.get(key)!;
+        return this.queues.get(key);
     }
 
     /**

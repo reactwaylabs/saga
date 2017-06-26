@@ -98,7 +98,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     private moveFromQueuesToState(state: Items<any>): Items<any> | undefined {
         const moveList = this.queuesHandler.GetFilteredItems(x => x.Status >= ItemStatus.Loaded);
         if (moveList.size === 0) {
-            return;
+            return undefined;
         }
         const keysForRemove = new Array<string>(moveList.size);
         const newState = state.withMutations(mutableState => {
