@@ -1,7 +1,6 @@
 # Example of MapStore
 
-<!--- TODO: add link to MapStore documentation --->
-Example of `MapStore`.
+Example of [`MapStore`](../../README.md#mapstore).
 
 ## Getting started
 
@@ -27,5 +26,4 @@ This example uses:
 - [`whatwg-fetch`](https://github.com/github/fetch) `window.fetch` polyfill to make requests.
 - [`JSONPlaceholder`](https://jsonplaceholder.typicode.com/) fake `API` as a `MapStore` data source.
 
-<!--- TODO: add link to SimplrFlux README --->
-These dependencies are not necessary for `SimplrFlux`, it's just an example of it's capabilities in action.
+These dependencies are not necessary for [`SimplrFlux`](../../README.md), it's just an example of its capabilities in action.
