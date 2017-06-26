@@ -577,9 +577,13 @@ State of `MapStore` is a `Items` of type TValue. Check API section for [`Abstrac
 
 `TValue` - type of `MapStore` item value.
 
-#### `constructor(): void`
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
 
 Creates an instance of MapStore.
+
+| Argument            | Type                                        | Description                 |
+|---------------------|---------------------------------------------|-----------------------------|
+| `dispatcher`        | `Flux.Dispatcher<DispatcherMessage<any>>`   | Dispatcher instance.        |
 
 <a name="map-store-requestData"></a>
 
@@ -740,7 +744,7 @@ import { DataStore } from "simplr-flux";
 
 State of `DataStore` is a `Items` of `any` value type. Check API section for [`Abstractions Items`](#items-type).
 
-#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>): void`
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
 
 Creates an instance of DataStore.
 
