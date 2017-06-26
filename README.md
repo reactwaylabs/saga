@@ -587,25 +587,28 @@ Creates an instance of MapStore.
 
 <a name="map-store-requestData"></a>
 
-#### protected abstract requestData
-
-```ts
-protected abstract requestData(
-    ids: string[],
-    onSuccess?: (values: { [id: string]: TValue }) => void,
-    onFailed?: (values?: { [id: string]: ItemStatus } | string[]) => void
-): Promise<{ [id: string]: TValue }> | void;
-```
+#### `protected abstract requestData(ids: string[], onSuccess?: OnSuccess<TValue>, onFailed?: OnFailure): Promise<{ [id: string]: TValue }> | void`
 
 API call to get data from server or other data source.
 
 Returns dictionary of resolved values.
 
-| Argument      | Type                                                          | Description                                   |
-|---------------|---------------------------------------------------------------|-----------------------------------------------|
-| `ids`         | string[]                                                      | List of requesting ids.                       |
-| `onSuccess`   | (values: { [id: string]: TValue }) => void                    | Success callback with items that succeeded.   |
-| `onFailed`    | (values?: { [id: string]: ItemStatus } \| string[]) => void   | Failure callback with items statuses.         |
+| Argument      | Type                      | Description                                   |
+|---------------|---------------------------|-----------------------------------------------|
+| `ids`         | string[]                  | List of requesting ids.                       |
+| `onSuccess`   | OnSuccess<TValue>         | Success callback with items that succeeded.   |
+| `onFailed`    | OnFailure                 | Failure callback with items statuses.         |
+
+`TValue` - type of `MapStore` item value.
+
+`OnSuccess` and `OnFailure` can be imported from `Contracts`.
+
+```ts
+import { Contracts } from "simplr-flux";
+
+// Contracts.OnSuccess
+// Contracts.OnFailure
+```
 
 <a name="map-store-get"></a>
 
