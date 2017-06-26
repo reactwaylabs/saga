@@ -535,7 +535,7 @@ This method is only available in the middle of a dispatch!
 
 Returns current session timestamp.
 
-#### `getDispatcher(): DispatcherBuilder`
+#### `public getDispatcher(): DispatcherBuilder`
 
 Returns the dispatcher for this store.
 
@@ -748,7 +748,7 @@ State of `DataStore` is a `Items` of `any` value type. Check API section for [`A
 
 Creates an instance of DataStore.
 
-#### `getInitialState(): Items<any>`
+#### `public getInitialState(): Items<any>`
 
 Constructs the initial state for this store. This is called once during construction of the store.
 
