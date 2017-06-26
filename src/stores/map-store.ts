@@ -267,10 +267,13 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param {string[]} keys - Requested item key.
      * @param {boolean} [noCache=false] - Update cached item from the server.
      */
-    public PrefetchAll(keys: string[], noCache: boolean = false): void {
+    public PrefetchAll(keys: string[], noCache?: boolean): void
+    public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void
+    public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void
+    public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void
+    public PrefetchAll(keys: any, noCache: boolean = false): void {
         this.getAll(keys, undefined, noCache);
     }
-
 
     /**
      * Remove item from cache, if exist.
@@ -321,11 +324,15 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * Providing a previous result allows the possibility of keeping the same
      * reference if the keys did not change.
      *
-     * @param {string[] | Immutable.List<string>} keys - Requested keys list in Array or Immutable List.
+     * @param {string[] | Immutable.List<string> } keys - Requested keys list in Array or Immutable List.
      * @param {Immutable.Map<string, T>} [prev] - Previous data list merged with new data list.
      * @param {boolean} [noCache=false] - Update cached items from the server.
-     * @return {Immutable.Map<string,T>} Requested data list.
+     * @return {Items<TValue>} Requested data list.
      */
+    public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>
+    public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
+    public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
+    public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
     public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue> {
         let newKeys: Immutable.Set<string>;
         let start = prev || this.getInitialState();
