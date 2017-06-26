@@ -1,4 +1,4 @@
-﻿import * as Flux from "flux";
+import * as Flux from "flux";
 import * as Immutable from "immutable";
 import { ReduceStore } from "./reduce-store";
 import { DispatcherMessage, Dispatcher } from "../dispatcher";
@@ -11,7 +11,6 @@ import { Items } from "../abstractions/items";
 import { ItemStatus } from "../abstractions/item-status";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 import { OnSuccess, OnFailure } from "../contracts/callbacks";
-
 
 const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " +
     "'Immutable.Set<string>' or 'Immutable.List<string>'.";
@@ -40,9 +39,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Return initial queues value.
      */
-    private getInitialQueues = () => {
-        return new QueuesHandler<TValue>();
-    }
+    private getInitialQueues = () => new QueuesHandler<TValue>();
 
     /**
      * State cache invalidation handler.
@@ -70,7 +67,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @type {QueuesHandler<TValue>}
      */
     private queuesHandler: QueuesHandler<TValue>;
-
 
     private dispatchChanges() {
         Dispatcher.dispatch(new DataMapStoreUpdatedAction(this.getDispatchToken()));

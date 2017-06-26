@@ -23,7 +23,7 @@ export class InvalidationHandler<TValue> {
         }
         this.pendingDeletionItems.withMutations(mutablePendingDeletionItems => {
             for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
+                const key = keys[i];
                 if (this.pendingDeletionItems.indexOf(key) === -1) {
                     this.pendingDeletionItems = this.pendingDeletionItems.push(key);
                 }
@@ -36,8 +36,8 @@ export class InvalidationHandler<TValue> {
      *
      * @param {Items<TValue>} state - Store state.
      */
-    public Start(state: Items<TValue>): { State: Items<TValue>, RemovedKeys: Array<string> } {
-        let removed = new Array<string>(this.pendingDeletionItems.size);
+    public Start(state: Items<TValue>): { State: Items<TValue>, RemovedKeys: string[] } {
+        const removed = new Array<string>(this.pendingDeletionItems.size);
         state = state.withMutations(mutableState => {
             let index = 0;
             this.pendingDeletionItems.forEach(key => {

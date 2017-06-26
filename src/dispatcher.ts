@@ -1,4 +1,4 @@
-﻿import * as flux from "flux";
+import * as flux from "flux";
 
 export interface DispatcherMessage<TAction> {
     action: TAction;
@@ -11,7 +11,7 @@ export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>> {
      * @param {TAction} dispatcherMessage - Instance of a class.
      */
     public dispatch<TAction>(dispatcherMessage: TAction): void {
-        let payload: DispatcherMessage<TAction> = {
+        const payload: DispatcherMessage<TAction> = {
             action: dispatcherMessage
         };
         try {

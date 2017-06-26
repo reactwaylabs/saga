@@ -65,7 +65,7 @@ export class QueuesHandler<TValue> {
         }
 
         this.queues = this.queues.update(key, oldValue => {
-            let newValue = new Item<TValue>(status, oldValue.Value);
+            const newValue = new Item<TValue>(status, oldValue.Value);
             return this.tryToFreezeObject(newValue);
         });
 
@@ -78,15 +78,15 @@ export class QueuesHandler<TValue> {
      * @param {Array<string>} keys - List of items keys.
      * @param {ItemStatus} status - Item status.
      */
-    public SetMultipleItemsStatus(keys: Array<string>, status: ItemStatus): void {
+    public SetMultipleItemsStatus(keys: string[], status: ItemStatus): void {
         this.queues = this.queues.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
+                const key = keys[i];
                 if (!mutableQueues.has(key)) {
                     continue;
                 }
                 mutableQueues = mutableQueues.update(key, oldValue => {
-                    let newValue = new Item<TValue>(status, oldValue.Value);
+                    const newValue = new Item<TValue>(status, oldValue.Value);
                     return this.tryToFreezeObject(newValue);
                 });
             }
@@ -150,10 +150,10 @@ export class QueuesHandler<TValue> {
      *
      * @param {Array<string>} keys - Items keys list.
      */
-    public RemoveMultiple(keys: Array<string>): void {
+    public RemoveMultiple(keys: string[]): void {
         this.queues = this.queues.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
+                const key = keys[i];
                 if (key == null) {
                     continue;
                 }

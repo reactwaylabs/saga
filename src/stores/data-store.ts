@@ -11,7 +11,6 @@ import { Items } from "../contracts/items";
 import { StoreUpdateAction } from "../actions/data-store-actions";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 
-
 export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Creates an instance of DataStore.
@@ -65,8 +64,8 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      */
     private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>) {
         try {
-            let response = await promiseFactory();
-            let status = (response != null) ? ItemStatus.Loaded : ItemStatus.NoData;
+            const response = await promiseFactory();
+            const status = (response != null) ? ItemStatus.Loaded : ItemStatus.NoData;
             this.queuesHandler.Set(key, response || undefined, status);
         } catch (error) {
             this.queuesHandler.SetItemStatus(key, ItemStatus.Failed);
@@ -97,12 +96,12 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param {Item<any>} state - Current store state.
      */
     private moveFromQueuesToState(state: Items<any>): Items<any> | undefined {
-        let moveList = this.queuesHandler.GetFilteredItems(x => x.Status >= ItemStatus.Loaded);
+        const moveList = this.queuesHandler.GetFilteredItems(x => x.Status >= ItemStatus.Loaded);
         if (moveList.size === 0) {
             return;
         }
-        let keysForRemove = new Array<string>(moveList.size);
-        let newState = state.withMutations(mutableState => {
+        const keysForRemove = new Array<string>(moveList.size);
+        const newState = state.withMutations(mutableState => {
             let index = 0;
             moveList.forEach((item, key) => {
                 if (item == null || key == null) {
@@ -122,7 +121,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      *
      * @returns {Items<any>}
      */
-    getInitialState(): Items<any> {
+    public getInitialState(): Items<any> {
         return Immutable.Map<string, Item<any>>({});
     }
 
@@ -135,10 +134,10 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param {DispatcherMessage<any>} payload - Dispatched message from dispatcher.
      * @returns {Items<any>}
      */
-    reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
+    public reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
         if (payload.action instanceof StoreUpdateAction) {
             if (this.getDispatchToken() === payload.action.DispatchToken) {
-                let newState = this.moveFromQueuesToState(state);
+                const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
                     state = newState;
                 }
@@ -148,7 +147,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
         state = super.reduce(state, payload);
 
         if (this.invalidationHandler.IsWaiting) {
-            let result = this.invalidationHandler.Start(state);
+            const result = this.invalidationHandler.Start(state);
             this.queuesHandler.RemoveMultiple(result.RemovedKeys);
             state = result.State;
         }
