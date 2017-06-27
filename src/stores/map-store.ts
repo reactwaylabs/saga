@@ -228,9 +228,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Check if given function is Promise.
      *
-     * @param {any} [func] - function
+     * @param {any} func - function
      */
-    private isPromise<TResult>(func?: any): func is Promise<TResult> {
+    private isPromise<TResult>(func: any): func is Promise<TResult> {
         return func != null && func.then != null && func.catch != null;
     }
 
@@ -263,10 +263,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param {string[]} keys - Requested item key.
      * @param {boolean} [noCache=false] - Update cached item from the server.
      */
-    public PrefetchAll(keys: string[], noCache?: boolean): void
-    public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void
-    public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void
-    public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void
+    public PrefetchAll(keys: string[], noCache?: boolean): void;
+    public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void;
+    public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void;
+    public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void;
     public PrefetchAll(keys: any, noCache: boolean = false): void {
         this.getAll(keys, undefined, noCache);
     }
@@ -325,10 +325,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param {boolean} [noCache=false] - Update cached items from the server.
      * @return {Items<TValue>} Requested data list.
      */
-    public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>
-    public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
-    public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
-    public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>
+    public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
+    public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
+    public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
+    public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
     public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue> {
         let newKeys: Immutable.Set<string>;
         let start = prev || this.getInitialState();
