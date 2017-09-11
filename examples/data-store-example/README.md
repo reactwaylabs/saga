@@ -1,7 +1,6 @@
 # Example of DataStore
 
-<!--- TODO: add link to DataStore documentation --->
-Example of `DataStore`.
+Example of [`DataStore`](../../README.md#datastore).
 
 ## Getting started
 
@@ -30,5 +29,4 @@ This example uses:
 - [`systemjs/plugin-json`](https://github.com/systemjs/plugin-json) to load `JSON` files.
 - [`path`](https://nodejs.org/api/path.html) polyfill that is supplied by [`JSPM`](http://jspm.io/) to handle paths to `JSON` files.
 
-<!--- TODO: add link to SimplrFlux README --->
-These dependencies are not necessary for `SimplrFlux`, it's just an example of its capabilities in action.
+These dependencies are not necessary for [`SimplrFlux`](../../README.md), it's just an example of its capabilities in action.

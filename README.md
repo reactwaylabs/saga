@@ -168,6 +168,8 @@ class CounterReduceStoreClass extends ReduceStore<StoreState> {
 export const CounterReduceStore = new CounterReduceStoreClass();
 ```
 
+Full working example can be found in [`examples/reduce-store-example`](./examples/reduce-store-example).
+
 ### MapStore
 
 [`MapStore`](#map-store) is a key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map) that keeps key-value pairs of the same value type.
@@ -295,6 +297,8 @@ class ContactDataStoreClass extends DataStore {
 
 export const ContactDataStore = new ContactDataStoreClass();
 ```
+
+Full working example can be found in [`examples/data-store-example`](./examples/data-store-example).
 
 ## Container
 

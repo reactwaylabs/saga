@@ -1,0 +1,31 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "jsx": "react",
+    "reactNamespace": "React",
+    "rootDir": "src/app",
+    "outDir": "wwwroot/app",
+    "strict": true,
+    "preserveConstEnums": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "inlineSources": true,
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "skipDefaultLibCheck": true,
+    "types": [
+      "core-js",
+      "node",
+      "systemjs"
+    ],
+    "typeRoots": [
+      "node_modules/@types/"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "wwwroot"
+  ]
+}
