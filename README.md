@@ -535,7 +535,7 @@ This method is only available in the middle of a dispatch!
 
 Returns current session timestamp.
 
-#### `getDispatcher(): DispatcherBuilder`
+#### `public getDispatcher(): DispatcherBuilder`
 
 Returns the dispatcher for this store.
 
@@ -577,31 +577,38 @@ State of `MapStore` is a `Items` of type TValue. Check API section for [`Abstrac
 
 `TValue` - type of `MapStore` item value.
 
-#### `constructor(): void`
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
 
 Creates an instance of MapStore.
 
+| Argument            | Type                                        | Description                 |
+|---------------------|---------------------------------------------|-----------------------------|
+| `dispatcher`        | `Flux.Dispatcher<DispatcherMessage<any>>`   | Dispatcher instance.        |
+
 <a name="map-store-requestData"></a>
 
-#### protected abstract requestData
-
-```ts
-protected abstract requestData(
-    ids: string[],
-    onSuccess?: (values: { [id: string]: TValue }) => void,
-    onFailed?: (values?: { [id: string]: ItemStatus } | string[]) => void
-): Promise<{ [id: string]: TValue }> | void;
-```
+#### `protected abstract requestData(ids: string[], onSuccess?: OnSuccess<TValue>, onFailed?: OnFailure): Promise<{ [id: string]: TValue }> | void`
 
 API call to get data from server or other data source.
 
 Returns dictionary of resolved values.
 
-| Argument      | Type                                                          | Description                                   |
-|---------------|---------------------------------------------------------------|-----------------------------------------------|
-| `ids`         | string[]                                                      | List of requesting ids.                       |
-| `onSuccess`   | (values: { [id: string]: TValue }) => void                    | Success callback with items that succeeded.   |
-| `onFailed`    | (values?: { [id: string]: ItemStatus } \| string[]) => void   | Failure callback with items statuses.         |
+| Argument      | Type                      | Description                                   |
+|---------------|---------------------------|-----------------------------------------------|
+| `ids`         | string[]                  | List of requesting ids.                       |
+| `onSuccess`   | OnSuccess<TValue>         | Success callback with items that succeeded.   |
+| `onFailed`    | OnFailure                 | Failure callback with items statuses.         |
+
+`TValue` - type of `MapStore` item value.
+
+`OnSuccess` and `OnFailure` can be imported from `Contracts`.
+
+```ts
+import { Contracts } from "simplr-flux";
+
+// Contracts.OnSuccess
+// Contracts.OnFailure
+```
 
 <a name="map-store-get"></a>
 
@@ -620,7 +627,13 @@ Returns undefined `Value` and status if the key does not exist in the cache (che
 
 <a name="map-store-getAll"></a>
 
-#### `public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue>`
+#### `public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
+
+#### `public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>`
 
 `TValue` - type of `MapStore` item value.
 
@@ -632,11 +645,11 @@ Providing a previous result allows the possibility of keeping the same reference
 
 Returns requested data map.
 
-| Argument      | Type                                          | Description                                                 |
-|---------------|-----------------------------------------------|-------------------------------------------------------------|
-| `keys`        | string[] \| Immutable.List\<string\>          | Requested keys list in an `Array` or an `ImmutableList`.    |
-| `prev`        | Items\<TValue>                                | Previous data map merged with new data map.                 |
-| `noCache`     | Items\<TValue>                                | Update cached item from the server or other data source.    |
+| Argument      | Type                                                                                                      | Description                                                 |
+|---------------|-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `keys`        | string[] \| Immutable.List\<string\> \| Immutable.Set\<string\> \| Immutable.OrderedSet\<string\>         | Requested keys list in an `Array` or an `ImmutableList`.    |
+| `prev`        | Items\<TValue>                                                                                            | Previous data map merged with new data map.                 |
+| `noCache`     | Items\<TValue>                                                                                            | Update cached item from the server or other data source.    |
 
 #### `public has(key: string): boolean`
 
@@ -659,12 +672,18 @@ Prefetch item by key.
 
 #### `public PrefetchAll(keys: string[], noCache: boolean = false): void`
 
+#### `public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void`
+
+#### `public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void`
+
+#### `public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void`
+
 Prefetch all items by keys.
 
-| Argument      | Type                        | Description                                                 |
-|---------------|-----------------------------|-------------------------------------------------------------|
-| `keys`        | string[]                    | Requested items keys.                                       |
-| `noCache`     | boolean                     | Update cached item from the server or other data source.    |
+| Argument      | Type                                                                                                  | Description                                                 |
+|---------------|-------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `keys`        | string[] \| Immutable.List\<string\> \| Immutable.Set\<string\> \| Immutable.OrderedSet\<string\>     | Requested items keys.                                       |
+| `noCache`     | boolean                                                                                               | Update cached item from the server or other data source.    |
 
 #### `public InvalidateCache(key: string): void`
 
@@ -728,11 +747,11 @@ import { DataStore } from "simplr-flux";
 
 State of `DataStore` is a `Items` of `any` value type. Check API section for [`Abstractions Items`](#items-type).
 
-#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>): void`
+#### `constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>)`
 
 Creates an instance of DataStore.
 
-#### `getInitialState(): Items<any>`
+#### `public getInitialState(): Items<any>`
 
 Constructs the initial state for this store. This is called once during construction of the store.
 
