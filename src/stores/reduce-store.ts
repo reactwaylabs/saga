@@ -61,7 +61,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         let newState: TState | undefined;
         if (this.storeWillCleanUp != null) {
             const cleanupState = this.storeWillCleanUp();
-            if (cleanupState != null && cleanupState) {
+            if (cleanupState != null) {
                 newState = cleanupState;
             }
         }
@@ -87,7 +87,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 const newState = handler(payload.action, state);
-                if (newState != null && newState) {
+                if (newState != null) {
                     state = newState;
                 }
             }
