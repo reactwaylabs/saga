@@ -2,7 +2,7 @@
 
 Flux implementation that enables you to handle actions by their type, without nasty and never ending if or switch trees.
 
-The package is most useful when used with [TypeScript](https://www.typescriptlang.org/) and [React](https://www.typescriptlang.org/).
+The package is most useful when used with [TypeScript](https://www.typescriptlang.org/) and [React](https://facebook.github.io/react/).
 
 ## Get started
 
