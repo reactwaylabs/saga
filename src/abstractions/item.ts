@@ -11,8 +11,8 @@ export class Item<T> {
     /**
      * Construct new item.
      *
-     * @param status {ItemStatus} [status=ItemStatus.Init] - Intial item status.
-     * @param value {T} [value=undefined] - Initial item value.
+     * @param {ItemStatus} [status=ItemStatus.Init] - Initial item status.
+     * @param {T} [value=undefined] - Initial item value.
      */
     constructor(status?: ItemStatus, value?: T) {
         this.Status = (status != null) ? status : ItemStatus.Init;

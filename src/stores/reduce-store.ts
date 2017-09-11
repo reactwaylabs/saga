@@ -11,7 +11,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher = Dispatcher] - Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
@@ -78,15 +78,15 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * This method should be pure and have no side-effects.
      *
      * @param {TState} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Disaptched payload message.
+     * @param {DispatcherMessage<any>} payload - Dispatched payload message.
      */
-    reduce(state: TState, payload: DispatcherMessage<any>): TState {
+    public reduce(state: TState, payload: DispatcherMessage<any>): TState {
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
         this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
-                let newState = handler(payload.action, state);
+                const newState = handler(payload.action, state);
                 if (newState != null && newState) {
                     state = newState;
                 }
@@ -105,13 +105,13 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param {TState} startingState - Starting state (current).
      * @param {TState} endingState - Ending state (updated).
      */
-    areEqual(startingState: TState, endingState: TState): boolean {
+    public areEqual(startingState: TState, endingState: TState): boolean {
         if (startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
             !Immutable.Iterable.isIterable(startingState)) {
 
-            let keys = Object.keys(startingState);
+            const keys = Object.keys(startingState);
             if (keys.length === 0) {
                 return startingState === endingState;
             }
@@ -133,7 +133,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * This method will return the dispatcher for this store.
      *
      */
-    getDispatcher(): DispatcherBuilder {
+    public getDispatcher(): DispatcherBuilder {
         return super.getDispatcher();
     }
 
@@ -142,7 +142,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * This is called once during construction of the store.
      *
      */
-    abstract getInitialState(): TState;
+    public abstract getInitialState(): TState;
 
     /**
      * Method is invoked immediately before a store began to clean the state.
@@ -166,8 +166,6 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Clean up all store data.
      * This method is only available in the middle of a dispatch!
-     *
-     * @return {Immutable.Map<string, T>} - Initial empty state.
      */
     protected cleanUpStore(): void {
         if (!Dispatcher.isDispatching()) {
@@ -184,13 +182,13 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param {ActionHandler<TClass, TState>} handler - Action handler function.
      */
     protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
-        let actionType = typeof action;
+        const actionType = typeof action;
         if (actionType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
                 `cannot register action with 'action' type of '${actionType}'.`);
         }
 
-        let handlerType = typeof handler;
+        const handlerType = typeof handler;
         if (handlerType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
                 `cannot register action with 'handler' type of '${handlerType}'.`);
