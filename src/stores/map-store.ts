@@ -301,7 +301,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     private getItem(key: string, noCache: boolean): Item<TValue> {
         let item: Item<TValue>;
-        if (key != null && this.has(key) && !noCache) {
+        if (key != null && this.getState().has(key) && !noCache) {
             item = this.getState().get(key);
         } else {
             if (this.queuesHandler.Has(key)) {
@@ -368,7 +368,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             // remove any old keys that are not in new keys or are no longer in the cache
             if (resultMap.size > 0) {
                 resultMap.forEach((oldValue, oldKey) => {
-                    if (oldKey != null && (!newKeys.has(oldKey) || !this.has(oldKey))) {
+                    if (oldKey != null && (!newKeys.has(oldKey) || !this.getState().has(oldKey))) {
                         resultMap.delete(oldKey);
                     }
                 });
@@ -463,8 +463,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @returns {(Item<TValue> | undefined)}
      */
     public at(key: string): Item<TValue> | undefined {
-        if (this.has(key)) {
+        if (this.getState().has(key)) {
             return this.get(key);
+        } else if (this.queuesHandler.Has(key)) {
+            return this.queuesHandler.Get(key);
         } else {
             console.error(this.buildError("at", `Expected store to have key ${key}.`));
             return undefined;
@@ -478,7 +480,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @returns {boolean}
      */
     public has(key: string): boolean {
-        return this.getState().has(key);
+        return this.getState().has(key) || this.queuesHandler.Has(key);
     }
 
 }
