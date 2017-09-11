@@ -222,6 +222,8 @@ class PostsStoreClass extends MapStore<Post> {
 export const PostsStore = new PostsStoreClass();
 ```
 
+Full working example can be found in [`examples/map-store-example`](./examples/map-store-example).
+
 ### DataStore
 
 [`DataStore`](#data-store) is another key-value store with a state of [Immutable.Map](https://facebook.github.io/immutable-js/docs/#/Map). Not like `MapStore` it can hold values of different types.

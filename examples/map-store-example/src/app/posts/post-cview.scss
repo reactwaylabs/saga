@@ -1,0 +1,12 @@
+.post-cview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    max-width: 500px;
+    height: 200px;
+
+    .control-container {
+        padding: 15px;
+    }
+}
