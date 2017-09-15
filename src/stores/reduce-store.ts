@@ -111,13 +111,18 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
             typeof startingState === "object" &&
             !Immutable.Iterable.isIterable(startingState)) {
 
-            const keys = Object.keys(startingState);
-            if (keys.length === 0) {
+            const startingKeys = Object.keys(startingState);
+            if (startingKeys.length === 0) {
                 return startingState === endingState;
             }
+            const endingKeys = Object.keys(endingState);
+            if (startingKeys.length !== endingKeys.length) {
+                return false;
+            }
+
             let areEqual = true;
-            for (let i = 0; i < keys.length; i++) {
-                let key = keys[i];
+            for (let i = 0; i < startingKeys.length; i++) {
+                let key = startingKeys[i];
                 if ((startingState as { [key: string]: any })[key] !== (endingState as { [key: string]: any })[key]) {
                     areEqual = false;
                     break;
