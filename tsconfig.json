@@ -4,6 +4,7 @@
         "target": "es5",
         "removeComments": false,
         "preserveConstEnums": true,
+        "noEmitHelpers": true,
         "outDir": "dist",
         "rootDir": "src",
         "strict": true,
