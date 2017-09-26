@@ -408,7 +408,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 for (let i = 0; i < moveList.length; i++) {
                     let key = moveList[i];
                     let item = this.queuesHandler.Get(key);
-                    stateMap.set(key, { ...item });
+                    if (item != null) {
+                        stateMap.set(key, { ...item });
+                    }
                     this.queuesHandler.Remove(key);
                 }
             });
