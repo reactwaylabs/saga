@@ -1,6 +1,6 @@
 import { ItemStatus } from "../abstractions";
 
-export function ItemsStatusesResolver(...statuses: ItemStatus[]): ItemStatus {
+export function ItemsStatusResolver(...statuses: ItemStatus[]): ItemStatus {
     let loadedCount: number = 0;
     let noDataCount: number = 0;
     let pendingCount: number = 0;
