@@ -139,7 +139,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      *
      */
     public getDispatcher(): DispatcherBuilder {
-        return super.getDispatcher();
+        return super.getDispatcher() as DispatcherBuilder;
     }
 
     /**
