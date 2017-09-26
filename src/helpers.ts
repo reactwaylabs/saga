@@ -1,3 +1,3 @@
 export { ItemIsPending } from "./helpers/item-is-pending";
-export { ItemsStatusesResolver } from "./helpers/items-statuses-resolver";
+export { ItemsStatusResolver } from "./helpers/items-status-resolver";
 export { WaitForStoreChanges } from "./helpers/wait-for-store-changes";
