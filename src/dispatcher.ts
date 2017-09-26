@@ -4,7 +4,7 @@ export interface DispatcherMessage<TAction> {
     action: TAction;
 }
 
-export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>> {
+export class DispatcherClass extends flux.Dispatcher<DispatcherMessage<any>> {
     /**
      * Dispatches a payload to all registered callbacks.
      *
@@ -26,4 +26,4 @@ export class DispatcherBuilder extends flux.Dispatcher<DispatcherMessage<any>> {
     }
 }
 
-export const Dispatcher = new DispatcherBuilder();
+export const Dispatcher = new DispatcherClass();
