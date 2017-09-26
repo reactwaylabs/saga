@@ -1,4 +1,4 @@
-import { ItemStatus } from "../abstractions/item-status";
+import { ItemStatus } from "../abstractions";
 
 export function ItemsStatusesResolver(...statuses: ItemStatus[]): ItemStatus {
     let loadedCount: number = 0;
