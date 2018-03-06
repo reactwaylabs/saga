@@ -8,7 +8,7 @@ export class DispatcherClass extends flux.Dispatcher<DispatcherMessage<any>> {
     /**
      * Dispatches a payload to all registered callbacks.
      *
-     * @param {TAction} dispatcherMessage - Instance of a class.
+     * @param dispatcherMessage Instance of a class.
      */
     public dispatch<TAction>(dispatcherMessage: TAction): void {
         const payload: DispatcherMessage<TAction> = {

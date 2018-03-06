@@ -2,32 +2,23 @@ import { ItemStatus } from "./item-status";
 
 /**
  * Item class in map store state.
- *
- * @export
- * @class Item
- * @template T
  */
-export class Item<T> {
+export class Item<TValue> {
     /**
-     * Construct new item.
-     *
-     * @param {ItemStatus} [status=ItemStatus.Init] - Initial item status.
-     * @param {T} [value=undefined] - Initial item value.
+     * Constructs new item.
      */
-    constructor(status?: ItemStatus, value?: T) {
-        this.Status = (status != null) ? status : ItemStatus.Init;
-        this.Value = (value != null) ? value : undefined;
+    constructor(status: ItemStatus = ItemStatus.Init, value?: TValue) {
+        this.status = status;
+        this.value = value;
     }
 
     /**
      * Item status.
-     *
      */
-    public readonly Status: ItemStatus;
+    public readonly status: ItemStatus;
 
     /**
      * Item value.
-     *
      */
-    public readonly Value: Readonly<T> | undefined;
+    public readonly value: Readonly<TValue> | undefined;
 }

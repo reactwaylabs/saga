@@ -3,21 +3,19 @@ import { Items } from "../contracts/items";
 
 export class InvalidationHandler<TValue> {
 
-    private pendingDeletionItems = Immutable.List<string>();
+    private pendingDeletionItems: Immutable.List<string> = Immutable.List();
 
     /**
-     * Handler has keys to invalidate and waiting for start.
+     * Checks whether any keys are enqueued for invalidation.
      */
-    public get IsWaiting(): boolean {
+    public get isWaiting(): boolean {
         return this.pendingDeletionItems.size > 0;
     }
 
     /**
-     * Set keys for invalidation.
-     *
-     * @param {string[]} keys - List of keys.
+     * Enqueues keys for invalidation.
      */
-    public Prepare(keys: string[]): void {
+    public enqueue(keys: string[]): void {
         if (keys.length === 0) {
             return;
         }
@@ -32,11 +30,11 @@ export class InvalidationHandler<TValue> {
     }
 
     /**
-     * Start invalidating pending keys and return new state with list of removed keys.
+     * Invalidates pending keys from given state and returns a new state with a list of removed keys.
      *
-     * @param {Items<TValue>} state - Store state.
+     * @param state Store state.
      */
-    public Start(state: Items<TValue>): { State: Items<TValue>, RemovedKeys: string[] } {
+    public processEnqueuedInvalidations(state: Items<TValue>): { state: Items<TValue>, removedKeys: string[] } {
         const removed = new Array<string>(this.pendingDeletionItems.size);
         state = state.withMutations(mutableState => {
             let index = 0;
@@ -52,8 +50,8 @@ export class InvalidationHandler<TValue> {
         });
         this.pendingDeletionItems = Immutable.List<string>();
         return {
-            RemovedKeys: removed,
-            State: state
+            removedKeys: removed,
+            state: state
         };
     }
 }

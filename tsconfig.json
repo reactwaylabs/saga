@@ -8,6 +8,7 @@
         "outDir": "dist",
         "rootDir": "src",
         "strict": true,
+        "strictPropertyInitialization": false,
         "noUnusedLocals": true,
         "sourceMap": false,
         "skipDefaultLibCheck": true,
@@ -17,7 +18,8 @@
             "dom",
             "dom.iterable",
             "es2015"
-        ]
+        ],
+        "plugins": [{ "name": "tslint-language-service" }]
     },
     "exclude": [
         "node_modules",

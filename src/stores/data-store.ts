@@ -15,7 +15,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Creates an instance of DataStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     * @param dispatcher Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
@@ -25,13 +25,11 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
 
     /**
      * Queues list handler.
-     * @type {QueuesHandler<any>}
      */
     private queuesHandler: QueuesHandler<any>;
 
     /**
      * State cache invalidation handler.
-     * @type {InvalidationHandler<any>}
      */
     private invalidationHandler: InvalidationHandler<any>;
 
@@ -46,7 +44,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Asynchronously dispatch action that this store has changed.
      * Dispatch process will be cancelled if specified `stillValid` method return false.
      *
-     * @param {() => boolean} stillValid - Is dispatch still valid.
+     * @param stillValid Is dispatch still valid.
      */
     private dispatchChangesAsync(stillValid?: () => boolean): void {
         setTimeout(() => {
@@ -57,18 +55,18 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     }
 
     /**
-     * Start resolving promise and resolving item by key.
+     * Starts resolving promise and resolves item by key.
      *
-     * @param {string} key - Item key.
-     * @param {() => Promise<TValue>} promiseFactory - Function which return a promise.
+     * @param key Item key.
+     * @param promiseFactory Function returning a promise for value.
      */
-    private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>) {
+    private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>): Promise<void> {
         try {
             const response = await promiseFactory();
-            const status = (response != null) ? ItemStatus.Loaded : ItemStatus.NoData;
-            this.queuesHandler.Set(key, response || undefined, status);
+            const status = response != null ? ItemStatus.Loaded : ItemStatus.NoData;
+            this.queuesHandler.set(key, response || undefined, status);
         } catch (error) {
-            this.queuesHandler.SetItemStatus(key, ItemStatus.Failed);
+            this.queuesHandler.setItemStatus(key, ItemStatus.Failed);
         }
         this.dispatchChanges();
     }
@@ -77,26 +75,28 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Return specified item value.
      * Create new item in queues if not exists in store state.
      *
-     * @param {string} key - Item key.
-     * @param {boolean} noCache - Update cached item from the server.
+     * @param key Item key.
+     * @param noCache Update cached item from the server.
      */
-    private getItem<TValue>(key: string, noCache: boolean): Item<TValue> {
+    private getItem<TValue>(key: string, noCache: boolean): Item<TValue> | undefined {
         if (key != null && this.has(key) && !noCache) {
             return this.getState().get(key);
         }
-        if (this.queuesHandler.Has(key)) {
-            return this.queuesHandler.Get(key)!;
+        if (this.queuesHandler.has(key)) {
+            return this.queuesHandler.get(key)!;
         }
-        return this.queuesHandler.Create(key);
+        this.queuesHandler.create(key);
+
+        return this.queuesHandler.get(key);
     }
 
     /**
      * Move completed items from queues to state.
      *
-     * @param {Item<any>} state - Current store state.
+     * @param state Current store state.
      */
     private moveFromQueuesToState(state: Items<any>): Items<any> | undefined {
-        const moveList = this.queuesHandler.GetFilteredItems(x => x.Status >= ItemStatus.Loaded);
+        const moveList = this.queuesHandler.getFilteredItems(x => x.status >= ItemStatus.Loaded);
         if (moveList.size === 0) {
             return undefined;
         }
@@ -111,18 +111,16 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
                 keysForRemove[index++] = key;
             });
         });
-        this.queuesHandler.RemoveMultiple(keysForRemove);
+        this.queuesHandler.removeMultiple(keysForRemove);
         return newState;
     }
 
     /**
      * Constructs the initial state for this store.
      * This is called once during construction of the store.
-     *
-     * @returns {Items<any>}
      */
     public getInitialState(): Items<any> {
-        return Immutable.Map<string, Item<any>>({});
+        return Immutable.Map<string, Item<any>>();
     }
 
     /**
@@ -130,9 +128,8 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {Items<any>} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched message from dispatcher.
-     * @returns {Items<any>}
+     * @param state Current store state.
+     * @param payload Dispatched message from dispatcher.
      */
     public reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
         if (payload.action instanceof StoreUpdateAction) {
@@ -146,10 +143,10 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
 
         state = super.reduce(state, payload);
 
-        if (this.invalidationHandler.IsWaiting) {
-            const result = this.invalidationHandler.Start(state);
-            this.queuesHandler.RemoveMultiple(result.RemovedKeys);
-            state = result.State;
+        if (this.invalidationHandler.isWaiting) {
+            const result = this.invalidationHandler.processEnqueuedInvalidations(state);
+            this.queuesHandler.removeMultiple(result.removedKeys);
+            state = result.state;
         }
         return state;
     }
@@ -158,19 +155,14 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Return specified item value.
      * Start resolving data with `promiseFactory`.
      *
-     * @param {string} key - Item key.
-     * @param {() => Promise<TValue>} promiseFactory - Function which return promise with value resolver.
-     * @param {boolean} [noCache=false] - Use data without cache.
-     * @returns {Item<TValue>}
+     * @param key Item key.
+     * @param promiseFactory Function which return promise with value resolver.
+     * @param noCache Use data without cache.
      */
-    protected getValueFromState<TValue>(
-        key: string,
-        promiseFactory: () => Promise<TValue>,
-        noCache: boolean = false
-    ): Item<TValue> {
+    protected getValueFromState<TValue>(key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue> {
         let value = this.getItem<TValue>(key, noCache);
-        if (value.Status === ItemStatus.Init) {
-            value = this.queuesHandler.SetItemStatus(key, ItemStatus.Pending);
+        if (value.status === ItemStatus.Init) {
+            value = this.queuesHandler.setItemStatus(key, ItemStatus.Pending);
             this.startRequestingData(key, promiseFactory);
         }
         return value;
@@ -179,8 +171,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Check if the cache has a particular key.
      *
-     * @param {string} key - Item key.
-     * @returns {boolean}
+     * @param key Item key.
      */
     protected has(key: string): boolean {
         return this.getState().has(key);
@@ -189,7 +180,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Remove item from cache, if exist.
      *
-     * @param {string} key - Item key.
+     * @param key Item key.
      */
     protected invalidateCache(key: string): void {
         this.invalidateCacheMultiple([key]);
@@ -198,12 +189,12 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * Remove multiple items from cache, if exist.
      *
-     * @param {string[]} keys - Items keys.
+     * @param keys Items keys.
      */
     protected invalidateCacheMultiple(keys: string[]): void {
         if (keys.length > 0) {
-            this.invalidationHandler.Prepare(keys);
-            this.dispatchChangesAsync(() => this.invalidationHandler.IsWaiting);
+            this.invalidationHandler.enqueue(keys);
+            this.dispatchChangesAsync(() => this.invalidationHandler.isWaiting);
         }
     }
 }

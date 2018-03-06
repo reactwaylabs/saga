@@ -12,95 +12,69 @@ import { ItemStatus } from "../abstractions/item-status";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 import { OnSuccess, OnFailure } from "../contracts/callbacks";
 
-const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " +
-    "'Immutable.Set<string>' or 'Immutable.List<string>'.";
+const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accepts only 'Array<string>', 'Immutable.Set<string>' or 'Immutable.List<string>'.";
 
 /**
  * MapStore to cache data by id.
- *
- * @export
- * @abstract
- * @class MapStore
- * @extends {ReduceStore<Items<TValue>>}
- * @template TValue
  */
 export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Creates an instance of MapStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     * @param dispatcher Dispatcher instance.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
-        this.queuesHandler = this.getInitialQueues();
+        this.queuesHandler = new QueuesHandler<TValue>();
         this.invalidationHandler = new InvalidationHandler<TValue>();
     }
 
+    //#region Properties
+
     /**
-     * Return initial queues value.
+     * With a large amount of requests MapStore throttles them.
+     * This property defines interval between portions of requests.
      */
-    private getInitialQueues = () => new QueuesHandler<TValue>();
+    protected requestsIntervalInMs: number = 50;
+
+    /**
+     * Queues list pending for request.
+     */
+    private queuesHandler: QueuesHandler<TValue>;
 
     /**
      * State cache invalidation handler.
-     *
-     * @type {InvalidationHandler<TValue>}
      */
     private invalidationHandler: InvalidationHandler<TValue>;
 
+    private requestIntervalTimer: undefined | number;
+
+    //#endregion
+
+    //#region Helpers
+
     /**
-     * Build error with prefix and instance name.
-     *
-     * @private
-     * @param {string} functionName
-     * @param {string} message
-     * @returns {string}
+     * Build error with prefix and class name.
      */
     private buildError(functionName: string, message: string): string {
         return `SimplrFlux.MapStore.${functionName}() [${this.constructor.name}]: ${message}`;
     }
 
-    /**
-     * Queues list pending for request.
-     *
-     * @private
-     * @type {QueuesHandler<TValue>}
-     */
-    private queuesHandler: QueuesHandler<TValue>;
-
-    private dispatchChanges() {
+    private dispatchChanges(): void {
         Dispatcher.dispatch(new DataMapStoreUpdatedAction(this.getDispatchToken()));
     }
 
-    private dispatchChangesAsync() {
+    private dispatchChangesAsync(): void {
         setTimeout(() => {
             this.dispatchChanges();
         });
     }
 
     /**
-     * API call to get data from server.
-     *
-     * @param {string[]} ids - List of requesting ids.
-     * @param {OnSuccess} [onSuccess] - Resolve some values.
-     * @param {OnFailure} [onFailed] - Reject some values.
-     * @return {Promise<Function>} Request response promise.
-     */
-    protected abstract requestData(
-        ids: string[],
-        onSuccess?: OnSuccess<TValue>,
-        onFailed?: OnFailure
-    ): Promise<{ [id: string]: TValue }> | void;
-
-    /**
      * Update queues items from request.
-     *
-     * @private
-     * @param {({ [id: string]: TValue | undefined })} values
      */
     private updateQueuesFromRequest(values: { [id: string]: TValue | undefined }): void {
-        /* tslint:disable */
-        for (let key in values) {
+        Object.keys(values).forEach(key => {
             let value = values[key];
             let status: ItemStatus;
             if (value != null) {
@@ -109,17 +83,15 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 value = undefined;
                 status = ItemStatus.NoData;
             }
-            this.queuesHandler.Set(key, value, status);
-        }
+            this.queuesHandler.set(key, value, status);
+        });
     }
-
 
     /**
      * Request creator to load data from server.
-     *
-     * @private
      */
     private createRequest(): void {
+        // FIXME: DFQ
         if (this.requestIntervalTimer != null) {
             return;
         }
@@ -127,54 +99,39 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         setTimeout(() => {
             this.startRequestingData(true);
         });
-        this.requestIntervalTimer = setTimeout(this.startRequestingData, this.RequestsIntervalInMs);
+        this.requestIntervalTimer = setTimeout(this.startRequestingData, this.requestsIntervalInMs);
     }
 
-    private requestIntervalTimer: undefined | number;
-
-    /**
-     * With a large amount of requests MapStore throttles them.
-     * This property defines interval between portions of requests.
-     * 
-     * @protected
-     * @type {number}
-     */
-    protected RequestsIntervalInMs: number = 50;
-
     private startRequestingData = (initial: boolean = false): void => {
+        // FIXME: DFQ
         if (!initial) {
             this.requestIntervalTimer = undefined;
         }
 
-        let ids = this.queuesHandler.GetFilteredItemsKeys(item => item.Status === ItemStatus.Init);
+        const ids = this.queuesHandler.getFilteredItemsKeys(item => item.status === ItemStatus.Init);
         if (ids.length === 0) {
             return;
         }
 
-        let currentSession = this.currentSession;
+        // Save current session timestamp for checking if session changed while in an asynchronous context
+        const currentSessionTimestamp = this.currentSessionTimestamp;
 
-        this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Pending);
+        this.queuesHandler.setMultipleItemsStatus(ids, ItemStatus.Pending);
 
-        let onSuccess = this.onRequestSuccess.bind(this, currentSession);
-        let onFailed = this.onRequestFailed.bind(this, currentSession, ids);
+        const onSuccess = this.onRequestSuccess.bind(this, currentSessionTimestamp);
+        const onFailed = this.onRequestFailed.bind(this, currentSessionTimestamp, ids);
 
-        let maybePromise = this.requestData(ids, onSuccess, onFailed);
-        if (this.isPromise(maybePromise)) {
-            maybePromise
-                .then(onSuccess)
-                .catch(error => {
-                    this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
-                    this.dispatchChanges();
-                });
-        }
-    }
+        this.requestData(ids, onSuccess, onFailed);
+    };
 
-    private onRequestSuccess = (currentSession: number, values: { [id: string]: TValue }) => {
-        if (currentSession !== this.currentSession) {
-            console.warn(this.buildError(
-                "requestData",
-                "RequestData method was resolved after store data has been cleared. Check `this.cleanUpStore()` method calls."
-            ));
+    private onRequestSuccess = (currentSessionTimestamp: number, values: { [id: string]: TValue }) => {
+        if (currentSessionTimestamp !== this.currentSessionTimestamp) {
+            console.warn(
+                this.buildError(
+                    "requestData",
+                    "RequestData method was resolved after store data has been cleared. Check `this.cleanUpStore()` method calls."
+                )
+            );
             return;
         }
         if (values == null) {
@@ -183,27 +140,29 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
         this.updateQueuesFromRequest(values);
         this.dispatchChanges();
-    }
+    };
 
-    private onRequestFailed = (currentSession: number, ids: string[], values?: { [id: string]: ItemStatus } | string[]) => {
-        if (currentSession !== this.currentSession) {
-            console.warn(this.buildError(
-                "requestData",
-                "RequestData method was rejected after store data has been cleared. Check `this.cleanUpStore()` method calls."
-            ));
+    private onRequestFailed = (currentSessionTimestamp: number, ids: string[], values?: { [id: string]: ItemStatus } | string[]) => {
+        if (currentSessionTimestamp !== this.currentSessionTimestamp) {
+            console.warn(
+                this.buildError(
+                    "requestData",
+                    "RequestData method was rejected after store data has been cleared. Check `this.cleanUpStore()` method calls."
+                )
+            );
             return;
         }
 
         if (values == null) {
-            this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
+            this.queuesHandler.setMultipleItemsStatus(ids, ItemStatus.Failed);
         } else if (Array.isArray(values)) {
-            this.queuesHandler.SetMultipleItemsStatus(values, ItemStatus.Failed);
+            this.queuesHandler.setMultipleItemsStatus(values, ItemStatus.Failed);
         } else if (typeof values === "object") {
             let isExistResults = false;
-            let results: { [status: number]: string } = {};
+            const results: { [status: number]: string } = {};
 
             Object.keys(values).forEach(id => {
-                let status = values[id];
+                const status = values[id];
                 results[status] = id;
                 if (!isExistResults) {
                     isExistResults = true;
@@ -211,106 +170,96 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             });
             if (isExistResults) {
                 Object.keys(results).forEach(status => {
-                    this.queuesHandler.SetMultipleItemsStatus(ids, parseInt(status));
+                    this.queuesHandler.setMultipleItemsStatus(ids, parseInt(status));
                 });
             } else {
-                this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
+                this.queuesHandler.setMultipleItemsStatus(ids, ItemStatus.Failed);
             }
         } else {
-            this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
+            this.queuesHandler.setMultipleItemsStatus(ids, ItemStatus.Failed);
         }
 
         this.dispatchChanges();
-    }
-
-
+    };
+    //#endregion
 
     /**
-     * Check if given function is Promise.
+     * An abstract method to provide data for requested ids.
      *
-     * @param {any} func - function
+     * @param ids List of requested ids.
+     * @param onSuccess Callback to resolve some values.
+     * @param onFailed Callback to reject some values.
      */
-    private isPromise<TResult>(func: any): func is Promise<TResult> {
-        return func != null && func.then != null && func.catch != null;
-    }
-
+    protected abstract requestData(ids: string[], onSuccess?: OnSuccess<TValue>, onFailed?: OnFailure): Promise<void> | void;
 
     /**
-     * Get the value of a particular key. Returns Value undefined and status if the key does not exist in the cache.
+     * Gets the value of a particular key and
+     * returns Value: undefined and status:init if the key does not exist in the cache.
      *
-     * @param {string} key - Requested item key.
-     * @param {boolean} [noCache=false] - Update cached item from the server.
+     * @param key Requested item key.
+     * @param noCache Should cached item be re-fetched from the server.
      */
     public get(key: string, noCache: boolean = false): Item<TValue> {
-        let item = this.getItem(key, noCache);
+        const item = this.getItem(key, noCache);
         this.createRequest();
         return item;
     }
 
+    /**
+     * Invalidates item if it exists in the cache.
+     *
+     * @param key Item key to be invalidated.
+     */
+    public invalidateCache(keys: string | string[]): void {
+        if (!Array.isArray(keys)) {
+            keys = [keys];
+        }
+        this.invalidationHandler.enqueue(keys);
+        this.dispatchChangesAsync();
+    }
 
     /**
      * Prefetch item by key.
-     * @param {string} key - Requested item key.
-     * @param {boolean} [noCache=false] = Update cached item from the server.
+     * @param key Requested item key.
+     * @param noCache Should cached item be re-fetched from the server.
      */
-    public Prefetch(key: string, noCache: boolean = false): void {
+    public prefetch(key: string, noCache: boolean = false): void {
         this.get(key, noCache);
     }
 
-
     /**
-     * Prefetch all items by keys.
-     * @param {string[]} keys - Requested item key.
-     * @param {boolean} [noCache=false] - Update cached item from the server.
-     */
-    public PrefetchAll(keys: string[], noCache?: boolean): void;
-    public PrefetchAll(keys: Immutable.List<string>, noCache?: boolean): void;
-    public PrefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void;
-    public PrefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void;
-    public PrefetchAll(keys: any, noCache: boolean = false): void {
-        this.getAll(keys, undefined, noCache);
-    }
-
-    /**
-     * Remove item from cache, if exist.
+     * Returns item value from state or adds it to the queue to be requested.
      *
-     * @param {string} key - Requested item key.
-     * @returns {void}
-     */
-    public InvalidateCache(key: string): void {
-        this.invalidationHandler.Prepare([key]);
-        this.dispatchChangesAsync();
-    }
-
-    /**
-     * Remove multiple items from cache, if exist.
-     *
-     * @param {string[]} keys - Requested item key.
-     * @returns {void}
-     */
-    public InvalidateCacheMultiple(keys: string[]): void {
-        this.invalidationHandler.Prepare(keys);
-        this.dispatchChangesAsync();
-    }
-
-    /**
-     * Get the item value from state or add to queue.
-     *
-     * @param {string} key - Requested item key.
-     * @param {boolean} noCache - Update cached item from the server.
+     * @param key Requested item key.
+     * @param noCache Should cached item be re-fetched from the server.
      */
     private getItem(key: string, noCache: boolean): Item<TValue> {
         let item: Item<TValue>;
         if (key != null && this.getState().has(key) && !noCache) {
-            item = this.getState().get(key);
-        } else {
-            if (this.queuesHandler.Has(key)) {
-                item = this.queuesHandler.Get(key)!;
-            } else {
-                item = this.queuesHandler.Create(key);
+            const itemFromState = this.getState().get(key);
+            if (itemFromState != null) {
+                return itemFromState;
             }
         }
+        if (this.queuesHandler.has(key)) {
+            item = this.queuesHandler.get(key);
+        } else {
+            item = this.queuesHandler.create(key);
+        }
         return item;
+    }
+
+    /**
+     * Prefetch all items by keys.
+     * @param keys Requested item keys.
+     * @param noCache Should cached items be re-fetched from the server.
+     */
+    public prefetchAll(keys: string[], noCache?: boolean): void;
+    public prefetchAll(keys: Immutable.List<string>, noCache?: boolean): void;
+    public prefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void;
+    public prefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void;
+    public prefetchAll(keys: any, noCache: boolean = false): void {
+        this.getAll(keys, undefined, noCache);
     }
 
     /**
@@ -320,35 +269,44 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * Providing a previous result allows the possibility of keeping the same
      * reference if the keys did not change.
      *
-     * @param {string[] | Immutable.List<string> } keys - Requested keys list in Array or Immutable List.
-     * @param {Immutable.Map<string, T>} [prev] - Previous data list merged with new data list.
-     * @param {boolean} [noCache=false] - Update cached items from the server.
-     * @return {Items<TValue>} Requested data list.
+     * @param keys Requested keys list in Array or Immutable List.
+     * @param prev Previous data list merged with new data list.
+     * @param noCache Update cached items from the server.
      */
     public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
     public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
     public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
     public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
-    public getAll(keys: any, prev?: Items<TValue>, noCache: boolean = false): Items<TValue> {
+    public getAll(
+        keys: string[] | Immutable.List<string> | Immutable.Set<string> | Immutable.OrderedSet<string>,
+        prev?: Items<TValue>,
+        noCache: boolean = false
+    ): Items<TValue> {
         let newKeys: Immutable.Set<string>;
-        let start = prev || this.getInitialState();
+        const start = prev || this.getInitialState();
 
         if (keys != null) {
             if (keys instanceof Array) {
+                // string[]
                 try {
                     newKeys = Immutable.Set(keys);
                 } catch (error) {
+                    // FIXME: DFQ
                     console.error(this.buildError("getAll", ERROR_GET_ALL_WRONG_PARAM));
                     newKeys = Immutable.Set<string>();
                 }
-            } else if (Immutable.Set.isSet(keys)) {
-                newKeys = keys as Immutable.Set<string>;
             } else if (Immutable.OrderedSet.isOrderedSet(keys)) {
+                // Immutable.OrderedSet<string>
                 newKeys = keys as Immutable.OrderedSet<string>;
+            } else if (Immutable.Set.isSet(keys)) {
+                // Immutable.Set<string>
+                newKeys = keys as Immutable.Set<string>;
             } else if (Immutable.List.isList(keys)) {
+                // Immutable.List<string>
                 try {
-                    newKeys = keys.toSet() as Immutable.Set<string>;
+                    newKeys = keys.toSet();
                 } catch (error) {
+                    // FIXME: DFQ
                     newKeys = Immutable.Set<string>();
                     console.error(this.buildError("getAll", ERROR_GET_ALL_WRONG_PARAM));
                 }
@@ -364,7 +322,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             return start;
         }
 
-        return start.withMutations((resultMap) => {
+        return start.withMutations(resultMap => {
             // remove any old keys that are not in new keys or are no longer in the cache
             if (resultMap.size > 0) {
                 resultMap.forEach((oldValue, oldKey) => {
@@ -374,9 +332,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 });
             }
             // then add all of the new keys that exist in the cache
-            newKeys.forEach((key) => {
+            newKeys.forEach(key => {
                 if (key != null) {
-                    let item = this.getItem(key, noCache);
+                    const item = this.getItem(key, noCache);
                     resultMap.set(key, item);
                 }
             });
@@ -388,30 +346,30 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * Constructs the initial state for this store.
      * This is called once during construction of the store.
      *
-     * @return {Immutable.Map<string, T>} Initial empty state.
+     * @return Initial empty state.
      */
     public getInitialState(): Items<TValue> {
-        return Immutable.Map<string, Item<TValue>>({});
+        return Immutable.Map<string, Item<TValue>>();
     }
 
     /**
      * Move completed items from queues to state.
      *
-     * @private
-     * @param {Items<TValue>} state
-     * @returns {(Items<TValue> | undefined)}
+     * @param state
      */
     private moveFromQueuesToState(state: Items<TValue>): Items<TValue> | undefined {
-        let moveList = this.queuesHandler.GetFilteredItemsKeys(x => [ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed].indexOf(x.Status) !== -1);
+        const moveList = this.queuesHandler.getFilteredItemsKeys(
+            x => [ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed].indexOf(x.status) !== -1
+        );
         if (moveList.length > 0) {
             return state.withMutations(stateMap => {
                 for (let i = 0; i < moveList.length; i++) {
-                    let key = moveList[i];
-                    let item = this.queuesHandler.Get(key);
+                    const key = moveList[i];
+                    const item = this.queuesHandler.get(key);
                     if (item != null) {
                         stateMap.set(key, { ...item });
                     }
-                    this.queuesHandler.Remove(key);
+                    this.queuesHandler.remove(key);
                 }
             });
         }
@@ -420,27 +378,23 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
     /**
      * Holds a function that will be invoked before store clean up.
-     * 
-     * @protected
-     * @type {() => void}
      */
     protected storeWillCleanUp: () => void = () => {
-        this.queuesHandler.RemoveAll();
-    }
+        this.queuesHandler.removeAll();
+    };
 
     /**
      * Reduces the current state, and an action to the new state of this store.
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {Items<TValue>} state - Store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched message from simplr-dispatcher.
-     * @return {Items<TValue>} Updated state with new data.
+     * @param state Store state.
+     * @param payload Dispatched message from simplr-dispatcher.
      */
     public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
         if (payload.action instanceof DataMapStoreUpdatedAction) {
             if (this.getDispatchToken() === payload.action.StoreId) {
-                let newState = this.moveFromQueuesToState(state);
+                const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
                     state = newState;
                 }
@@ -448,27 +402,24 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
         state = super.reduce(state, payload);
 
-        if (this.invalidationHandler.IsWaiting) {
-            let result = this.invalidationHandler.Start(state);
-            this.queuesHandler.RemoveMultiple(result.RemovedKeys);
-            state = result.State;
+        if (this.invalidationHandler.isWaiting) {
+            const result = this.invalidationHandler.processEnqueuedInvalidations(state);
+            this.queuesHandler.removeMultiple(result.removedKeys);
+            state = result.state;
         }
 
         return state;
     }
 
     /**
-     * Access the value at the given key.
-     * Return undefined if the key does not exist in the cache.
-     *
-     * @param {string} key
-     * @returns {(Item<TValue> | undefined)}
+     * Returns the value at the given key.
+     * Returns undefined if the key does not exist in the cache.
      */
     public at(key: string): Item<TValue> | undefined {
         if (this.getState().has(key)) {
             return this.get(key);
-        } else if (this.queuesHandler.Has(key)) {
-            return this.queuesHandler.Get(key);
+        } else if (this.queuesHandler.has(key)) {
+            return this.queuesHandler.get(key);
         } else {
             console.error(this.buildError("at", `Expected store to have key ${key}.`));
             return undefined;
@@ -476,13 +427,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     }
 
     /**
-     * Check if the cache has a particular key.
-     *
-     * @param {string} key
-     * @returns {boolean}
+     * Checks whether the cache has a particular key.
      */
     public has(key: string): boolean {
-        return this.getState().has(key) || this.queuesHandler.Has(key);
+        return this.getState().has(key) || this.queuesHandler.has(key);
     }
-
 }

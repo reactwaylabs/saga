@@ -6,89 +6,83 @@ const OBJECT_FREEZE_EXIST = Object != null && Object.freeze != null;
 
 export class QueuesHandler<TValue> {
     constructor() {
-        this.queues = Immutable.Map<string, Item<TValue>>();
+        this.queue = Immutable.Map<string, Item<TValue>>();
     }
 
     /**
-     * Queues list.
-     *
+     * queue.
      */
-    private queues: Immutable.Map<string, Item<TValue>>;
+    private queue: Immutable.Map<string, Item<TValue>>;
 
     /**
      * Freeze specified object if global function exists.
      *
-     * @param {TObject} obj - Object to freeze.
+     * @param obj Object to freeze.
      */
-    protected tryToFreezeObject<TObject>(obj: TObject): TObject {
+    protected freezeObjectIfSupported<TObject>(obj: TObject): TObject {
         if (!OBJECT_FREEZE_EXIST) {
             return obj;
         }
         return Object.freeze(obj);
     }
 
+    protected createAndFreezeItem(status: ItemStatus, value: TValue | undefined): Item<TValue> {
+        const newValue = new Item<TValue>(ItemStatus.Init);
+        return this.freezeObjectIfSupported(newValue);
+    }
+
     /**
-     * Set item data by specified key.
+     * Sets an item data by key specified.
      *
-     * @param {string} key - Item key.
-     * @param {(TValue | undefined)} value - Item value.
-     * @param {ItemStatus} status - Item status.
+     * @param key Item key.
+     * @param value Item value.
+     * @param status Item status.
      */
-    public Set(key: string, value: TValue | undefined, status: ItemStatus): Item<TValue> {
-        let newValue = new Item<TValue>(status, value);
-        newValue = this.tryToFreezeObject(newValue);
-        this.queues = this.queues.set(key, newValue);
-        return newValue;
+    public set(key: string, value: TValue | undefined, status: ItemStatus): void {
+        const newValue = this.createAndFreezeItem(status, value);
+        this.queue = this.queue.set(key, newValue);
     }
 
     /**
      * Create new initial item with specified key.
      *
-     * @param {string} key - Item key.
+     * @param key Item key.
      */
-    public Create(key: string): Item<TValue> {
-        let newValue = new Item<TValue>(ItemStatus.Init);
-        newValue = this.tryToFreezeObject(newValue);
-        this.queues = this.queues.set(key, newValue);
-        return newValue;
+    public create(key: string): void {
+        const newValue = this.createAndFreezeItem(ItemStatus.Init, undefined);
+        this.queue = this.queue.set(key, newValue);
     }
 
     /**
-     * Set specified status for item by key.
+     * Sets a specified status for item by key.
      *
-     * @param {string} key - Item key.
-     * @param {ItemStatus} status - Item status.
+     * @param key Item key.
+     * @param status Item status.
      */
-    public SetItemStatus(key: string, status: ItemStatus): Item<TValue> {
-        if (!this.queues.has(key)) {
-            return this.Set(key, undefined, status);
+    public setItemStatus(key: string, status: ItemStatus): void {
+        if (!this.queue.has(key)) {
+            this.set(key, undefined, status);
         }
 
-        this.queues = this.queues.update(key, oldValue => {
-            const newValue = new Item<TValue>(status, oldValue.Value);
-            return this.tryToFreezeObject(newValue);
-        });
-
-        return this.queues.get(key);
+        this.queue = this.queue.update(key, oldValue => this.createAndFreezeItem(status, oldValue.value));
     }
 
     /**
-     * Set specified status for multiple items by keys.
+     * Sets a specified status for multiple items by given keys.
      *
-     * @param {Array<string>} keys - List of items keys.
-     * @param {ItemStatus} status - Item status.
+     * @param keys List of items keys.
+     * @param status Item status.
      */
-    public SetMultipleItemsStatus(keys: string[], status: ItemStatus): void {
-        this.queues = this.queues.withMutations(mutableQueues => {
+    public setMultipleItemsStatus(keys: string[], status: ItemStatus): void {
+        this.queue = this.queue.withMutations(mutableQueues => {
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
+
                 if (!mutableQueues.has(key)) {
-                    continue;
+                    mutableQueues.set(key, this.createAndFreezeItem(status, undefined));
+                } else {
+                    mutableQueues.update(key, oldValue => this.createAndFreezeItem(status, oldValue.value));
                 }
-                mutableQueues = mutableQueues.update(key, oldValue => {
-                    const newValue = new Item<TValue>(status, oldValue.Value);
-                    return this.tryToFreezeObject(newValue);
-                });
             }
         });
     }
@@ -96,77 +90,71 @@ export class QueuesHandler<TValue> {
     /**
      * Returns filtered items by specified item status.
      *
-     * @param {ItemStatus} status - Item status.
+     * @param status Item status.
      */
-    public GetFilteredItems(filter: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
-        return this.queues.filter(x => x != null && filter(x)).toMap();
+    public getFilteredItems(filter: (item: Item<TValue>) => boolean): Immutable.Map<string, Item<TValue>> {
+        return this.queue.filter(x => x != null && filter(x)).toMap();
     }
 
     /**
      * Returns filtered items keys by specified item status.
      *
-     * @param {ItemStatus} status - Item status.
-     * @returns {string[]}
+     * @param status Item status.
      */
-    public GetFilteredItemsKeys(filter: (item: Item<TValue>, key: string) => boolean): string[] {
-        return this.queues
-            .filter((value, key) => (key != null && value != null && filter(value, key)))
-            .map((value, key) => key)
-            .toArray() as string[];
+    public getFilteredItemsKeys(filter: (item: Item<TValue>, key: string) => boolean): string[] {
+        return this.queue
+            .filter((value, key) => key != null && value != null && filter(value, key))
+            .keySeq()
+            .toArray();
     }
 
     /**
-     * Returns the value with specified key from queues list.
-     * Or `undefined` if item with specified key doesn't exist in queues list.
+     * Returns the value with specified key from queue
+     * or `undefined` if an item with specified key doesn't exist in queue.
      *
-     * @param {string} key - Item key.
-     * @returns {Item<TValue> | undefined}
+     * @param key Item key.
      */
-    public Get(key: string): Item<TValue> | undefined {
-        return this.queues.get(key);
+    public get(key: string): Item<TValue> | undefined {
+        return this.queue.get(key);
     }
 
     /**
-     * Return true if item with specified key exists in queues list.
+     * Checks whether an item with a specified key exists in queue.
      *
-     * @param {string} key - Item key.
-     * @returns {boolean}
+     * @param key Item key.
      */
-    public Has(key: string): boolean {
-        return this.queues.has(key);
+    public has(key: string): boolean {
+        return this.queue.has(key);
     }
 
     /**
-     * Remove specified item by key from queues list.
+     * Removes a specified item by key from queue.
      *
-     * @param {string} key - Item key.
+     * @param key Item key.
      */
-    public Remove(key: string): void {
-        this.queues = this.queues.remove(key);
+    public remove(key: string): void {
+        this.queue = this.queue.remove(key);
     }
 
     /**
-     * Remove multiple items by keys from queues list.
-     *
-     * @param {Array<string>} keys - Items keys list.
+     * Removes multiple items by given keys from queue.
      */
-    public RemoveMultiple(keys: string[]): void {
-        this.queues = this.queues.withMutations(mutableQueues => {
+    public removeMultiple(keys: string[]): void {
+        this.queue = this.queue.withMutations(mutableQueue => {
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 if (key == null) {
                     continue;
                 }
-                mutableQueues = mutableQueues.remove(key);
+                mutableQueue = mutableQueue.remove(key);
             }
         });
     }
 
     /**
-     * Remove all items from queues list.
-     *
+     * Removes all items from queue.
      */
-    public RemoveAll(): void {
-        this.queues = Immutable.Map<string, Item<TValue>>();
+    public removeAll(): void {
+        this.queue = Immutable.Map<string, Item<TValue>>();
     }
 }

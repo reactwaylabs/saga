@@ -5,13 +5,13 @@ import { Dispatcher, DispatcherMessage, DispatcherClass } from "../dispatcher";
 
 export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
 
-export type StoreWillCleanup<TState> = () => void | TState;
+export type StoreWillCleanup<TState> = () => TState | void;
 
 export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher = Dispatcher] - Dispatcher instance.
+     * @param dispatcher An instance of Dispatcher to use for incoming payloads and emitting changes.
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher || Dispatcher);
@@ -20,42 +20,39 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
 
     /**
      * Actions handlers list.
-     *
      */
-    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState>>();
+    private actionsHandlers: Immutable.Map<Function, ActionHandler<any, TState>> = Immutable.Map<Function, ActionHandler<any, TState>>();
 
     /**
      * Is store in clean up state.
      *
      */
-    private inCleanUpState: boolean;
+    private isInCleanUpState: boolean;
 
     /**
-     * Session start in timestamp.
-     *
+     * Session start timestamp.
      */
-    private session: number;
+    private sessionTimestamp: number;
 
     /**
-     * Return current session timestamp.
+     * Returns a current session timestamp.
      */
-    protected get currentSession(): number {
-        return this.session;
+    protected get currentSessionTimestamp(): number {
+        return this.sessionTimestamp;
     }
 
     /**
-     * Start a new session.
-     *
+     * Starts a new session.
      */
-    private startNewSession() {
-        this.session = +new Date();
-        this.inCleanUpState = false;
+    private startNewSession(): void {
+        this.sessionTimestamp = +new Date();
+        this.isInCleanUpState = false;
     }
 
     /**
-     * Generate new initial state start new session.
+     * Generates a new initial state and starts a new session.
      *
-     * @param {TState} state - Current store state.
+     * @param state Current store state.
      */
     private getCleanStateAndStartNewSession(state: TState): TState {
         let newState: TState | undefined;
@@ -73,18 +70,19 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     }
 
     /**
-     * Reduces the current state, and an action to the new state of this store.
+     * Reduces the current state and given action to a new state of this store.
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {TState} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched payload message.
+     * @param state Current store state.
+     * @param payload Dispatched payload message.
      */
     public reduce(state: TState, payload: DispatcherMessage<any>): TState {
-        if (this.inCleanUpState) {
-            state = this.getCleanStateAndStartNewSession(state);
+        if (this.isInCleanUpState) {
+            return this.getCleanStateAndStartNewSession(state);
         }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
+
+        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function): void => {
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 const newState = handler(payload.action, state);
                 if (newState != null) {
@@ -92,24 +90,22 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
                 }
             }
         });
-        if (this.inCleanUpState) {
-            state = this.getCleanStateAndStartNewSession(state);
-        }
+
         return state;
     }
 
     /**
      * Checks if two versions of state are the same.
-     * You do not need to override.
+     * You do not need to override this.
      *
-     * @param {TState} startingState - Starting state (current).
-     * @param {TState} endingState - Ending state (updated).
+     * @param startingState Starting state (current).
+     * @param endingState Ending state (updated).
      */
     public areEqual(startingState: TState, endingState: TState): boolean {
         if (startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
-            !Immutable.Iterable.isIterable(startingState)) {
+            !Immutable.isImmutable(startingState)) {
 
             const startingKeys = Object.keys(startingState);
             if (startingKeys.length === 0) {
@@ -122,7 +118,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
 
             let areEqual = true;
             for (let i = 0; i < startingKeys.length; i++) {
-                let key = startingKeys[i];
+                const key = startingKeys[i];
                 if ((startingState as { [key: string]: any })[key] !== (endingState as { [key: string]: any })[key]) {
                     areEqual = false;
                     break;
@@ -135,8 +131,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     }
 
     /**
-     * This method will return the dispatcher for this store.
-     *
+     * Returns the dispatcher for this store.
      */
     public getDispatcher(): DispatcherClass {
         return super.getDispatcher() as DispatcherClass;
@@ -152,39 +147,39 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     /**
      * Method is invoked immediately before a store began to clean the state.
      * It's called in the middle of a dispatch cycle.
-     * If state returned in this method, it's used for initial state.
+     * If a state is returned in this method, it's used as an initial state.
      *
      */
     protected storeWillCleanUp: undefined | StoreWillCleanup<TState>;
 
     /**
-     * Check if action should handled.
-     * By default always return true.
+     * Check if an action should be handled.
+     * By default, this is always true.
      *
-     * @param {Object} action - Action payload data.
-     * @param {TState} state - Updated store state.
+     * @param action Action payload data.
+     * @param state Updated store state.
      */
     protected shouldHandleAction(action: Object, state: TState): boolean {
         return true;
     }
 
     /**
-     * Clean up all store data.
-     * This method is only available in the middle of a dispatch!
+     * Cleans up all store data.
+     * This method is only available in the middle of dispatch!
      */
     protected cleanUpStore(): void {
         if (!Dispatcher.isDispatching()) {
             throw new Error(`SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
                 "Cannot clean up store when dispatch is not in the middle of a dispatch.");
         }
-        this.inCleanUpState = true;
+        this.isInCleanUpState = true;
     }
 
     /**
      * Register specified action handler in this store.
      *
-     * @param {Function} action - Action class function.
-     * @param {ActionHandler<TClass, TState>} handler - Action handler function.
+     * @param action Action class function.
+     * @param handler Action handler function.
      */
     protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
         const actionType = typeof action;
