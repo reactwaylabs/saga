@@ -5,6 +5,7 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "noEmitHelpers": true,
+        "importHelpers": true,
         "outDir": "dist",
         "rootDir": "src",
         "strict": true,
@@ -18,6 +19,9 @@
             "dom",
             "dom.iterable",
             "es2015"
+        ],
+        "types": [
+            "jest"
         ],
         "plugins": [{ "name": "tslint-language-service" }]
     },
