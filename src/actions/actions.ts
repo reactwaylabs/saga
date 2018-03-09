@@ -1,13 +1,13 @@
 export class DataMapStoreUpdatedAction {
-    constructor(private storeId: string) { }
-    public get StoreId() {
-        return this.storeId;
+    constructor(private _storeId: string) { }
+    public get storeId(): string {
+        return this._storeId;
     }
 }
 
 export class DataMapStoreCleanUpAction {
-    constructor(private storeId: string) { }
-    public get StoreId() {
-        return this.storeId;
+    constructor(private _storeId: string) { }
+    public get storeId(): string {
+        return this._storeId;
     }
 }

@@ -7,7 +7,7 @@ import { DataMapStoreUpdatedAction } from "../actions/actions";
 import { QueuesHandler } from "../handlers/queues-handler";
 
 import { Item } from "../abstractions/item";
-import { Items } from "../abstractions/items";
+import { Items } from "../contracts/items";
 import { ItemStatus } from "../abstractions/item-status";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 import { OnSuccess, OnFailure } from "../contracts/callbacks";
@@ -241,11 +241,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 return itemFromState;
             }
         }
-        if (this.queuesHandler.has(key)) {
-            item = this.queuesHandler.get(key);
-        } else {
-            item = this.queuesHandler.create(key);
+        if (!this.queuesHandler.has(key)) {
+            this.queuesHandler.create(key);
         }
+        item = this.queuesHandler.get(key)!;
         return item;
     }
 
@@ -393,7 +392,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
         if (payload.action instanceof DataMapStoreUpdatedAction) {
-            if (this.getDispatchToken() === payload.action.StoreId) {
+            if (this.getDispatchToken() === payload.action.storeId) {
                 const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
                     state = newState;

@@ -8,7 +8,7 @@ import { QueuesHandler } from "../handlers/queues-handler";
 import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import { Items } from "../contracts/items";
-import { StoreUpdateAction } from "../actions/data-store-actions";
+import { StoreUpdatedAction } from "../actions/data-store-actions";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
@@ -37,7 +37,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Dispatch action that this store has changed.
      */
     private dispatchChanges(): void {
-        this.getDispatcher().dispatch(new StoreUpdateAction(this.getDispatchToken()));
+        this.getDispatcher().dispatch(new StoreUpdatedAction(this.getDispatchToken()));
     }
 
     /**
@@ -132,8 +132,8 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param payload Dispatched message from dispatcher.
      */
     public reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
-        if (payload.action instanceof StoreUpdateAction) {
-            if (this.getDispatchToken() === payload.action.DispatchToken) {
+        if (payload.action instanceof StoreUpdatedAction) {
+            if (this.getDispatchToken() === payload.action.dispatchToken) {
                 const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
                     state = newState;
@@ -159,10 +159,18 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param promiseFactory Function which return promise with value resolver.
      * @param noCache Use data without cache.
      */
-    protected getValueFromState<TValue>(key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue> {
+    protected getValueFromState<TValue>(
+        key: string,
+        promiseFactory: () => Promise<TValue>,
+        noCache: boolean = false
+    ): Item<TValue> | undefined {
         let value = this.getItem<TValue>(key, noCache);
+        if (value == null) {
+            return undefined;
+        }
         if (value.status === ItemStatus.Init) {
-            value = this.queuesHandler.setItemStatus(key, ItemStatus.Pending);
+            this.queuesHandler.setItemStatus(key, ItemStatus.Pending);
+            value = this.queuesHandler.get(key);
             this.startRequestingData(key, promiseFactory);
         }
         return value;

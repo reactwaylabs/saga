@@ -6,14 +6,17 @@
     "version": "2.3.0",
     "scripts": {
         "build": "webpack",
-        "pretest": "tsc -p . --noEmit && tslint -p .",
+        "pretest": "tsc -p . --noEmit && tslint -p . --format stylish",
         "test": "jest",
         "test-ci": "npm run test -- --maxWorkers=4",
         "watch": "webpack --watch",
         "uglifyjs": "uglifyjs ./dist/simplr-flux.js -o ./dist/simplr-flux.min.js --compress --mangle",
         "release": "npm run build && npm run uglifyjs"
     },
-    "author": "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
+    "author": "SimplrJS <simplr@quatrodev.com> (https://github.com/simplrjs)",
+    "contributors": [
+        "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)"
+    ],
     "files": [
         "dist",
         "@types",
@@ -25,6 +28,7 @@
     "devDependencies": {
         "@types/jest": "^22.2.0",
         "jest": "^22.4.2",
+        "react": "^16.2.0",
         "simplr-tslint": "1.0.0-alpha.8",
         "ts-jest": "^22.4.1",
         "ts-loader": "^2.1.0",
@@ -43,7 +47,7 @@
         "tslib": "^1.9.0"
     },
     "jest": {
-        "collectCoverage": true,
+        "collectCoverage": false,
         "collectCoverageFrom": [
             "src/**/*.{ts,tsx}",
             "!*",
