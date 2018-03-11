@@ -7,7 +7,7 @@ export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => T
 
 export type StoreWillCleanup<TState> = () => TState | void;
 
-export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
+export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<Function>> {
     /**
      * Creates an instance of ReduceStore.
      *
@@ -77,7 +77,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param state Current store state.
      * @param payload Dispatched payload message.
      */
-    public reduce(state: TState, payload: DispatcherMessage<any>): TState {
+    public reduce(state: TState, payload: DispatcherMessage<Function>): TState {
         if (this.isInCleanUpState) {
             return this.getCleanStateAndStartNewSession(state);
         }
@@ -181,7 +181,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param action Action class function.
      * @param handler Action handler function.
      */
-    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
+    protected registerAction<TAction>(action: Function, handler: ActionHandler<TAction, TState>): void {
         const actionType = typeof action;
         if (actionType !== "function") {
             throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +

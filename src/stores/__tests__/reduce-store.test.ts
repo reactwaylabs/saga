@@ -14,15 +14,16 @@ class TestAction {
     }
 }
 
+class AnotherAction {
+    constructor(private _value: number) {}
+    public get value(): number {
+        return this._value;
+    }
+}
+
 class TestReduceStore extends ReduceStore<TestState> {
-    constructor(
-        dispatcher: Flux.Dispatcher<DispatcherMessage<any>>,
-        testHandler?: (action: TestAction, state: TestState) => TestState | undefined
-    ) {
+    constructor(dispatcher: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
-        if (testHandler != null) {
-            this.registerAction<TestAction>(TestAction, testHandler);
-        }
     }
     public getInitialState(): TestState {
         return {
@@ -35,6 +36,10 @@ class TestReduceStore extends ReduceStore<TestState> {
      */
     public getActionsHandlers(): Immutable.Map<Function, ActionHandler<any, TestState>> {
         return (this as any).actionsHandlers;
+    }
+
+    public registerTestAction<TAction>(action: Function, handler: ActionHandler<TAction, TestState>): void {
+        return this.registerAction(action, handler);
     }
 }
 
@@ -50,12 +55,13 @@ const testHandler = (action: TestAction, state: TestState): TestState => {
 };
 
 it("should have no registered actions by default", () => {
-    const reduceStore = new TestReduceStore(dispatcher, undefined);
+    const reduceStore = new TestReduceStore(dispatcher);
     expect(reduceStore.getActionsHandlers().count()).toBe(0);
 });
 
 it("should register action by type", () => {
-    const reduceStore = new TestReduceStore(dispatcher, testHandler);
+    const reduceStore = new TestReduceStore(dispatcher);
+    reduceStore.registerTestAction(TestAction, testHandler);
 
     const registeredHandlers = reduceStore.getActionsHandlers();
     expect(registeredHandlers.count()).toBe(1);
@@ -64,7 +70,8 @@ it("should register action by type", () => {
 
 it("should call action handler for dispatched registered action type", () => {
     const mockedHandler = jest.fn(testHandler);
-    const reduceStore = new TestReduceStore(dispatcher, mockedHandler);
+    const reduceStore = new TestReduceStore(dispatcher);
+    reduceStore.registerTestAction(TestAction, mockedHandler);
 
     const testAction = new TestAction(1);
 
@@ -75,13 +82,46 @@ it("should call action handler for dispatched registered action type", () => {
     expect(mockedHandler).toBeCalledWith(testAction, stateBeforeDispatch);
 });
 
+it("should not call action handler for dispatched non-registered action type", () => {
+    const mockedHandler = jest.fn(testHandler);
+    const reduceStore = new TestReduceStore(dispatcher);
+    reduceStore.registerTestAction(TestAction, mockedHandler);
+
+    const anotherAction = new AnotherAction(1);
+
+    dispatcher.dispatch(anotherAction);
+
+    expect(mockedHandler).not.toBeCalled();
+});
+
+it("should call action handler for dispatched registered action type and not call action handler for non-registered one", () => {
+    const mockedHandler = jest.fn(testHandler);
+    const mockedAnotherHandler = jest.fn(testHandler);
+    const reduceStore = new TestReduceStore(dispatcher);
+    reduceStore.registerTestAction(TestAction, mockedHandler);
+    reduceStore.registerTestAction(AnotherAction, mockedAnotherHandler);
+    
+    const anotherAction = new AnotherAction(1);
+
+    dispatcher.dispatch(anotherAction);
+
+    expect(mockedHandler).not.toBeCalled();
+    expect(mockedAnotherHandler).toBeCalled();
+});
+
 it("should update store state after invoking dispatched registered action type", () => {
     const mockedHandler = jest.fn(testHandler);
-    const reduceStore = new TestReduceStore(dispatcher, mockedHandler);
+    const reduceStore = new TestReduceStore(dispatcher);
+    reduceStore.registerTestAction(TestAction, mockedHandler);
 
     const testAction = new TestAction(1);
+    expect(reduceStore.getState()).toEqual(reduceStore.getInitialState());
 
     dispatcher.dispatch(testAction);
 
     expect(reduceStore.getState()).toEqual({ value: testAction.value } as TestState);
 });
+
+
+
+// TODO: cleanUpStore test

@@ -44,7 +44,7 @@ export class QueuesHandler<TValue> {
     }
 
     /**
-     * Create new initial item with specified key.
+     * Creates an item with specified key and Init status.
      *
      * @param key Item key.
      */

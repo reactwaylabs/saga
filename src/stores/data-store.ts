@@ -8,7 +8,7 @@ import { QueuesHandler } from "../handlers/queues-handler";
 import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import { Items } from "../contracts/items";
-import { StoreUpdatedAction } from "../actions/data-store-actions";
+import { UpdateDataStoreAction } from "../actions/data-store-actions";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
@@ -37,7 +37,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * Dispatch action that this store has changed.
      */
     private dispatchChanges(): void {
-        this.getDispatcher().dispatch(new StoreUpdatedAction(this.getDispatchToken()));
+        this.getDispatcher().dispatch(new UpdateDataStoreAction(this.getDispatchToken()));
     }
 
     /**
@@ -132,7 +132,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param payload Dispatched message from dispatcher.
      */
     public reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
-        if (payload.action instanceof StoreUpdatedAction) {
+        if (payload.action instanceof UpdateDataStoreAction) {
             if (this.getDispatchToken() === payload.action.dispatchToken) {
                 const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
