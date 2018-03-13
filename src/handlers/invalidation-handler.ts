@@ -1,5 +1,5 @@
 import * as Immutable from "immutable";
-import { Items } from "../contracts/items";
+import { Items } from "../contracts";
 
 export class InvalidationHandler<TValue> {
 

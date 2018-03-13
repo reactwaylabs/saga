@@ -1,17 +1,16 @@
 import * as Flux from "flux";
-import { Store } from "flux/utils";
+// import { Store } from "flux/utils";
 import * as Immutable from "immutable";
 import { ReduceStore } from "./reduce-store";
 import { DispatcherMessage, Dispatcher } from "../dispatcher";
 import { SynchronizeMapStoreAction } from "../actions/actions";
 import { Item } from "../abstractions/item";
-import { Items } from "../contracts/items";
+import { Items, RequestDataHandlerResult } from "../contracts";
 import { ItemStatus } from "../abstractions/item-status";
-import { InvalidationHandler } from "../handlers/invalidation-handler";
-import { OnSuccess, OnFailure } from "../contracts/callbacks";
+// import { InvalidationHandler } from "../handlers/invalidation-handler";
 import { RequestsBuffer } from "../handlers/requests-buffer";
 
-const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accepts only 'string[]', 'Immutable.Set<string>' or 'Immutable.List<string>'.";
+// const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accepts only 'string[]', 'Immutable.Set<string>' or 'Immutable.List<string>'.";
 
 /**
  * MapStore to cache data by id.
@@ -24,20 +23,23 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
-        this.requestsBuffer = new RequestsBuffer<TValue>();
-        // this.requestsBuffer.
+        this.requestsBuffer = new RequestsBuffer<TValue>(this.requestData.bind(this));
     }
 
     //#region Properties
+
+    protected requestsBuffer: RequestsBuffer<TValue>;
 
     /**
      * With a large amount of requests MapStore debounces them.
      * This property defines interval between portions of requests.
      */
-    protected requestsInterval: number = 50;
-    protected requestIntervalTimer: undefined | number;
-
-    protected requestsBuffer: RequestsBuffer<TValue>;
+    protected get dataFetchThrottleTime(): number {
+        return this.requestsBuffer.dataFetchThrottleTime;
+    }
+    protected set dataFetchThrottleTime(value: number) {
+        this.requestsBuffer.dataFetchThrottleTime = value;
+    }
 
     //#endregion
 
@@ -53,12 +55,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     protected dispatchSynchronizationAction(): void {
         Dispatcher.dispatch(new SynchronizeMapStoreAction(this.getDispatchToken()));
     }
-
-    protected dispatchSynchronizationActionAsync(): void {
-        setTimeout(() => {
-            this.dispatchSynchronizationAction();
-        });
-    }
     //#endregion
 
     /**
@@ -68,7 +64,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param onSuccess Callback to resolve some values.
      * @param onFailed Callback to reject some values.
      */
-    protected abstract requestData(ids: string[], onSuccess: OnSuccess<TValue>, onFailed: OnFailure): Promise<void> | void;
+    protected abstract requestData(ids: string[]): Promise<RequestDataHandlerResult<TValue>>;
 
     getState(): Items<TValue> {
         throw new Error(
@@ -104,10 +100,8 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 this.requestsBuffer.enqueue(key);
             }
 
-            this.requestData([key], () => {}, () => {});
             return newItem;
         }
-
 
         // If key exists, we are sure the value is defined.
         return this.state.get(key)!;

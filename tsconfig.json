@@ -11,24 +11,14 @@
         "strict": true,
         "strictPropertyInitialization": false,
         "noUnusedLocals": true,
-        "sourceMap": false,
+        "inlineSourceMap": true,
+        "inlineSources": true,
         "skipDefaultLibCheck": true,
         "declaration": true,
         "declarationDir": "@types",
-        "lib": [
-            "dom",
-            "dom.iterable",
-            "es2015"
-        ],
-        "types": [
-            "jest"
-        ],
+        "lib": ["dom", "dom.iterable", "es2015"],
+        "types": ["jest"],
         "plugins": [{ "name": "tslint-language-service" }]
     },
-    "exclude": [
-        "node_modules",
-        "dist",
-        "@types",
-        "examples"
-    ]
+    "exclude": ["node_modules", "dist", "@types", "examples"]
 }

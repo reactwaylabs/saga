@@ -7,7 +7,7 @@ import { QueuesHandler } from "../handlers/queues-handler";
 
 import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
-import { Items } from "../contracts/items";
+import { Items } from "../contracts";
 import { UpdateDataStoreAction } from "../actions/data-store-actions";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 

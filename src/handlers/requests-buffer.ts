@@ -2,37 +2,57 @@ import * as Immutable from "immutable";
 import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import * as _ from "lodash";
+import { RequestDataHandler } from "../contracts";
 
 /**
  * Buffers the items implicitly and debounces their requests
  */
 export class RequestsBuffer<TValue> {
-    constructor() {
+    constructor(protected readonly requestDataFunc: RequestDataHandler<TValue>) {
         this.items = Immutable.Map<string, Item<TValue>>();
+        this.dataFetchThrottleTime = 50;
     }
 
-    private $dataRequestDebounceTime: number = 50;
+    private $dataFetchThrottleTime: number = 50;
 
-    public get dataRequestDebounceTime(): number {
-        return this.$dataRequestDebounceTime;
+    public get dataFetchThrottleTime(): number {
+        return this.$dataFetchThrottleTime;
     }
 
-    public set dataRequestDebounceTime(value) {
-        this.$dataRequestDebounceTime = value;
-        this.throttledRequestData = _.throttle(this.fetchData, value, {
-            leading: false
+    public set dataFetchThrottleTime(value) {
+        this.$dataFetchThrottleTime = value;
+        this.throttledRequestData = _.throttle(this.requestData, value, {
+            leading: false,
+            trailing: true
         });
+    }
+
+    protected requestData() {
+        const keysToFetch: string[] = this.items
+            .filter(x => x.status === ItemStatus.Init)
+            .keySeq()
+            .toArray();
+
+        this.items = this.items.withMutations(mutableItems => {
+            for (const key of keysToFetch) {
+                // As keys were filtered from existing items, they will definitely exist.
+                // We simply override them with a pending status.
+                mutableItems.set(key, this.createAndFreezeItem(ItemStatus.Pending, undefined));
+            }
+        });
+
+        this.requestDataFunc(keysToFetch);
     }
 
     protected items: Immutable.Map<string, Item<TValue>>;
     protected throttledRequestData: (() => void) & _.Cancelable;
 
-    /**
-     * Build error with prefix and class name.
-     */
-    private buildError(functionName: string, message: string): string {
-        return `SimplrFlux.Buffer.${functionName}() [${this.constructor.name}]: ${message}`;
-    }
+    // /**
+    //  * Build error with prefix and class name.
+    //  */
+    // private buildError(functionName: string, message: string): string {
+    //     return `SimplrFlux.Buffer.${functionName}() [${this.constructor.name}]: ${message}`;
+    // }
 
     protected createAndFreezeItem(status: ItemStatus, value: TValue | undefined): Item<TValue> {
         const newValue = new Item<TValue>(status, value);
@@ -50,6 +70,9 @@ export class RequestsBuffer<TValue> {
                 return mutableItems;
             });
         }
+
+        console.log("Starting throttled requestData...");
+        this.throttledRequestData();
     }
 
     public set(key: string, status: ItemStatus, value?: TValue): void {
@@ -73,6 +96,11 @@ export class RequestsBuffer<TValue> {
      * @param status Item status to be set for all items.
      */
     public setItemsStatus(keys: string[], status: ItemStatus): void {
+        if (keys.length === 1) {
+            this.setItemStatus(keys[0], status);
+            return;
+        }
+
         this.items = this.items.withMutations(mutableItems => {
             for (const key of keys) {
                 if (!mutableItems.has(key)) {
@@ -102,6 +130,4 @@ export class RequestsBuffer<TValue> {
     public has(key: string): boolean {
         return this.items.has(key);
     }
-
-    protected fetchData(): void {}
 }
