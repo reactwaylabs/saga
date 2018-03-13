@@ -27,7 +27,7 @@ export class RequestsBuffer<TValue> {
         });
     }
 
-    protected requestData() {
+    protected async requestData() {
         const keysToFetch: string[] = this.items
             .filter(x => x.status === ItemStatus.Init)
             .keySeq()
@@ -41,7 +41,29 @@ export class RequestsBuffer<TValue> {
             }
         });
 
-        this.requestDataFunc(keysToFetch);
+        try {
+            const result = await this.requestDataFunc(keysToFetch);
+            this.items = this.items.withMutations(mutableItems => {
+                for (const key of Object.keys(result)) {
+                    // As keys were filtered from existing items, they will definitely exist.
+                    // We simply override them with a pending status.
+                    const value = result[key];
+                    if (value != null) {
+                        mutableItems.set(key, this.createAndFreezeItem(ItemStatus.Loaded, value));
+                    } else {
+                        mutableItems.set(key, this.createAndFreezeItem(ItemStatus.NoData, undefined));
+                    }
+                }
+            });
+        } catch {
+            this.items = this.items.withMutations(mutableItems => {
+                for (const key of keysToFetch) {
+                    // As keys were filtered from existing items, they will definitely exist.
+                    // We simply override them with a pending status.
+                    mutableItems.set(key, this.createAndFreezeItem(ItemStatus.Failed, undefined));
+                }
+            });
+        }
     }
 
     protected items: Immutable.Map<string, Item<TValue>>;
@@ -71,7 +93,6 @@ export class RequestsBuffer<TValue> {
             });
         }
 
-        console.log("Starting throttled requestData...");
         this.throttledRequestData();
     }
 

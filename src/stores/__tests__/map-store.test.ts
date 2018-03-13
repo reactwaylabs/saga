@@ -114,9 +114,8 @@ it("should have defined buffer after initialization", () => {
 });
 
 it("should add non-cached item key to the buffer", () => {
-    const mapStore = new TestMapStore(dispatcher, requestDataSync);
-
     const id = "any-item-id";
+    const mapStore = new TestMapStore(dispatcher, requestDataSync);
 
     expect(mapStore.getTestRequestsBuffer().has(id)).toBe(false);
     mapStore.get(id);
@@ -124,6 +123,7 @@ it("should add non-cached item key to the buffer", () => {
 });
 
 it("should call requestData", async done => {
+    const id = "any-item-id";
     const resolvable = new Resolvable();
 
     const requestDataHandler: RequestDataHandler<TestItem> = async ids => {
@@ -134,8 +134,6 @@ it("should call requestData", async done => {
     const mockedRequestDataHandler = jest.fn(requestDataHandler);
     const mapStore = new TestMapStore(dispatcher, mockedRequestDataHandler);
 
-    const id = "any-item-id";
-
     mapStore.get(id);
     await resolvable.promise;
     // mockedRequestDataHandler will surely be called, as resolvable is resolved only inside of it, but let's check it anyway
@@ -143,39 +141,80 @@ it("should call requestData", async done => {
     done();
 });
 
-it("should set items statuses to Pending while waiting for requestData result", async done => {
+it("should set items statuses to Pending while waiting for requestData to be resolved", async done => {
+    const id = "one";
     const requestDataResolvable = new Resolvable();
-    const testsResolvable = new Resolvable();
 
     const requestDataHandler: RequestDataHandler<TestItem> = async ids => {
         // Indicate that requestData has been called
         requestDataResolvable.resolve();
 
-        // Wait for tests to run
-        await testsResolvable.promise;
+        // And to let tests capture intermediate state, defer resolution indefinitely
+        await new Promise(resolve => {});
         return requestDataSync(ids);
     };
 
-    const mockedRequestDataHandler = jest.fn(requestDataHandler);
-    const mapStore = new TestMapStore(dispatcher, mockedRequestDataHandler);
-
-    const id = "one";
+    const mapStore = new TestMapStore(dispatcher, requestDataHandler);
 
     // Request data for an item
-    debugger;
     mapStore.get(id);
 
-    // Wait until requestData will be called
+    // Resolved only when requestDataHandler is called
     await requestDataResolvable.promise;
 
-    const buffer = mapStore.getTestRequestsBuffer();
-    console.log((buffer as any).items);
+    let buffer = mapStore.getTestRequestsBuffer();
     expect(buffer.has(id)).toBe(true);
-    const bufferItem = buffer.get(id);
+    let bufferItem = buffer.get(id);
     expect(bufferItem).toBeDefined();
     expect(bufferItem!.status).toBe(ItemStatus.Pending);
 
-    // mockedRequestDataHandler will surely be called, as resolvable is resolved only inside of it, but let's check it anyway
-    expect(mockedRequestDataHandler).toBeCalled();
+    done();
+});
+
+it("should set items statuses to Loaded when requestData result returns requested values for keys", async done => {
+    const id = "one";
+    const mapStore = new TestMapStore(dispatcher, requestDataSync);
+
+    // Request data for an item
+    mapStore.get(id);
+
+    // Ensure that throttling only defers one async cycle later (0ms throttle)
+    expect(mapStore.getTestDataFetchThrottleTime()).toBe(0);
+
+    // Defer tests one async cycle later for request to be resolved before tests
+    await new Promise(resolve => setTimeout(resolve));
+
+    let buffer = mapStore.getTestRequestsBuffer();
+    expect(buffer.has(id)).toBe(true);
+    let bufferItem = buffer.get(id);
+    expect(bufferItem).toBeDefined();
+    expect(bufferItem!.status).toBe(ItemStatus.Loaded);
+    expect(bufferItem!.value).toEqual(cache.get(id));
+
+    done();
+});
+
+it("should set items statuses to Failed when requestData throws", async done => {
+    const id = "one";
+    const mapStore = new TestMapStore(dispatcher, ids => {
+        throw new Error("requestData failed.");
+    });
+
+    // Request data for an item
+    mapStore.get(id);
+
+    // Ensure that throttling only defers one async cycle later (0ms throttle)
+    expect(mapStore.getTestDataFetchThrottleTime()).toBe(0);
+
+    // Defer tests one async cycle later for request to be resolved before tests
+    await new Promise(resolve => setTimeout(resolve));
+
+    let buffer = mapStore.getTestRequestsBuffer();
+    expect(buffer.has(id)).toBe(true);
+    let bufferItem = buffer.get(id);
+    expect(bufferItem).toBeDefined();
+    expect(bufferItem!.status).toBe(ItemStatus.Failed);
+    expect(bufferItem!.value).not.toEqual(cache.get(id));
+
     done();
 });
