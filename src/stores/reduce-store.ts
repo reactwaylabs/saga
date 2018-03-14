@@ -55,18 +55,19 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param state Current store state.
      */
     private getCleanStateAndStartNewSession(state: TState): TState {
-        let newState: TState | undefined;
-        if (this.storeWillCleanUp != null) {
-            const cleanupState = this.storeWillCleanUp();
-            if (cleanupState != null) {
-                newState = cleanupState;
-            }
-        }
-        if (newState == null) {
-            newState = this.getInitialState();
-        }
-        this.startNewSession();
-        return newState;
+        throw new Error("Not implemented.");
+        // let newState: TState | undefined;
+        // if (this.storeWillCleanUp != null) {
+        //     const cleanupState = this.storeWillCleanUp();
+        //     if (cleanupState != null) {
+        //         newState = cleanupState;
+        //     }
+        // }
+        // if (newState == null) {
+        //     newState = this.getInitialState();
+        // }
+        // this.startNewSession();
+        // return newState;
     }
 
     /**

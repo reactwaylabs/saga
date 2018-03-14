@@ -1,33 +1,59 @@
+import * as Flux from "flux";
 import * as Immutable from "immutable";
+import * as _ from "lodash";
 import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
-import * as _ from "lodash";
 import { RequestDataHandler } from "../contracts";
+import { DispatcherMessage } from "..";
+import { SynchronizeMapStoreAction } from "../actions/actions";
 
 /**
  * Buffers the items implicitly and debounces their requests
  */
+
 export class RequestsBuffer<TValue> {
-    constructor(protected readonly requestDataFunc: RequestDataHandler<TValue>) {
+    constructor(
+        protected readonly dispatcher: Flux.Dispatcher<DispatcherMessage<any>>,
+        protected readonly mapStoreDispatchToken: string,
+        protected readonly requestDataFunc: RequestDataHandler<TValue>
+    ) {
         this.items = Immutable.Map<string, Item<TValue>>();
         this.dataFetchThrottleTime = 50;
     }
 
-    private $dataFetchThrottleTime: number = 50;
+    protected items: Immutable.Map<string, Item<TValue>>;
+    protected throttledRequestData: (() => void) & _.Cancelable;
+
+    private _dataFetchThrottleTime: number = 50;
 
     public get dataFetchThrottleTime(): number {
-        return this.$dataFetchThrottleTime;
+        return this._dataFetchThrottleTime;
     }
 
     public set dataFetchThrottleTime(value) {
-        this.$dataFetchThrottleTime = value;
-        this.throttledRequestData = _.throttle(this.requestData, value, {
+        this._dataFetchThrottleTime = value;
+        this.throttledRequestData = _.throttle(this.requestDataFuncCaller, value, {
             leading: false,
             trailing: true
         });
     }
 
-    protected async requestData() {
+    public enqueue(...keys: string[]): void {
+        if (keys.length === 1) {
+            this.items = this.items.set(keys[0], this.createAndFreezeItem(ItemStatus.Init, undefined));
+        } else {
+            this.items = this.items.withMutations(mutableItems => {
+                for (const key of keys) {
+                    mutableItems.set(key, this.createAndFreezeItem(ItemStatus.Init, undefined));
+                }
+                return mutableItems;
+            });
+        }
+
+        this.throttledRequestData();
+    }
+
+    protected async requestDataFuncCaller(): Promise<void> {
         const keysToFetch: string[] = this.items
             .filter(x => x.status === ItemStatus.Init)
             .keySeq()
@@ -64,36 +90,10 @@ export class RequestsBuffer<TValue> {
                 }
             });
         }
-    }
 
-    protected items: Immutable.Map<string, Item<TValue>>;
-    protected throttledRequestData: (() => void) & _.Cancelable;
-
-    // /**
-    //  * Build error with prefix and class name.
-    //  */
-    // private buildError(functionName: string, message: string): string {
-    //     return `SimplrFlux.Buffer.${functionName}() [${this.constructor.name}]: ${message}`;
-    // }
-
-    protected createAndFreezeItem(status: ItemStatus, value: TValue | undefined): Item<TValue> {
-        const newValue = new Item<TValue>(status, value);
-        return Object.freeze(newValue);
-    }
-
-    public enqueue(...keys: string[]) {
-        if (keys.length === 1) {
-            this.items = this.items.set(keys[0], this.createAndFreezeItem(ItemStatus.Init, undefined));
-        } else {
-            this.items = this.items.update(mutableItems => {
-                for (const key of keys) {
-                    mutableItems.set(key, this.createAndFreezeItem(ItemStatus.Init, undefined));
-                }
-                return mutableItems;
-            });
-        }
-
-        this.throttledRequestData();
+        this.dispatcher.dispatch({
+            action: new SynchronizeMapStoreAction(this.mapStoreDispatchToken)
+        });
     }
 
     public set(key: string, status: ItemStatus, value?: TValue): void {
@@ -150,5 +150,29 @@ export class RequestsBuffer<TValue> {
      */
     public has(key: string): boolean {
         return this.items.has(key);
+    }
+
+    public filterByStatuses(statuses: ItemStatus[]): Immutable.Map<string, Item<TValue>> {
+        return this.items.filter(x => statuses.indexOf(x.status) !== -1);
+    }
+
+    public remove(key: string): void {
+        this.items = this.items.remove(key);
+    }
+
+    public removeAll(keys: string[]): void {
+        this.items = this.items.removeAll(keys);
+    }
+
+    // /**
+    //  * Build error with prefix and class name.
+    //  */
+    // private buildError(functionName: string, message: string): string {
+    //     return `SimplrFlux.Buffer.${functionName}() [${this.constructor.name}]: ${message}`;
+    // }
+
+    protected createAndFreezeItem(status: ItemStatus, value: TValue | undefined): Item<TValue> {
+        const newValue = new Item<TValue>(status, value);
+        return Object.freeze(newValue);
     }
 }

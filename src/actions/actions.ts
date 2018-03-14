@@ -1,7 +1,7 @@
 export class SynchronizeMapStoreAction {
-    constructor(private _storeId: string) { }
-    public get storeId(): string {
-        return this._storeId;
+    constructor(private readonly _storeDispatchToken: string) { }
+    public get storeDispatchToken(): string {
+        return this._storeDispatchToken;
     }
 }
 

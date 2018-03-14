@@ -23,7 +23,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
-        this.requestsBuffer = new RequestsBuffer<TValue>(this.requestData.bind(this));
+        this.requestsBuffer = new RequestsBuffer<TValue>(dispatcher || Dispatcher, this.getDispatchToken(), this.requestData.bind(this));
+
+        this.registerAction<SynchronizeMapStoreAction>(SynchronizeMapStoreAction, this.synchronizeStoreStateWithBuffer.bind(this));
     }
 
     //#region Properties
@@ -53,7 +55,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     }
 
     protected dispatchSynchronizationAction(): void {
-        Dispatcher.dispatch(new SynchronizeMapStoreAction(this.getDispatchToken()));
+        Dispatcher.dispatch({
+            action: new SynchronizeMapStoreAction(this.getDispatchToken())
+        });
     }
     //#endregion
 
@@ -66,16 +70,20 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     protected abstract requestData(ids: string[]): Promise<RequestDataHandlerResult<TValue>>;
 
-    getState(): Items<TValue> {
+    /**
+     * @throws Always throws, because state behind MapStore is mutable,
+     * therefore store-specific methods must be used (get, isCached, etc.).
+     */
+    public getState(): Items<TValue> {
         throw new Error(
             this.buildError(
                 this.getState.name,
-                "State behind the store is mutable, therefore store-specific methods must be used (get, isCached, etc.)."
+                "State behind MapStore is mutable, therefore store-specific methods must be used (get, isCached, etc.)."
             )
         );
     }
 
-    protected state: Items<TValue> = this.getInitialState();
+    protected _state: Items<TValue> = this.getInitialState();
 
     /**
      * Gets the value of a particular key and
@@ -86,13 +94,13 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      */
     public get(key: string, noCache: boolean = false): Item<TValue> {
         // If key is new to us
-        if (!this.state.has(key)) {
+        if (!this._state.has(key)) {
             // Create synthetic value with ItemStatus.Init
             const newItem: Item<TValue> = new Item(ItemStatus.Init);
             Object.freeze(newItem);
 
             // And set it to state for subsequent requests to find it already
-            this.state = this.state.set(key, newItem);
+            this._state = this._state.set(key, newItem);
 
             // If the key does not exist in the buffer (it shouldn't)
             if (!this.requestsBuffer.has(key)) {
@@ -104,11 +112,11 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
 
         // If key exists, we are sure the value is defined.
-        return this.state.get(key)!;
+        return this._state.get(key)!;
     }
 
     public isCached(key: string): boolean {
-        return this.state.has(key);
+        return this._state.has(key);
     }
 
     /**
@@ -162,7 +170,39 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         prev?: Items<TValue>,
         noCache: boolean = false
     ): Items<TValue> {
-        throw new Error("Not implemented");
+        let keysArray: string[];
+
+        if (Array.isArray(keys)) {
+            keysArray = keys;
+        } else {
+            throw new Error("Not implemented");
+        }
+
+        const keysToEnqueue: string[] = [];
+        const foundItems: { [key: string]: Item<TValue> } = {};
+
+        this._state = this._state.withMutations(mutableState => {
+            for (const key of keysArray) {
+                // If the key is new to us
+                if (!mutableState.has(key)) {
+                    // Create synthetic value with ItemStatus.Init
+                    const newItem: Item<TValue> = new Item(ItemStatus.Init);
+                    Object.freeze(newItem);
+                    mutableState.set(key, newItem);
+
+                    // If the key does not exist in the buffer (it shouldn't)
+                    if (!this.requestsBuffer.has(key)) {
+                        keysToEnqueue.push(key);
+                    }
+                }
+
+                foundItems[key] = mutableState.get(key)!;
+            }
+        });
+
+        this.requestsBuffer.enqueue(...keysToEnqueue);
+
+        return Immutable.Map(foundItems);
     }
 
     /**
@@ -175,6 +215,25 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         return Immutable.Map<string, Item<TValue>>();
     }
 
+    public synchronizeStoreStateWithBuffer(action: SynchronizeMapStoreAction, state: Items<TValue>): Items<TValue> {
+        if (this.getDispatchToken() !== action.storeDispatchToken) {
+            return state;
+        }
+
+        const fulfilledItems = this.requestsBuffer.filterByStatuses([ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed]);
+        const pendingItems = this.requestsBuffer.filterByStatuses([ItemStatus.Pending]);
+
+        if (fulfilledItems.count() === 0) {
+            return state;
+        }
+        // Merges fulfilled and pending items on top of previous state
+        const newState = state.merge(fulfilledItems.merge(pendingItems));
+        // Remove fulfilled items from the buffer
+        this.requestsBuffer.removeAll(fulfilledItems.keySeq().toArray());
+
+        return newState;
+    }
+
     /**
      * Reduces the current state, and an action to the new state of this store.
      * All subclasses must implement this method.
@@ -183,24 +242,19 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param state Store state.
      * @param payload Dispatched message from simplr-dispatcher.
      */
-    public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
-        // if (payload.action instanceof SynchronizeMapStoreAction) {
-        //     if (this.getDispatchToken() === payload.action.storeId) {
-        //         const newState = this.moveFromQueuesToState(state);
-        //         if (newState != null) {
-        //             state = newState;
-        //         }
-        //     }
-        // }
-        // state = super.reduce(state, payload);
+    // public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
+    //     if (payload.action instanceof SynchronizeMapStoreAction) {
 
-        // if (this.invalidationHandler.isWaiting) {
-        //     const result = this.invalidationHandler.processEnqueuedInvalidations(state);
-        //     this.queuesHandler.removeMultiple(result.removedKeys);
-        //     state = result.state;
-        // }
+    //     }
+    //     state = super.reduce(state, payload);
 
-        // return state;
-        throw new Error("Not implemented");
-    }
+    //     // if (this.invalidationHandler.isWaiting) {
+    //     //     const result = this.invalidationHandler.processEnqueuedInvalidations(state);
+    //     //     this.queuesHandler.removeMultiple(result.removedKeys);
+    //     //     state = result.state;
+    //     // }
+
+    //     return state;
+    //     // throw new Error("Not implemented");
+    // }
 }

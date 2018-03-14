@@ -30,7 +30,9 @@ it("dispatches an action to registered listeners", () => {
     class Action {}
 
     const action = new Action();
-    dispatcher.dispatch(action);
+    dispatcher.dispatch({
+        action: action
+    });
 
     expect(actionCatcher.actionsCount).toBe(1);
     expect(actionCatcher.lastAction).toBeDefined();

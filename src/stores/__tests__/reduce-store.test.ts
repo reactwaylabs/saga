@@ -22,8 +22,8 @@ class AnotherAction {
 }
 
 class TestReduceStore extends ReduceStore<TestState> {
-    constructor(dispatcher: Flux.Dispatcher<DispatcherMessage<any>>) {
-        super(dispatcher);
+    constructor(_dispatcher: Flux.Dispatcher<DispatcherMessage<any>>) {
+        super(_dispatcher);
     }
     public getInitialState(): TestState {
         return {
@@ -48,11 +48,9 @@ beforeEach(() => {
     dispatcher = new DispatcherClass();
 });
 
-const testHandler = (action: TestAction, state: TestState): TestState => {
-    return {
-        value: action.value
-    };
-};
+const testHandler = (action: TestAction, state: TestState): TestState => ({
+    value: action.value
+});
 
 it("should have no registered actions by default", () => {
     const reduceStore = new TestReduceStore(dispatcher);
@@ -77,7 +75,9 @@ it("should call action handler for dispatched registered action type", () => {
 
     const stateBeforeDispatch = reduceStore.getState();
 
-    dispatcher.dispatch(testAction);
+    dispatcher.dispatch({
+        action: testAction
+    });
 
     expect(mockedHandler).toBeCalledWith(testAction, stateBeforeDispatch);
 });
@@ -89,7 +89,9 @@ it("should not call action handler for dispatched non-registered action type", (
 
     const anotherAction = new AnotherAction(1);
 
-    dispatcher.dispatch(anotherAction);
+    dispatcher.dispatch({
+        action: anotherAction
+    });
 
     expect(mockedHandler).not.toBeCalled();
 });
@@ -100,10 +102,12 @@ it("should call action handler for dispatched registered action type and not cal
     const reduceStore = new TestReduceStore(dispatcher);
     reduceStore.registerTestAction(TestAction, mockedHandler);
     reduceStore.registerTestAction(AnotherAction, mockedAnotherHandler);
-    
+
     const anotherAction = new AnotherAction(1);
 
-    dispatcher.dispatch(anotherAction);
+    dispatcher.dispatch({
+        action: anotherAction
+    });
 
     expect(mockedHandler).not.toBeCalled();
     expect(mockedAnotherHandler).toBeCalled();
@@ -117,11 +121,11 @@ it("should update store state after invoking dispatched registered action type",
     const testAction = new TestAction(1);
     expect(reduceStore.getState()).toEqual(reduceStore.getInitialState());
 
-    dispatcher.dispatch(testAction);
+    dispatcher.dispatch({
+        action: testAction
+    });
 
     expect(reduceStore.getState()).toEqual({ value: testAction.value } as TestState);
 });
-
-
 
 // TODO: cleanUpStore test
