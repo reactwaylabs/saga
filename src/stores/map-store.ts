@@ -93,6 +93,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param noCache Should cached item be re-fetched from the server.
      */
     public get(key: string, noCache: boolean = false): Item<TValue> {
+        if (noCache) {
+            this.invalidateCache(key);
+        }
+
         // If key is new to us
         if (!this._state.has(key)) {
             // Create synthetic value with ItemStatus.Init
@@ -125,7 +129,24 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param key Item key to be invalidated.
      */
     public invalidateCache(keys: string | string[]): void {
-        throw new Error("Not implemented");
+        let keysArray: string[];
+        if (Array.isArray(keys)) {
+            keysArray = keys;
+        } else {
+            keysArray = [keys];
+        }
+
+        if (keysArray.length === 0) {
+            return;
+        }
+
+        // Invalidate cache
+        this._state = this._state.withMutations(mutableState => {
+            for (const key of keysArray) {
+                mutableState.remove(key);
+            }
+        });
+        this.requestsBuffer.removeAll(keysArray);
     }
 
     /**
@@ -176,6 +197,10 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             keysArray = keys;
         } else {
             throw new Error("Not implemented");
+        }
+
+        if (noCache) {
+            this.invalidateCache(keysArray);
         }
 
         const keysToEnqueue: string[] = [];
