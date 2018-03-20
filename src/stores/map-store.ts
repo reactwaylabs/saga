@@ -7,7 +7,7 @@ import { SynchronizeMapStoreAction } from "../actions/actions";
 import { Item } from "../abstractions/item";
 import { Items, RequestDataHandlerResult } from "../contracts";
 import { ItemStatus } from "../abstractions/item-status";
-// import { InvalidationHandler } from "../handlers/invalidation-handler";
+import { InvalidationBuffer } from "../handlers/invalidation-buffer";
 import { RequestsBuffer } from "../handlers/requests-buffer";
 
 // const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accepts only 'string[]', 'Immutable.Set<string>' or 'Immutable.List<string>'.";
@@ -24,13 +24,15 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
         this.requestsBuffer = new RequestsBuffer<TValue>(dispatcher || Dispatcher, this.getDispatchToken(), this.requestData.bind(this));
+        this.invalidationBuffer = new InvalidationBuffer();
 
-        this.registerAction<SynchronizeMapStoreAction>(SynchronizeMapStoreAction, this.synchronizeStoreStateWithBuffer.bind(this));
+        this.registerAction<SynchronizeMapStoreAction>(SynchronizeMapStoreAction, this.synchronizeMapStoreHandler.bind(this));
     }
 
     //#region Properties
 
     protected requestsBuffer: RequestsBuffer<TValue>;
+    protected invalidationBuffer: InvalidationBuffer<TValue>;
 
     /**
      * With a large amount of requests MapStore debounces them.
@@ -83,6 +85,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         );
     }
 
+    // Underscored state name, because this is how it's called in ReduceStore and it is used in underlying reduce mechanism.
+    // If this is renamed to something else (e.g. state), the state is not being updated during action reducing anymore
+    // and effectively there are two separate states, which is bad :D.
     protected _state: Items<TValue> = this.getInitialState();
 
     /**
@@ -90,13 +95,8 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * returns Value: undefined and status:init if the key does not exist in the cache.
      *
      * @param key Requested item key.
-     * @param noCache Should cached item be re-fetched from the server.
      */
-    public get(key: string, noCache: boolean = false): Item<TValue> {
-        if (noCache) {
-            this.invalidateCache(key);
-        }
-
+    public get(key: string): Item<TValue> {
         // If key is new to us
         if (!this._state.has(key)) {
             // Create synthetic value with ItemStatus.Init
@@ -136,39 +136,38 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             keysArray = [keys];
         }
 
-        if (keysArray.length === 0) {
-            return;
-        }
+        // if (keysArray.length === 0) {
+        //     return;
+        // }
 
-        // Invalidate cache
-        this._state = this._state.withMutations(mutableState => {
-            for (const key of keysArray) {
-                mutableState.remove(key);
-            }
-        });
-        this.requestsBuffer.removeAll(keysArray);
+        // // Invalidate cache
+        // this._state = this._state.withMutations(mutableState => {
+        //     for (const key of keysArray) {
+        //         mutableState.remove(key);
+        //     }
+        // });
+        // this.requestsBuffer.removeAll(keysArray);
+        this.invalidationBuffer.enqueue(keysArray);
     }
 
     /**
      * Prefetch item by key.
      * @param key Requested item key.
-     * @param noCache Should cached item be re-fetched from the server.
      */
-    public prefetch(key: string, noCache: boolean = false): void {
-        this.get(key, noCache);
+    public prefetch(key: string): void {
+        this.get(key);
     }
 
     /**
      * Prefetch all items by keys.
      * @param keys Requested item keys.
-     * @param noCache Should cached items be re-fetched from the server.
      */
-    public prefetchAll(keys: string[], noCache?: boolean): void;
-    public prefetchAll(keys: Immutable.List<string>, noCache?: boolean): void;
-    public prefetchAll(keys: Immutable.Set<string>, noCache?: boolean): void;
-    public prefetchAll(keys: Immutable.OrderedSet<string>, noCache?: boolean): void;
-    public prefetchAll(keys: any, noCache: boolean = false): void {
-        this.getAll(keys, undefined, noCache);
+    public prefetchAll(keys: string[]): void;
+    public prefetchAll(keys: Immutable.List<string>): void;
+    public prefetchAll(keys: Immutable.Set<string>): void;
+    public prefetchAll(keys: Immutable.OrderedSet<string>): void;
+    public prefetchAll(keys: any): void {
+        this.getAll(keys, undefined);
     }
 
     /**
@@ -180,16 +179,14 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      *
      * @param keys Requested keys list in Array or Immutable List.
      * @param prev Previous data list merged with new data list.
-     * @param noCache Update cached items from the server.
      */
-    public getAll(keys: string[], prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
-    public getAll(keys: Immutable.List<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
-    public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
-    public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>, noCache?: boolean): Items<TValue>;
+    public getAll(keys: string[], prev?: Items<TValue>): Items<TValue>;
+    public getAll(keys: Immutable.List<string>, prev?: Items<TValue>): Items<TValue>;
+    public getAll(keys: Immutable.Set<string>, prev?: Items<TValue>): Items<TValue>;
+    public getAll(keys: Immutable.OrderedSet<string>, prev?: Items<TValue>): Items<TValue>;
     public getAll(
         keys: string[] | Immutable.List<string> | Immutable.Set<string> | Immutable.OrderedSet<string>,
-        prev?: Items<TValue>,
-        noCache: boolean = false
+        prev?: Items<TValue>
     ): Items<TValue> {
         let keysArray: string[];
 
@@ -197,10 +194,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             keysArray = keys;
         } else {
             throw new Error("Not implemented");
-        }
-
-        if (noCache) {
-            this.invalidateCache(keysArray);
         }
 
         const keysToEnqueue: string[] = [];
@@ -240,13 +233,32 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         return Immutable.Map<string, Item<TValue>>();
     }
 
-    public synchronizeStoreStateWithBuffer(action: SynchronizeMapStoreAction, state: Items<TValue>): Items<TValue> {
-        if (this.getDispatchToken() !== action.storeDispatchToken) {
+    protected synchronizeMapStoreHandler(action: SynchronizeMapStoreAction, state: Items<TValue>): Items<TValue> {
+        const newState = MapStore.synchronizeStoreStateWithRequestsBuffer<TValue>(
+            action,
+            state,
+            this.requestsBuffer,
+            this.getDispatchToken()
+        );
+        const invalidationResult = this.invalidationBuffer.reduceEnqueuedInvalidations(newState);
+        return invalidationResult.state;
+    }
+
+    /**
+     * Static and pure synchronization function (for easier testing)
+     */
+    protected static synchronizeStoreStateWithRequestsBuffer<TValue>(
+        action: SynchronizeMapStoreAction,
+        state: Items<TValue>,
+        requestsBuffer: RequestsBuffer<TValue>,
+        dispatchToken: string
+    ): Items<TValue> {
+        if (dispatchToken !== action.storeDispatchToken) {
             return state;
         }
 
-        const fulfilledItems = this.requestsBuffer.filterByStatuses([ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed]);
-        const pendingItems = this.requestsBuffer.filterByStatuses([ItemStatus.Pending]);
+        const fulfilledItems = requestsBuffer.filterByStatuses([ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed]);
+        const pendingItems = requestsBuffer.filterByStatuses([ItemStatus.Pending]);
 
         if (fulfilledItems.count() === 0) {
             return state;
@@ -254,7 +266,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         // Merges fulfilled and pending items on top of previous state
         const newState = state.merge(fulfilledItems.merge(pendingItems));
         // Remove fulfilled items from the buffer
-        this.requestsBuffer.removeAll(fulfilledItems.keySeq().toArray());
+        requestsBuffer.removeAll(fulfilledItems.keySeq().toArray());
 
         return newState;
     }

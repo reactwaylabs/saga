@@ -88,7 +88,7 @@ it("should throw if state is being accessed directly from the store", () => {
     expect(mapStore.getState).toThrow();
 });
 
-it("should return sythetic item with ItemStatus.Init when getting non-cached item", () => {
+it("should return synthetic item with ItemStatus.Init when getting non-cached item", () => {
     const mapStore = new TestMapStore(dispatcher, requestDataSync);
 
     const item = mapStore.get("any-item-id");
@@ -96,7 +96,7 @@ it("should return sythetic item with ItemStatus.Init when getting non-cached ite
     expect(item.status).toBe(ItemStatus.Init);
 });
 
-it("should return the same sythetic item with ItemStatus.Init when getting cached item in the same cycle", () => {
+it("should return the same synthetic item with ItemStatus.Init when getting cached item in the same cycle", () => {
     const mapStore = new TestMapStore(dispatcher, requestDataSync);
 
     const id = "any-item-id";
@@ -331,10 +331,10 @@ it("should dispatch synchronization action after loading data", async done => {
         const mapStore = new TestMapStore(dispatcher, requestDataHandler);
         const dispatchToken = mapStore.getDispatchToken();
 
-        let synchronizationActionDispached = false;
+        let synchronizationActionDispatched = false;
         dispatcher.register(payload => {
             if (payload.action instanceof SynchronizeMapStoreAction && payload.action.storeDispatchToken === dispatchToken) {
-                synchronizationActionDispached = true;
+                synchronizationActionDispatched = true;
             }
         });
 
@@ -350,71 +350,7 @@ it("should dispatch synchronization action after loading data", async done => {
         // Defer tests one async cycle later for request to be resolved before tests
         await new Promise(resolve => setTimeout(resolve));
 
-        expect(synchronizationActionDispached).toBe(true);
-
-        done();
-    } catch (error) {
-        done.fail(error);
-    }
-});
-
-it("should reload data when requested with noCache", async done => {
-    try {
-        const existingId = "one";
-
-        const requestDataResolvable1 = new Resolvable();
-        const requestDataResolvable2 = new Resolvable();
-        let requestDataCallCount = 0;
-
-        const requestDataHandler: RequestDataHandler<TestItem> = async ids => {
-            requestDataCallCount++;
-
-            if (requestDataCallCount === 1) {
-                // Indicate that requestData has been called once
-                requestDataResolvable1.resolve();
-            }
-
-            if (requestDataCallCount === 2) {
-                // Indicate that requestData has been called twice
-                requestDataResolvable2.resolve();
-            }
-
-            const result: { [id: string]: TestItem | null } = {};
-            for (const id of ids) {
-                result[id] = cache.get(id) || null;
-            }
-            return result;
-        };
-
-        const mapStore = new TestMapStore(dispatcher, requestDataHandler);
-
-        // Request data for an item
-        mapStore.get(existingId);
-
-        // Wait for requestData to be called
-        await requestDataResolvable1.promise;
-
-        expect(requestDataCallCount).toBe(1);
-
-        const item = mapStore.get(existingId);
-        expect(item).toBeDefined();
-        expect(item.status).toBe(ItemStatus.Loaded);
-        expect(item.value).toBe(cache.get(existingId));
-
-        const noCacheItem = mapStore.get(existingId, true);
-        expect(noCacheItem).toBeDefined();
-        expect(noCacheItem.status).toBe(ItemStatus.Init);
-        expect(noCacheItem.value).not.toBeDefined();
-
-        await requestDataResolvable2.promise;
-
-        expect(requestDataCallCount).toBe(2);
-
-        const noCacheItemLoaded = mapStore.get(existingId);
-        expect(noCacheItemLoaded).toBeDefined();
-        expect(noCacheItemLoaded.status).toBe(ItemStatus.Loaded);
-        expect(noCacheItemLoaded.value).toBeDefined();
-        expect(noCacheItemLoaded.value).toBe(cache.get(existingId));
+        expect(synchronizationActionDispatched).toBe(true);
 
         done();
     } catch (error) {
@@ -458,24 +394,28 @@ it("should invalidate data when invalidateCache is called", async done => {
         // Wait for requestData to be called
         await requestDataResolvable1.promise;
 
-        expect(requestDataCallCount).toBe(1);
-
+        // Item should be loaded and have appropriate value
         const item = mapStore.get(existingId);
         expect(item).toBeDefined();
         expect(item.status).toBe(ItemStatus.Loaded);
         expect(item.value).toBe(cache.get(existingId));
 
+        // Actively invalidate cache
         mapStore.invalidateCache(existingId);
 
+        // And get the same item from the store
         const invalidatedItem = mapStore.get(existingId);
         expect(invalidatedItem).toBeDefined();
-        expect(invalidatedItem.status).toBe(ItemStatus.Init);
-        expect(invalidatedItem.value).not.toBeDefined();
 
-        await requestDataResolvable2.promise;
+        // It should still be Loaded, because actual invalidation will be done during next reduce cycle,
+        // Thus will be available during next render cycle, right after `emitChange`
+        expect(invalidatedItem.status).toBe(ItemStatus.Loaded);
+        expect(invalidatedItem.value).toBe(cache.get(existingId));
 
-        expect(requestDataCallCount).toBe(2);
+        // await requestDataResolvable2.promise;
 
+        // After next requestData has been called, invalidated item status should be loaded
+        // And should have appropriate value
         const invalidatedItemLoaded = mapStore.get(existingId);
         expect(invalidatedItemLoaded).toBeDefined();
         expect(invalidatedItemLoaded.status).toBe(ItemStatus.Loaded);

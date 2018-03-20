@@ -9,7 +9,7 @@ import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import { Items } from "../contracts";
 import { UpdateDataStoreAction } from "../actions/data-store-actions";
-import { InvalidationHandler } from "../handlers/invalidation-handler";
+import { InvalidationBuffer } from "../handlers/invalidation-buffer";
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
@@ -20,7 +20,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
         super(dispatcher);
         this.queuesHandler = new QueuesHandler<any>();
-        this.invalidationHandler = new InvalidationHandler<any>();
+        this.invalidationHandler = new InvalidationBuffer<any>();
     }
 
     /**
@@ -31,13 +31,15 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
      * State cache invalidation handler.
      */
-    private invalidationHandler: InvalidationHandler<any>;
+    private invalidationHandler: InvalidationBuffer<any>;
 
     /**
      * Dispatch action that this store has changed.
      */
     private dispatchChanges(): void {
-        this.getDispatcher().dispatch(new UpdateDataStoreAction(this.getDispatchToken()));
+        this.getDispatcher().dispatch({
+            action: new UpdateDataStoreAction(this.getDispatchToken())
+        });
     }
 
     /**
@@ -144,7 +146,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
         state = super.reduce(state, payload);
 
         if (this.invalidationHandler.isWaiting) {
-            const result = this.invalidationHandler.processEnqueuedInvalidations(state);
+            const result = this.invalidationHandler.reduceEnqueuedInvalidations(state);
             this.queuesHandler.removeMultiple(result.removedKeys);
             state = result.state;
         }
