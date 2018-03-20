@@ -9,7 +9,7 @@ import { Item } from "../abstractions/item";
 import { ItemStatus } from "../abstractions/item-status";
 import { Items } from "../contracts";
 import { UpdateDataStoreAction } from "../actions/data-store-actions";
-import { InvalidationBuffer } from "../handlers/invalidation-buffer";
+import { InvalidationBuffer } from "../handlers/invalidation-handler";
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
     /**

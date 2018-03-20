@@ -7,7 +7,7 @@ import { SynchronizeMapStoreAction } from "../actions/actions";
 import { Item } from "../abstractions/item";
 import { Items, RequestDataHandlerResult } from "../contracts";
 import { ItemStatus } from "../abstractions/item-status";
-import { InvalidationBuffer } from "../handlers/invalidation-buffer";
+import { InvalidationBuffer } from "../handlers/invalidation-handler";
 import { RequestsBuffer } from "../handlers/requests-buffer";
 
 // const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accepts only 'string[]', 'Immutable.Set<string>' or 'Immutable.List<string>'.";
