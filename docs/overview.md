@@ -1,14 +1,14 @@
 # Overview
 
-*   [Overview](#overview)
-    *   [Actions](#actions)
-    *   [Dispatcher](#dispatcher)
-    *   [Action creators](#action-creators)
-    *   [Stores](#stores)
-        *   [ReduceStore](#reducestore)
-        *   [MapStore](#mapstore)
-        *   [DataStore](#datastore)
-    *   [Container](#container)
+- [Overview](#overview)
+    - [Actions](#actions)
+    - [Dispatcher](#dispatcher)
+    - [Action creators](#action-creators)
+    - [Stores](#stores)
+        - [ReduceStore](#reducestore)
+        - [MapStore](#mapstore)
+        - [DataStore](#datastore)
+    - [Container](#container)
 
 ## Actions
 
