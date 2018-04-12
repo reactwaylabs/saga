@@ -99,20 +99,24 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     public get(key: string): Item<TValue> {
         // If key is new to us
         if (!this._state.has(key)) {
-            // Create synthetic value with ItemStatus.Init
-            const newItem: Item<TValue> = new Item(ItemStatus.Init);
-            Object.freeze(newItem);
+            let newItem: Item<TValue>;
+            if (this.requestsBuffer.has(key)) {
+                // Item is defined
+                newItem = this.requestsBuffer.get(key)!;
+                this._state = this._state.set(key, newItem);
+            } else {
+                // Create synthetic value with ItemStatus.Init
+                newItem = new Item(ItemStatus.Init);
+                Object.freeze(newItem);
 
-            // And set it to state for subsequent requests to find it already
-            this._state = this._state.set(key, newItem);
+                // And set it to state for subsequent requests to find it already
+                this._state = this._state.set(key, newItem);
 
-            // If the key does not exist in the buffer (it shouldn't)
-            if (!this.requestsBuffer.has(key)) {
                 // Add it to the buffer
                 this.requestsBuffer.enqueue(key);
             }
 
-            return newItem;
+            return this._state.get(key)!;
         }
 
         // If key exists, we are sure the value is defined.
@@ -136,18 +140,12 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             keysArray = [keys];
         }
 
-        // if (keysArray.length === 0) {
-        //     return;
-        // }
+        if (keysArray.length === 0) {
+            return;
+        }
 
-        // // Invalidate cache
-        // this._state = this._state.withMutations(mutableState => {
-        //     for (const key of keysArray) {
-        //         mutableState.remove(key);
-        //     }
-        // });
-        // this.requestsBuffer.removeAll(keysArray);
         this.invalidationBuffer.enqueue(keysArray);
+        this.dispatchSynchronizationAction();
     }
 
     /**
@@ -155,7 +153,21 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @param key Requested item key.
      */
     public prefetch(key: string): void {
-        this.get(key);
+        // If item exists in a current state
+        if (this._state.has(key)) {
+            if (
+                // Is loaded AND is not queued for invalidation
+                (this._state.get(key)!.status === ItemStatus.Loaded && !this.invalidationBuffer.contains(key)) ||
+                // Or it exists in buffer
+                this.requestsBuffer.has(key)
+            ) {
+                // It is effectively prefetched.
+                return;
+            }
+        }
+
+        // Add it to the buffer
+        this.requestsBuffer.enqueue(key);
     }
 
     /**

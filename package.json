@@ -15,7 +15,11 @@
         "release": "npm run build && npm run uglifyjs"
     },
     "author": "SimplrJS <simplr@quatrodev.com> (https://github.com/simplrjs)",
-    "contributors": ["Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)"],
+    "contributors": [
+        "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
+        "Dovydas Navickas <dovydas@quatrodev.com> (https://github.com/dovydasnavickas)",
+        "Martynas Žilinskas <dovydas@quatrodev.com> (https://github.com/martynaszilinskas)"
+    ],
     "files": ["dist", "@types", "**/*.md", "LICENSE", "!examples"],
     "license": "MIT",
     "devDependencies": {
@@ -36,9 +40,9 @@
     "dependencies": {
         "@types/flux": "^3.1.7",
         "action-emitter": "^0.2.1",
-        "flux": "^3.1.3",
         "immutable": "4.0.0-rc.9",
         "lodash": "^4.17.5",
-        "tslib": "^1.9.0"
+        "tslib": "^1.9.0",
+        "flux": "^3.1.3"
     }
 }
