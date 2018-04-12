@@ -66,6 +66,19 @@ class Resolvable<TResult = any> {
     public promise: Promise<TResult>;
 }
 
+class OneStoreUpdate {
+    constructor(mapStore: MapStore<TestItem>) {
+        this.promise = new Promise((resolve, reject) => {
+            const listener = mapStore.addListener(() => {
+                resolve();
+                listener.remove();
+            });
+        });
+    }
+
+    public promise: Promise<void>;
+}
+
 let dispatcher: DispatcherClass;
 const requestDataSync: RequestDataHandler<TestItem> = async ids => {
     const results: { [id: string]: TestItem } = {};
@@ -362,22 +375,11 @@ it("should invalidate data when invalidateCache is called", async done => {
     try {
         const existingId = "one";
 
-        const requestDataResolvable1 = new Resolvable();
-        const requestDataResolvable2 = new Resolvable();
-        let requestDataCallCount = 0;
+        const requestDataResolvable = new Resolvable();
 
         const requestDataHandler: RequestDataHandler<TestItem> = async ids => {
-            requestDataCallCount++;
-
-            if (requestDataCallCount === 1) {
-                // Indicate that requestData has been called once
-                requestDataResolvable1.resolve();
-            }
-
-            if (requestDataCallCount === 2) {
-                // Indicate that requestData has been called twice
-                requestDataResolvable2.resolve();
-            }
+            // Indicate that requestData has been called
+            requestDataResolvable.resolve();
 
             const result: { [id: string]: TestItem | null } = {};
             for (const id of ids) {
@@ -392,7 +394,7 @@ it("should invalidate data when invalidateCache is called", async done => {
         mapStore.get(existingId);
 
         // Wait for requestData to be called
-        await requestDataResolvable1.promise;
+        await requestDataResolvable.promise;
 
         // Item should be loaded and have appropriate value
         const item = mapStore.get(existingId);
@@ -408,19 +410,85 @@ it("should invalidate data when invalidateCache is called", async done => {
         expect(invalidatedItem).toBeDefined();
 
         // It should still be Loaded, because actual invalidation will be done during next reduce cycle,
-        // Thus will be available during next render cycle, right after `emitChange`
+        // Thus will be available during the next render cycle, right after `emitChange`
         expect(invalidatedItem.status).toBe(ItemStatus.Loaded);
         expect(invalidatedItem.value).toBe(cache.get(existingId));
 
-        // await requestDataResolvable2.promise;
+        done();
+    } catch (error) {
+        done.fail(error);
+    }
+});
 
-        // After next requestData has been called, invalidated item status should be loaded
-        // And should have appropriate value
-        const invalidatedItemLoaded = mapStore.get(existingId);
-        expect(invalidatedItemLoaded).toBeDefined();
-        expect(invalidatedItemLoaded.status).toBe(ItemStatus.Loaded);
-        expect(invalidatedItemLoaded.value).toBeDefined();
-        expect(invalidatedItemLoaded.value).toBe(cache.get(existingId));
+it("should invalidate and prefetch data after next dispatch cycle", async done => {
+    try {
+        const existingId = "one";
+
+        const requestDataResolvable = new Resolvable();
+
+        const requestDataHandler: RequestDataHandler<TestItem> = async ids => {
+            // Indicate that requestData has been called.
+            requestDataResolvable.resolve();
+
+            const result: { [id: string]: TestItem | null } = {};
+            for (const id of ids) {
+                result[id] = cache.get(id) || null;
+            }
+            return result;
+        };
+
+        const mapStore = new TestMapStore(dispatcher, requestDataHandler);
+        const dispatchToken = mapStore.getDispatchToken();
+
+        // Request data for an item.
+        mapStore.get(existingId);
+
+        // Wait for requestData to be called.
+        await requestDataResolvable.promise;
+
+        // Item should be loaded and have appropriate value.
+        const item = mapStore.get(existingId);
+        expect(item).toBeDefined();
+        expect(item.status).toBe(ItemStatus.Loaded);
+        expect(item.value).toBe(cache.get(existingId));
+
+        const dispatcherResolvable = new Resolvable();
+        dispatcher.register(payload => {
+            if (payload.action instanceof SynchronizeMapStoreAction && payload.action.storeDispatchToken === dispatchToken) {
+                dispatcherResolvable.resolve();
+            }
+        });
+
+        // Actively invalidate cache
+        mapStore.invalidateCache(existingId);
+
+        // And queue prefetching of the item
+        mapStore.prefetch(existingId);
+
+        // And get the same item from the store
+        let invalidatedItem = mapStore.get(existingId);
+        expect(invalidatedItem).toBeDefined();
+
+        // It should still be Loaded, because actual invalidation will be done during next reduce cycle,
+        expect(invalidatedItem.status).toBe(ItemStatus.Loaded);
+        expect(invalidatedItem.value).toBe(cache.get(existingId));
+
+        await new OneStoreUpdate(mapStore).promise;
+        // await dispatcherResolvable.promise;
+
+        // And after dispatch cycle it should be Init, because actual invalidation has just been done.
+        invalidatedItem = mapStore.get(existingId);
+        expect(invalidatedItem).toBeDefined();
+        expect(invalidatedItem.status).toBe(ItemStatus.Init);
+        expect(invalidatedItem.value).toBeUndefined();
+
+        await new Promise(resolve => setTimeout(resolve));
+
+        // And after another dispatch cycle it should be Loaded.
+        invalidatedItem = mapStore.get(existingId);
+        expect(invalidatedItem).toBeDefined();
+        expect(invalidatedItem.status).toBe(ItemStatus.Loaded);
+        expect(invalidatedItem.value).toBe(cache.get(existingId));
 
         done();
     } catch (error) {

@@ -27,6 +27,10 @@ export class InvalidationBuffer<TValue> {
         });
     }
 
+    public contains(key: string): boolean {
+        return this.pendingKeys.contains(key);
+    }
+
     /**
      * Invalidates pending keys from a given state and returns a new state with a list of removed keys.
      *
