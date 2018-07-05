@@ -1,41 +1,39 @@
 {
-  "name": "simplr-flux",
-  "description": "Strongly-typed Flux architecture.",
-  "main": "dist/simplr-flux.js",
-  "types": "@types/index.d.ts",
-  "version": "2.3.0",
-  "scripts": {
-    "build": "webpack",
-    "tslint": "tslint --project . --config ./tslint.json",
-    "watch": "webpack --watch",
-    "test": "tsc -p . --noEmit && npm run tslint",
-    "uglifyjs": "uglifyjs ./dist/simplr-flux.js -o ./dist/simplr-flux.min.js --compress --mangle",
-    "release": "npm run build && npm run uglifyjs"
-  },
-  "author": "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
-  "files": [
-    "dist",
-    "@types",
-    "**/*.md",
-    "LICENSE",
-    "!examples"
-  ],
-  "license": "AGPL-3.0",
-  "devDependencies": {
-    "ts-loader": "^2.1.0",
-    "tslint": "^5.7.0",
-    "tslint-loader": "^3.5.3",
-    "typescript": "^2.5.2",
-    "uglifyjs": "^2.4.11",
-    "webpack": "^2.6.1"
-  },
-  "dependencies": {
-    "@types/flux": "^3.1.0",
-    "action-emitter": "^0.2.1",
-    "flux": "^3.1.2",
-    "immutable": "^3.8.1"
-  },
-  "peerDependencies": {
-    "tslib": "^1.7.1"
-  }
+    "name": "simplr-flux",
+    "description": "Strongly-typed Flux architecture.",
+    "main": "dist/simplr-flux.js",
+    "types": "@types/index.d.ts",
+    "version": "2.3.1",
+    "scripts": {
+        "build": "webpack",
+        "tslint": "tslint --project . --config ./tslint.json",
+        "watch": "webpack --watch",
+        "test": "tsc -p . --noEmit && npm run tslint",
+        "uglifyjs": "uglifyjs ./dist/simplr-flux.js -o ./dist/simplr-flux.min.js --compress --mangle",
+        "release": "npm run build && npm run uglifyjs"
+    },
+    "author": "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
+    "files": [
+        "dist",
+        "@types",
+        "**/*.md",
+        "LICENSE",
+        "!examples"
+    ],
+    "license": "AGPL-3.0",
+    "devDependencies": {
+        "ts-loader": "^2.1.0",
+        "tslint": "^5.7.0",
+        "tslint-loader": "^3.5.3",
+        "typescript": "^2.5.2",
+        "uglifyjs": "^2.4.11",
+        "webpack": "^2.6.1"
+    },
+    "dependencies": {
+        "@types/flux": "^3.1.0",
+        "action-emitter": "^0.2.1",
+        "flux": "^3.1.2",
+        "immutable": "^3.8.1",
+        "tslib": "^1.7.1"
+    }
 }

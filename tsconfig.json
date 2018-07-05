@@ -5,6 +5,7 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "noEmitHelpers": true,
+        "importHelpers": true,
         "outDir": "dist",
         "rootDir": "src",
         "strict": true,

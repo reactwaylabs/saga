@@ -27,6 +27,7 @@ module.exports = {
         "flux": "flux",
         "flux/utils": "flux/utils",
         "immutable": "immutable",
-        "action-emitter": "action-emitter"
+        "action-emitter": "action-emitter",
+        "tslib": "tslib"
     }
 };
