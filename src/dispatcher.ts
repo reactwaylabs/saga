@@ -15,7 +15,7 @@ export class DispatcherClass extends flux.Dispatcher<DispatcherMessage> {
     public dispatch<TAction extends FluxAction>(dispatcherMessage: TAction): void;
     public dispatch<TAction>(dispatcherMessage: TAction): void;
     public dispatch<TAction>(dispatcherMessage: TAction | FluxAction): void {
-        let payload: DispatcherMessage<TAction> | FluxAction;
+        let payload: DispatcherMessage<TAction>;
         if (this.isAnonymousObject(dispatcherMessage)) {
             payload = dispatcherMessage as FluxAction;
         } else {
@@ -26,13 +26,13 @@ export class DispatcherClass extends flux.Dispatcher<DispatcherMessage> {
         }
 
         try {
-            if (!this.isDispatching()) {
-                super.dispatch(payload);
-            } else {
+            if (this.isDispatching()) {
                 throw new Error("SimplrFlux.Dispatcher.dispatch(): Cannot dispatch in the middle of a dispatch.");
             }
-        } catch (e) {
-            console.error(e);
+
+            super.dispatch(payload);
+        } catch (error) {
+            console.error(error);
         }
     }
 }
