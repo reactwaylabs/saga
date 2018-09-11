@@ -86,7 +86,7 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
 
         for (const action of this.actionsHandlers.keySeq().toArray()) {
             const handler = this.actionsHandlers.get(action);
-            if (handler == null) {
+            if (handler == null && this.shouldHandleAction(payload, state)) {
                 continue;
             }
 
