@@ -1,19 +1,30 @@
 import * as flux from "flux";
 
-export interface DispatcherMessage<TAction> {
-    action: TAction;
-}
+import { DispatcherMessage, FluxAction } from "./contracts/actions";
 
-export class DispatcherClass extends flux.Dispatcher<DispatcherMessage<any>> {
+export class DispatcherClass extends flux.Dispatcher<DispatcherMessage> {
+    private isObject(obj: {}): boolean {
+        return obj.constructor.name === "Object";
+    }
+
     /**
      * Dispatches a payload to all registered callbacks.
      *
      * @param {TAction} dispatcherMessage - Instance of a class.
      */
-    public dispatch<TAction>(dispatcherMessage: TAction): void {
-        const payload: DispatcherMessage<TAction> = {
-            action: dispatcherMessage
-        };
+    public dispatch<TAction extends FluxAction>(dispatcherMessage: TAction): void;
+    public dispatch<TAction>(dispatcherMessage: TAction): void;
+    public dispatch<TAction>(dispatcherMessage: TAction | FluxAction): void {
+        let payload: DispatcherMessage<TAction> | FluxAction;
+        if (this.isObject(dispatcherMessage)) {
+            payload = dispatcherMessage as FluxAction;
+        } else {
+            payload = {
+                type: "SIMPLR_ACTION",
+                action: dispatcherMessage
+            };
+        }
+
         try {
             if (!this.isDispatching()) {
                 super.dispatch(payload);
