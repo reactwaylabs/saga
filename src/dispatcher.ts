@@ -3,7 +3,7 @@ import * as flux from "flux";
 import { DispatcherMessage, FluxAction } from "./contracts/actions";
 
 export class DispatcherClass extends flux.Dispatcher<DispatcherMessage> {
-    private isObject(obj: {}): boolean {
+    private isAnonymousObject(obj: {}): boolean {
         return obj.constructor.name === "Object";
     }
 
@@ -16,7 +16,7 @@ export class DispatcherClass extends flux.Dispatcher<DispatcherMessage> {
     public dispatch<TAction>(dispatcherMessage: TAction): void;
     public dispatch<TAction>(dispatcherMessage: TAction | FluxAction): void {
         let payload: DispatcherMessage<TAction> | FluxAction;
-        if (this.isObject(dispatcherMessage)) {
+        if (this.isAnonymousObject(dispatcherMessage)) {
             payload = dispatcherMessage as FluxAction;
         } else {
             payload = {
