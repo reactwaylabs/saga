@@ -20,21 +20,18 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
 
     /**
      * Actions handlers list.
-     *
      */
     private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState>>();
 
     /**
      * Is store in clean up state.
-     *
      */
-    private inCleanUpState: boolean;
+    private inCleanUpState: boolean = false;
 
     /**
      * Session start in timestamp.
-     *
      */
-    private session: number;
+    private session: number = +new Date();
 
     /**
      * Return current session timestamp.
@@ -84,14 +81,21 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
+
+        for (const action of this.actionsHandlers.keySeq().toArray()) {
+            const handler = this.actionsHandlers.get(action);
+            if (handler == null) {
+                continue;
+            }
+
             if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
                 const newState = handler(payload.action, state);
                 if (newState != null) {
                     state = newState;
                 }
             }
-        });
+        }
+
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
@@ -106,11 +110,12 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param {TState} endingState - Ending state (updated).
      */
     public areEqual(startingState: TState, endingState: TState): boolean {
-        if (startingState != null &&
+        if (
+            startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
-            !Immutable.Iterable.isIterable(startingState)) {
-
+            !Immutable.Iterable.isIterable(startingState)
+        ) {
             const startingKeys = Object.keys(startingState);
             if (startingKeys.length === 0) {
                 return startingState === endingState;
@@ -174,8 +179,10 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      */
     protected cleanUpStore(): void {
         if (!Dispatcher.isDispatching()) {
-            throw new Error(`SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
-                "Cannot clean up store when dispatch is not in the middle of a dispatch.");
+            throw new Error(
+                `SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
+                    "Cannot clean up store when dispatch is not in the middle of a dispatch."
+            );
         }
         this.inCleanUpState = true;
     }
@@ -189,19 +196,25 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
     protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
         const actionType = typeof action;
         if (actionType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'action' type of '${actionType}'.`);
+            throw new Error(
+                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
+                    `cannot register action with 'action' type of '${actionType}'.`
+            );
         }
 
         const handlerType = typeof handler;
         if (handlerType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'handler' type of '${handlerType}'.`);
+            throw new Error(
+                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
+                    `cannot register action with 'handler' type of '${handlerType}'.`
+            );
         }
 
         if (this.actionsHandlers.has(action)) {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `Handler for action '${action.name}' has already been registered.`);
+            throw new Error(
+                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
+                    `Handler for action '${action.name}' has already been registered.`
+            );
         }
 
         this.actionsHandlers = this.actionsHandlers.set(action, handler);
