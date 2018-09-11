@@ -196,29 +196,15 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
         this.inCleanUpState = true;
     }
 
-    /**
-     * Register specified action handler in this store.
-     *
-     * @param action Action class function.
-     * @param handler Action handler function.
-     */
-    protected registerAction<TAction extends Function>(action: TAction, handler: ActionHandler<TAction, TState>): void;
-    protected registerAction<TAction extends FluxAction>(action: TAction["type"], handler: ActionHandler<TAction, TState>): void;
-    protected registerAction<TAction>(action: Function | string, handler: ActionHandler<TAction, TState>): void {
+    private registerActionInternal<TAction>(action: Function | string, handler: ActionHandler<TAction, TState>): void {
         const actionType = typeof action;
         if (actionType !== "function" && actionType !== "string") {
-            throw new Error(
-                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                    `cannot register action with 'action' type of '${actionType}'.`
-            );
+            throw new Error(`[${this.constructor.name}]: ` + `Cannot register action with 'action' type of '${actionType}'.`);
         }
 
         const handlerType = typeof handler;
         if (handlerType !== "function") {
-            throw new Error(
-                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                    `cannot register action with 'handler' type of '${handlerType}'.`
-            );
+            throw new Error(`[${this.constructor.name}]: ` + `Cannot register action with 'handler' type of '${handlerType}'.`);
         }
 
         if (this.actionsHandlers.has(action)) {
@@ -229,12 +215,29 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
                 actionName = action;
             }
 
-            throw new Error(
-                `SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                    `Handler for action '${actionName}' has already been registered.`
-            );
+            throw new Error(`[${this.constructor.name}]: ` + `Handler for action '${actionName}' has already been registered.`);
         }
 
         this.actionsHandlers = this.actionsHandlers.set(action, handler);
+    }
+
+    /**
+     * Register specified action handler in this store.
+     *
+     * @param action Action class function.
+     * @param handler Action handler function.
+     */
+    protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
+        this.registerActionInternal(action, handler);
+    }
+
+    /**
+     * Register specified action handler in this store.
+     *
+     * @param action Action type.
+     * @param handler Action handler function.
+     */
+    protected registerFluxAction<TAction extends FluxAction>(action: TAction["type"], handler: ActionHandler<TAction, TState>): void {
+        this.registerActionInternal(action, handler);
     }
 }
