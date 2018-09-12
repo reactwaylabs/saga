@@ -3,7 +3,7 @@
     "description": "Strongly-typed Flux architecture.",
     "main": "dist/simplr-flux.js",
     "types": "@types/index.d.ts",
-    "version": "2.3.1",
+    "version": "3.0.0-alpha",
     "scripts": {
         "build": "webpack",
         "tslint": "tslint --project . --config ./tslint.json",
