@@ -1,40 +1,39 @@
 import * as Flux from "flux";
 import { ReduceStore as FluxReduceStore } from "flux/utils";
 import * as Immutable from "immutable";
-import { Dispatcher, DispatcherMessage, DispatcherClass } from "../dispatcher";
+
+import { Dispatcher, DispatcherClass } from "../dispatcher";
+import { isSimplrAction } from "../helpers/is-simplr-action";
+import { DispatcherMessage, FluxAction } from "../contracts/actions";
 
 export type ActionHandler<TClass, TState> = (action: TClass, state: TState) => TState | void;
-
 export type StoreWillCleanup<TState> = () => void | TState;
 
-export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage<any>> {
+export abstract class ReduceStore<TState> extends FluxReduceStore<TState, DispatcherMessage> {
     /**
      * Creates an instance of ReduceStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher = Dispatcher] - Dispatcher instance.
+     * @param Dispatcher instance.
      */
-    constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
+    constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage>) {
         super(dispatcher || Dispatcher);
         this.startNewSession();
     }
 
     /**
      * Actions handlers list.
-     *
      */
-    private actionsHandlers = Immutable.Map<Function, ActionHandler<any, TState>>();
+    private actionsHandlers = Immutable.Map<Function | string, ActionHandler<any, TState>>();
 
     /**
      * Is store in clean up state.
-     *
      */
-    private inCleanUpState: boolean;
+    private inCleanUpState: boolean = false;
 
     /**
      * Session start in timestamp.
-     *
      */
-    private session: number;
+    private session: number = +new Date();
 
     /**
      * Return current session timestamp.
@@ -77,21 +76,35 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {TState} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched payload message.
+     * @param state Current store state.
+     * @param payload Dispatched payload message.
      */
-    public reduce(state: TState, payload: DispatcherMessage<any>): TState {
+    public reduce(state: TState, payload: DispatcherMessage): TState {
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
-        this.actionsHandlers.forEach((handler: ActionHandler<Function, TState>, action: Function) => {
-            if (payload.action instanceof action && this.shouldHandleAction(payload.action, state)) {
+
+        for (const action of this.actionsHandlers.keySeq().toArray()) {
+            const handler = this.actionsHandlers.get(action);
+            if (handler == null && this.shouldHandleAction(payload, state)) {
+                continue;
+            }
+
+            if (isSimplrAction(payload) && typeof action === "function" && payload.action instanceof action) {
+                // Handle Class Actions.
                 const newState = handler(payload.action, state);
                 if (newState != null) {
                     state = newState;
                 }
+            } else if (typeof action === "string" && payload.type === action) {
+                // Handles Flux simple objects.
+                const newState = handler(payload, state);
+                if (newState != null) {
+                    state = newState;
+                }
             }
-        });
+        }
+
         if (this.inCleanUpState) {
             state = this.getCleanStateAndStartNewSession(state);
         }
@@ -106,11 +119,12 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * @param {TState} endingState - Ending state (updated).
      */
     public areEqual(startingState: TState, endingState: TState): boolean {
-        if (startingState != null &&
+        if (
+            startingState != null &&
             endingState != null &&
             typeof startingState === "object" &&
-            !Immutable.Iterable.isIterable(startingState)) {
-
+            !Immutable.Iterable.isIterable(startingState)
+        ) {
             const startingKeys = Object.keys(startingState);
             if (startingKeys.length === 0) {
                 return startingState === endingState;
@@ -161,10 +175,10 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      * Check if action should handled.
      * By default always return true.
      *
-     * @param {Object} action - Action payload data.
-     * @param {TState} state - Updated store state.
+     * @param action Action payload data.
+     * @param state Updated store state.
      */
-    protected shouldHandleAction(action: Object, state: TState): boolean {
+    protected shouldHandleAction(action: DispatcherMessage, state: TState): boolean {
         return true;
     }
 
@@ -174,36 +188,56 @@ export abstract class ReduceStore<TState> extends FluxReduceStore<TState, Dispat
      */
     protected cleanUpStore(): void {
         if (!Dispatcher.isDispatching()) {
-            throw new Error(`SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
-                "Cannot clean up store when dispatch is not in the middle of a dispatch.");
+            throw new Error(
+                `SimplrFlux.ReduceStore.cleanUpStore() [${this.constructor.name}]: ` +
+                    "Cannot clean up store when dispatch is not in the middle of a dispatch."
+            );
         }
         this.inCleanUpState = true;
+    }
+
+    private registerActionInternal<TAction>(action: Function | string, handler: ActionHandler<TAction, TState>): void {
+        const actionType = typeof action;
+        if (actionType !== "function" && actionType !== "string") {
+            throw new Error(`[${this.constructor.name}]: ` + `Cannot register action with 'action' type of '${actionType}'.`);
+        }
+
+        const handlerType = typeof handler;
+        if (handlerType !== "function") {
+            throw new Error(`[${this.constructor.name}]: ` + `Cannot register action with 'handler' type of '${handlerType}'.`);
+        }
+
+        if (this.actionsHandlers.has(action)) {
+            let actionName: string;
+            if (typeof action === "function") {
+                actionName = action.name;
+            } else {
+                actionName = action;
+            }
+
+            throw new Error(`[${this.constructor.name}]: ` + `Handler for action '${actionName}' has already been registered.`);
+        }
+
+        this.actionsHandlers = this.actionsHandlers.set(action, handler);
     }
 
     /**
      * Register specified action handler in this store.
      *
-     * @param {Function} action - Action class function.
-     * @param {ActionHandler<TClass, TState>} handler - Action handler function.
+     * @param action Action class function.
+     * @param handler Action handler function.
      */
     protected registerAction<TClass>(action: Function, handler: ActionHandler<TClass, TState>): void {
-        const actionType = typeof action;
-        if (actionType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'action' type of '${actionType}'.`);
-        }
+        this.registerActionInternal(action, handler);
+    }
 
-        const handlerType = typeof handler;
-        if (handlerType !== "function") {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `cannot register action with 'handler' type of '${handlerType}'.`);
-        }
-
-        if (this.actionsHandlers.has(action)) {
-            throw new Error(`SimplrFlux.ReduceStore.registerAction() [${this.constructor.name}]: ` +
-                `Handler for action '${action.name}' has already been registered.`);
-        }
-
-        this.actionsHandlers = this.actionsHandlers.set(action, handler);
+    /**
+     * Register specified action handler in this store.
+     *
+     * @param action Action type.
+     * @param handler Action handler function.
+     */
+    protected registerFluxAction<TAction extends FluxAction>(action: TAction["type"], handler: ActionHandler<TAction, TState>): void {
+        this.registerActionInternal(action, handler);
     }
 }

@@ -1,7 +1,8 @@
 import * as Flux from "flux";
 import * as Immutable from "immutable";
+
 import { ReduceStore } from "./reduce-store";
-import { DispatcherMessage, Dispatcher } from "../dispatcher";
+import { Dispatcher } from "../dispatcher";
 import { DataMapStoreUpdatedAction } from "../actions/actions";
 
 import { QueuesHandler } from "../handlers/queues-handler";
@@ -11,9 +12,10 @@ import { Items } from "../abstractions/items";
 import { ItemStatus } from "../abstractions/item-status";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
 import { OnSuccess, OnFailure } from "../contracts/callbacks";
+import { DispatcherMessage } from "../contracts/actions";
+import { isSimplrAction } from "../helpers/is-simplr-action";
 
-const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " +
-    "'Immutable.Set<string>' or 'Immutable.List<string>'.";
+const ERROR_GET_ALL_WRONG_PARAM = "'keys' param accept only 'Array<string>', " + "'Immutable.Set<string>' or 'Immutable.List<string>'.";
 
 /**
  * MapStore to cache data by id.
@@ -28,9 +30,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * Creates an instance of MapStore.
      *
-     * @param {Flux.Dispatcher<DispatcherMessage<any>>} [dispatcher] - Dispatcher instance.
+     * @param Dispatcher instance.
      */
-    constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage<any>>) {
+    constructor(dispatcher?: Flux.Dispatcher<DispatcherMessage>) {
         super(dispatcher);
         this.queuesHandler = this.getInitialQueues();
         this.invalidationHandler = new InvalidationHandler<TValue>();
@@ -113,7 +115,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
     }
 
-
     /**
      * Request creator to load data from server.
      *
@@ -135,7 +136,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     /**
      * With a large amount of requests MapStore throttles them.
      * This property defines interval between portions of requests.
-     * 
+     *
      * @protected
      * @type {number}
      */
@@ -160,21 +161,21 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
         let maybePromise = this.requestData(ids, onSuccess, onFailed);
         if (this.isPromise(maybePromise)) {
-            maybePromise
-                .then(onSuccess)
-                .catch(error => {
-                    this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
-                    this.dispatchChanges();
-                });
+            maybePromise.then(onSuccess).catch(error => {
+                this.queuesHandler.SetMultipleItemsStatus(ids, ItemStatus.Failed);
+                this.dispatchChanges();
+            });
         }
-    }
+    };
 
     private onRequestSuccess = (currentSession: number, values: { [id: string]: TValue }) => {
         if (currentSession !== this.currentSession) {
-            console.warn(this.buildError(
-                "requestData",
-                "RequestData method was resolved after store data has been cleared. Check `this.cleanUpStore()` method calls."
-            ));
+            console.warn(
+                this.buildError(
+                    "requestData",
+                    "RequestData method was resolved after store data has been cleared. Check `this.cleanUpStore()` method calls."
+                )
+            );
             return;
         }
         if (values == null) {
@@ -183,14 +184,16 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
         this.updateQueuesFromRequest(values);
         this.dispatchChanges();
-    }
+    };
 
     private onRequestFailed = (currentSession: number, ids: string[], values?: { [id: string]: ItemStatus } | string[]) => {
         if (currentSession !== this.currentSession) {
-            console.warn(this.buildError(
-                "requestData",
-                "RequestData method was rejected after store data has been cleared. Check `this.cleanUpStore()` method calls."
-            ));
+            console.warn(
+                this.buildError(
+                    "requestData",
+                    "RequestData method was rejected after store data has been cleared. Check `this.cleanUpStore()` method calls."
+                )
+            );
             return;
         }
 
@@ -221,9 +224,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         }
 
         this.dispatchChanges();
-    }
-
-
+    };
 
     /**
      * Check if given function is Promise.
@@ -233,7 +234,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     private isPromise<TResult>(func: any): func is Promise<TResult> {
         return func != null && func.then != null && func.catch != null;
     }
-
 
     /**
      * Get the value of a particular key. Returns Value undefined and status if the key does not exist in the cache.
@@ -247,7 +247,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
         return item;
     }
 
-
     /**
      * Prefetch item by key.
      * @param {string} key - Requested item key.
@@ -256,7 +255,6 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     public Prefetch(key: string, noCache: boolean = false): void {
         this.get(key, noCache);
     }
-
 
     /**
      * Prefetch all items by keys.
@@ -364,7 +362,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
             return start;
         }
 
-        return start.withMutations((resultMap) => {
+        return start.withMutations(resultMap => {
             // remove any old keys that are not in new keys or are no longer in the cache
             if (resultMap.size > 0) {
                 resultMap.forEach((oldValue, oldKey) => {
@@ -374,7 +372,7 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
                 });
             }
             // then add all of the new keys that exist in the cache
-            newKeys.forEach((key) => {
+            newKeys.forEach(key => {
                 if (key != null) {
                     let item = this.getItem(key, noCache);
                     resultMap.set(key, item);
@@ -402,7 +400,9 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
      * @returns {(Items<TValue> | undefined)}
      */
     private moveFromQueuesToState(state: Items<TValue>): Items<TValue> | undefined {
-        let moveList = this.queuesHandler.GetFilteredItemsKeys(x => [ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed].indexOf(x.Status) !== -1);
+        let moveList = this.queuesHandler.GetFilteredItemsKeys(
+            x => [ItemStatus.Loaded, ItemStatus.NoData, ItemStatus.Failed].indexOf(x.Status) !== -1
+        );
         if (moveList.length > 0) {
             return state.withMutations(stateMap => {
                 for (let i = 0; i < moveList.length; i++) {
@@ -420,25 +420,25 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
 
     /**
      * Holds a function that will be invoked before store clean up.
-     * 
+     *
      * @protected
      * @type {() => void}
      */
     protected storeWillCleanUp: () => void = () => {
         this.queuesHandler.RemoveAll();
-    }
+    };
 
     /**
      * Reduces the current state, and an action to the new state of this store.
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {Items<TValue>} state - Store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched message from simplr-dispatcher.
-     * @return {Items<TValue>} Updated state with new data.
+     * @param state Store state.
+     * @param payload Dispatched message from simplr-dispatcher.
+     * @return Updated state with new data.
      */
-    public reduce(state: Items<TValue>, payload: DispatcherMessage<any>): Items<TValue> {
-        if (payload.action instanceof DataMapStoreUpdatedAction) {
+    public reduce(state: Items<TValue>, payload: DispatcherMessage): Items<TValue> {
+        if (isSimplrAction(payload) && payload.action instanceof DataMapStoreUpdatedAction) {
             if (this.getDispatchToken() === payload.action.StoreId) {
                 let newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
@@ -484,5 +484,4 @@ export abstract class MapStore<TValue> extends ReduceStore<Items<TValue>> {
     public has(key: string): boolean {
         return this.getState().has(key) || this.queuesHandler.Has(key);
     }
-
 }

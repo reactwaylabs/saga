@@ -1,7 +1,6 @@
 import * as Immutable from "immutable";
 import * as Flux from "flux";
 
-import { DispatcherMessage } from "../dispatcher";
 import { ReduceStore } from "./reduce-store";
 import { QueuesHandler } from "../handlers/queues-handler";
 
@@ -10,6 +9,8 @@ import { ItemStatus } from "../abstractions/item-status";
 import { Items } from "../contracts/items";
 import { StoreUpdateAction } from "../actions/data-store-actions";
 import { InvalidationHandler } from "../handlers/invalidation-handler";
+import { isSimplrAction } from "../helpers/is-simplr-action";
+import { DispatcherMessage } from "../contracts/actions";
 
 export abstract class DataStore extends ReduceStore<Items<any>> {
     /**
@@ -65,7 +66,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
     private async startRequestingData<TValue>(key: string, promiseFactory: () => Promise<TValue>) {
         try {
             const response = await promiseFactory();
-            const status = (response != null) ? ItemStatus.Loaded : ItemStatus.NoData;
+            const status = response != null ? ItemStatus.Loaded : ItemStatus.NoData;
             this.queuesHandler.Set(key, response || undefined, status);
         } catch (error) {
             this.queuesHandler.SetItemStatus(key, ItemStatus.Failed);
@@ -130,12 +131,11 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * All subclasses must implement this method.
      * This method should be pure and have no side-effects.
      *
-     * @param {Items<any>} state - Current store state.
-     * @param {DispatcherMessage<any>} payload - Dispatched message from dispatcher.
-     * @returns {Items<any>}
+     * @param state Current store state.
+     * @param payload Dispatched message from dispatcher.
      */
-    public reduce(state: Items<any>, payload: DispatcherMessage<any>): Items<any> {
-        if (payload.action instanceof StoreUpdateAction) {
+    public reduce(state: Items<any>, payload: DispatcherMessage): Items<any> {
+        if (isSimplrAction(payload) && payload.action instanceof StoreUpdateAction) {
             if (this.getDispatchToken() === payload.action.DispatchToken) {
                 const newState = this.moveFromQueuesToState(state);
                 if (newState != null) {
@@ -163,11 +163,7 @@ export abstract class DataStore extends ReduceStore<Items<any>> {
      * @param {boolean} [noCache=false] - Use data without cache.
      * @returns {Item<TValue>}
      */
-    protected getValueFromState<TValue>(
-        key: string,
-        promiseFactory: () => Promise<TValue>,
-        noCache: boolean = false
-    ): Item<TValue> {
+    protected getValueFromState<TValue>(key: string, promiseFactory: () => Promise<TValue>, noCache: boolean = false): Item<TValue> {
         let value = this.getItem<TValue>(key, noCache);
         if (value.Status === ItemStatus.Init) {
             value = this.queuesHandler.SetItemStatus(key, ItemStatus.Pending);
