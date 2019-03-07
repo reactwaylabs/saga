@@ -1,39 +1,27 @@
 {
     "name": "simplr-flux",
+    "version": "4.0.0",
     "description": "Strongly-typed Flux architecture.",
-    "main": "dist/simplr-flux.js",
-    "types": "@types/index.d.ts",
-    "version": "3.0.0-alpha",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
-        "build": "webpack",
-        "tslint": "tslint --project . --config ./tslint.json",
-        "watch": "webpack --watch",
-        "test": "tsc -p . --noEmit && npm run tslint",
-        "uglifyjs": "uglifyjs ./dist/simplr-flux.js -o ./dist/simplr-flux.min.js --compress --mangle",
-        "release": "npm run build && npm run uglifyjs"
+        "build": "tsc -p .",
+        "watch": "tsc -p . -w",
+        "test": "tsc -p . --noEmit && tslint -p ."
     },
-    "author": "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
+    "author": "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
     "files": [
         "dist",
-        "@types",
-        "**/*.md",
-        "LICENSE",
-        "!examples"
+        "**/*.md"
     ],
-    "license": "AGPL-3.0",
+    "license": "MIT",
     "devDependencies": {
-        "ts-loader": "^2.1.0",
-        "tslint": "^5.7.0",
-        "tslint-loader": "^3.5.3",
-        "typescript": "^2.5.2",
-        "uglifyjs": "^2.4.11",
-        "webpack": "^2.6.1"
+        "simplr-tslint": "^1.0.0-alpha.14",
+        "tslint": "^5.13.1",
+        "tslint-language-service": "^0.9.9",
+        "typescript": "^3.3.3333"
     },
     "dependencies": {
-        "@types/flux": "^3.1.0",
-        "action-emitter": "^0.2.1",
-        "flux": "^3.1.2",
-        "immutable": "^3.8.1",
-        "tslib": "^1.7.1"
+        "tslib": "^1.9.3"
     }
 }
