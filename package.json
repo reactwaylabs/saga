@@ -7,7 +7,8 @@
     "scripts": {
         "build": "tsc -p .",
         "watch": "tsc -p . -w",
-        "test": "tsc -p . --noEmit && tslint -p ."
+        "pretest": "tsc -p . --noEmit && tslint -p .",
+        "test": "jest"
     },
     "author": "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
     "files": [
@@ -16,12 +17,35 @@
     ],
     "license": "MIT",
     "devDependencies": {
+        "@types/jest": "^24.0.9",
+        "istanbul-azure-reporter": "^0.1.4",
+        "jest": "^24.1.0",
+        "jest-junit": "^6.3.0",
         "simplr-tslint": "^1.0.0-alpha.14",
+        "ts-jest": "^24.0.0",
         "tslint": "^5.13.1",
         "tslint-language-service": "^0.9.9",
         "typescript": "^3.3.3333"
     },
     "dependencies": {
         "tslib": "^1.9.3"
+    },
+    "jest": {
+        "verbose": true,
+        "preset": "ts-jest",
+        "reporters": [
+            "default",
+            "jest-junit"
+        ],
+        "collectCoverage": true,
+        "testRegex": "/__tests__/.*\\.(test|spec).(ts|tsx)$",
+        "collectCoverageFrom": [
+            "src/**/*.{ts,tsx}",
+            "!src/index.ts"
+        ],
+        "coverageReporters": [
+            "cobertura",
+            "istanbul-azure-reporter"
+        ]
     }
 }

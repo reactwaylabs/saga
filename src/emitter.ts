@@ -1,72 +1,62 @@
-type Callback = (...args: any[]) => void;
+export type Callback = (...args: any[]) => void;
 
-interface Events {
-    [type: string]: Callback;
-}
+export class TinyEmitter<THandler extends Callback> {
+    private registry?: Callback | Callback[];
 
-export class TinyEmitter<TEvents extends Events> {
-    protected callbacks: { [type: string]: Callback | Callback[] | undefined } = {};
-
-    public addEventListener<TType extends keyof TEvents>(type: TType, handler: TEvents[TType]): () => void {
-        const callbacks = this.callbacks[type as string];
-        if (callbacks == null) {
-            this.callbacks[type as string] = handler;
-        } else if (Array.isArray(callbacks)) {
-            callbacks.push(handler);
+    public addListener(handler: THandler): () => void {
+        if (this.registry == null) {
+            this.registry = handler;
+        } else if (Array.isArray(this.registry)) {
+            this.registry.push(handler);
         } else {
-            this.callbacks[type as string] = [callbacks, handler];
+            this.registry = [this.registry, handler];
         }
 
-        return () => {
-            this.removeEventListener(type, handler);
-        };
+        return () => this.removeListener(handler);
     }
 
-    public removeEventListener<TType extends keyof TEvents>(type: TType, handler: TEvents[TType]): void {
-        const callbacks = this.callbacks[type as string];
-        if (callbacks == null) {
+    public removeListener(handler: THandler): void {
+        if (this.registry == null) {
             return;
         }
 
-        if (Array.isArray(callbacks)) {
+        if (Array.isArray(this.registry)) {
             const nextArray: Callback[] = [];
 
-            for (let i = 0; i < callbacks.length; i++) {
-                const callback = callbacks[i];
+            for (let i = 0; i < this.registry.length; i++) {
+                const callback = this.registry[i];
                 if (callback !== handler) {
-                    nextArray.push(handler);
+                    nextArray.push(callback);
                 }
             }
 
-            this.callbacks[type as string] = nextArray;
+            this.registry = nextArray;
         } else {
-            this.callbacks[type as string] = undefined;
+            this.registry = undefined;
         }
     }
 
-    public emit<TType extends keyof TEvents>(type: TType, ...payload: Parameters<TEvents[TType]>): void {
-        const callbacks = this.callbacks[type as string];
-
-        if (callbacks == null) {
+    public emit(...payload: Parameters<THandler>): void {
+        if (this.registry == null) {
             return;
         }
 
-        if (Array.isArray(callbacks)) {
-            for (let i = 0; i < callbacks.length; i++) {
-                callbacks[i](...payload);
+        if (Array.isArray(this.registry)) {
+            for (let i = 0; i < this.registry.length; i++) {
+                this.registry[i](...payload);
             }
         } else {
-            callbacks(...payload);
+            this.registry(...payload);
         }
     }
 
-    public getCount<TType extends keyof TEvents>(type: TType): number {
-        const callbacks = this.callbacks[type as string];
-
-        if (callbacks == null) {
+    public getCount(): number {
+        if (this.registry == null) {
             return 0;
-        } else if (Array.isArray(callbacks)) {
-            return callbacks.length;
+        }
+
+        if (Array.isArray(this.registry)) {
+            return this.registry.length;
         } else {
             return 1;
         }
