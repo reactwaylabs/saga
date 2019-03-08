@@ -51,16 +51,15 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
     }
 
     public dispatch(payload: TPayload): void {
-        if (!this.isDispatching) {
+        if (this._isDispatching) {
             throw new Error("Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.");
         }
 
         this.startDispatching(payload);
-
         try {
             for (const name of Object.keys(this.stores)) {
                 const store = this.stores[name];
-                if (store == null) {
+                if (store == null || store.isPending) {
                     continue;
                 }
 
