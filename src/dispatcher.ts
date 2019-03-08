@@ -4,7 +4,7 @@ export interface Dispatcher<TPayload> {
     register(name: string, callback: DispatcherRegisterHandler<TPayload>): void;
     unregister(name: string): void;
     waitFor(names: string[]): void;
-    dispatch(payload: TPayload): void;
+    dispatch<TDPayload extends TPayload>(payload: TDPayload): void;
     isDispatching: boolean;
 }
 
