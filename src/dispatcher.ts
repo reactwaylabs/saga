@@ -1,5 +1,7 @@
+export type DispatcherRegisterHandler<TPayload> = (payload: TPayload) => void;
+
 export interface Dispatcher<TPayload> {
-    register(name: string, callback: (payload: TPayload) => void): void;
+    register(name: string, callback: DispatcherRegisterHandler<TPayload>): void;
     unregister(name: string): void;
     waitFor(names: string[]): void;
     dispatch(payload: TPayload): void;
@@ -106,5 +108,3 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
 export function createDispatcher<TPayload>(): Dispatcher<TPayload> {
     return new DispatcherClass<TPayload>();
 }
-
-export const Dispatcher = createDispatcher();
