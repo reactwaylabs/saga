@@ -77,9 +77,11 @@ export interface StoreOptions<TState, TPayload> {
     initialState: TState;
     dispatcher: Dispatcher<TPayload>;
     reducer: StoreReduceHandler<TState, TPayload>;
-    areEqual: StoreAreEqualHandler<TState>;
+    areEqual?: StoreAreEqualHandler<TState>;
 }
 
 export function createStore<TState, TPayload>(options: StoreOptions<TState, TPayload>): Store<TState, TPayload> {
-    return new StoreClass<TState, TPayload>(options.name, options.initialState, options.dispatcher, options.reducer, options.areEqual);
+    const areEqual: StoreAreEqualHandler<TState> = options.areEqual != null ? options.areEqual : (state, nextState) => state === nextState;
+
+    return new StoreClass<TState, TPayload>(options.name, options.initialState, options.dispatcher, options.reducer, areEqual);
 }
