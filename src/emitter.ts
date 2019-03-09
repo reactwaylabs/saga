@@ -1,3 +1,4 @@
+// tslint:disable-next-line:no-any
 export type Callback = (...args: any[]) => void;
 
 export class TinyEmitter<THandler extends Callback> {

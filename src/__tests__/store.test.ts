@@ -22,10 +22,10 @@ interface StoreState {
     counter: number;
 }
 
-function createTestStore(dispatcher: Dispatcher<Action>): Store<StoreState, StoreActions> {
+function createTestStore(_dispatcher: Dispatcher<Action>): Store<StoreState, StoreActions> {
     return createStore<StoreState, StoreActions>({
         name: "test",
-        dispatcher: dispatcher as Dispatcher<StoreActions>,
+        dispatcher: _dispatcher as Dispatcher<StoreActions>,
         initialState: {
             counter: 0
         },
