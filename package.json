@@ -12,13 +12,18 @@
         "gatsby-plugin-sass": "^2.0.10",
         "gatsby-plugin-sharp": "^2.0.25",
         "gatsby-plugin-typescript": "^2.0.10",
+        "gatsby-remark-copy-linked-files": "^2.0.9",
+        "gatsby-remark-images": "^3.0.6",
+        "gatsby-remark-prismjs": "^3.2.4",
         "gatsby-source-filesystem": "^2.0.23",
+        "gatsby-transformer-remark": "^2.3.1",
         "gatsby-transformer-sharp": "^2.1.15",
         "node-sass": "^4.11.0",
         "prop-types": "^15.7.2",
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
-        "react-helmet": "^5.2.0"
+        "react-helmet": "^5.2.0",
+        "upath": "^1.1.1"
     },
     "devDependencies": {
         "@types/classnames": "^2.2.7",
