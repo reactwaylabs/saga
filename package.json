@@ -1,7 +1,17 @@
 {
-    "name": "simplr-flux",
-    "version": "4.0.0",
-    "description": "Strongly-typed Flux architecture.",
+    "name": "saga",
+    "version": "1.0.0-alpha",
+    "publishConfig": {
+        "tag": "alpha"
+    },
+    "description": "Yet another state management for applications",
+    "repository": "github:reactway/saga",
+    "bugs": "https://github.com/reactway/saga/issues",
+    "keywords": [
+        "state",
+        "management",
+        "flux"
+    ],
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
@@ -10,7 +20,10 @@
         "pretest": "tsc -p . --noEmit && tslint -p .",
         "test": "jest"
     },
-    "author": "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
+    "authors": [
+        "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
+        "Dovydas Navickas <dovydas@quatrodev.com> (https://github.com/DovydasNavickas)"
+    ],
     "files": [
         "dist",
         "**/*.md"
