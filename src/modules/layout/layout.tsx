@@ -1,7 +1,9 @@
 import React from "react";
 
-import "./layout.scss";
 import { Navigation } from "./navigation/navigation";
+import { Footer } from "./footer/footer";
+
+import "./layout.scss";
 
 interface Props {
     children: React.ReactNode;
@@ -10,10 +12,13 @@ interface Props {
 export function Layout(props: Props): JSX.Element {
     return (
         <div className="layout grid-y">
-            <div className="navigation cell">
+            <header className="cell">
                 <Navigation />
-            </div>
-            <div className="cell">full width cell</div>
+            </header>
+            <main className="cell auto">{props.children}</main>
+            <footer className="cell">
+                <Footer />
+            </footer>
         </div>
     );
 }
