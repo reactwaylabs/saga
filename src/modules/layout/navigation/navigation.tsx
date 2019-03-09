@@ -42,8 +42,9 @@ export function Navigation(): JSX.Element {
                 </Nav>
                 <Nav className="more">
                     <NavItem href="#">v4.0.0-alpha</NavItem>
-                    <NavItem href="#" className="github">
-                        <i className="fab fa-github" />
+                    <NavItem href="#">
+                        <span className="fab fa-github" />
+                        <span>Github</span>
                     </NavItem>
                 </Nav>
             </div>

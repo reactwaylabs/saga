@@ -66,6 +66,10 @@ $navigation-item-hover-color: lightblue;
                     color: $white;
                     position: relative;
 
+                    > *:not(:last-child) {
+                        margin-right: 0.25rem;
+                    }
+
                     &:hover {
                         color: $navigation-item-hover-color;
                         background-color: lighten($navigation-bg, 10);
