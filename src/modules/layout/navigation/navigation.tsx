@@ -20,7 +20,7 @@ function Nav(props: { className: string; children: React.ReactNode }): JSX.Eleme
 }
 
 export function Navigation(): JSX.Element {
-    const [mobileOpen, setMobileOpen] = useState(true);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
         <div className="navigation">
