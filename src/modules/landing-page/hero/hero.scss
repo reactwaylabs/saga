@@ -16,13 +16,19 @@
         justify-content: center;
         align-items: center;
 
-        .aa {
-            .logo {
-                text-align: center;
-            }
+        .content {
+            text-align: center;
+            padding: 0 0.5rem;
 
             .subtitle {
-                font-size: 1.5rem;
+                @each $breakpoint, $headings in $header-styles {
+                    @include breakpoint($breakpoint) {
+                        $heading-styles: map-get($headings, "h4");
+                        $font-size: map-get($heading-styles, "font-size");
+
+                        font-size: #{$font-size}px;
+                    }
+                }
             }
         }
 

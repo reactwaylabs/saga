@@ -28,7 +28,7 @@ export function Navigation(): JSX.Element {
                 <div className="logo-wrapper" onClick={() => setMobileOpen(!mobileOpen)}>
                     <span className="logo">
                         <a href="#" className="logo" onClick={event => event.stopPropagation()}>
-                            saga
+                            Saga
                         </a>
                     </span>
                     <span className="mobile-menu">
