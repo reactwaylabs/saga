@@ -1,0 +1,8 @@
+@import "foundation";
+@import url(//use.fontawesome.com/releases/v5.7.2/css/all.css);
+
+@include foundation-everything();
+
+.layout {
+    min-height: 100vh;
+}
