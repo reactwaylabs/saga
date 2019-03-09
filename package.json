@@ -1,39 +1,64 @@
 {
-    "name": "simplr-flux",
-    "description": "Strongly-typed Flux architecture.",
-    "main": "dist/simplr-flux.js",
-    "types": "@types/index.d.ts",
-    "version": "3.0.0-alpha",
-    "scripts": {
-        "build": "webpack",
-        "tslint": "tslint --project . --config ./tslint.json",
-        "watch": "webpack --watch",
-        "test": "tsc -p . --noEmit && npm run tslint",
-        "uglifyjs": "uglifyjs ./dist/simplr-flux.js -o ./dist/simplr-flux.min.js --compress --mangle",
-        "release": "npm run build && npm run uglifyjs"
+    "name": "saga",
+    "version": "1.0.0-alpha",
+    "publishConfig": {
+        "tag": "alpha"
     },
-    "author": "Giedrius Grabauskas <giedrius@quatrodev.com> (https://github.com/giedriusgrabauskas)",
+    "description": "Yet another state management for applications",
+    "repository": "github:reactway/saga",
+    "bugs": "https://github.com/reactway/saga/issues",
+    "keywords": [
+        "state",
+        "management",
+        "flux"
+    ],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p .",
+        "watch": "tsc -p . -w",
+        "pretest": "tsc -p . --noEmit && tslint -p .",
+        "test": "jest"
+    },
+    "authors": [
+        "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
+        "Dovydas Navickas <dovydas@quatrodev.com> (https://github.com/DovydasNavickas)"
+    ],
     "files": [
         "dist",
-        "@types",
-        "**/*.md",
-        "LICENSE",
-        "!examples"
+        "**/*.md"
     ],
-    "license": "AGPL-3.0",
+    "license": "MIT",
     "devDependencies": {
-        "ts-loader": "^2.1.0",
-        "tslint": "^5.7.0",
-        "tslint-loader": "^3.5.3",
-        "typescript": "^2.5.2",
-        "uglifyjs": "^2.4.11",
-        "webpack": "^2.6.1"
+        "@types/jest": "^24.0.9",
+        "istanbul-azure-reporter": "^0.1.4",
+        "jest": "^24.1.0",
+        "jest-junit": "^6.3.0",
+        "simplr-tslint": "^1.0.0-alpha.14",
+        "ts-jest": "^24.0.0",
+        "tslint": "^5.13.1",
+        "tslint-language-service": "^0.9.9",
+        "typescript": "^3.3.3333"
     },
     "dependencies": {
-        "@types/flux": "^3.1.0",
-        "action-emitter": "^0.2.1",
-        "flux": "^3.1.2",
-        "immutable": "^3.8.1",
-        "tslib": "^1.7.1"
+        "tslib": "^1.9.3"
+    },
+    "jest": {
+        "verbose": true,
+        "preset": "ts-jest",
+        "reporters": [
+            "default",
+            "jest-junit"
+        ],
+        "collectCoverage": true,
+        "testRegex": "/__tests__/.*\\.(test|spec).(ts|tsx)$",
+        "collectCoverageFrom": [
+            "src/**/*.{ts,tsx}",
+            "!src/index.ts"
+        ],
+        "coverageReporters": [
+            "cobertura",
+            "istanbul-azure-reporter"
+        ]
     }
 }
