@@ -1,6 +1,7 @@
 @import "foundation";
 
 $navigation-bg: #2c3840;
+$navigation-item-hover-color: lightblue;
 
 .navigation {
     display: flex;
@@ -16,7 +17,7 @@ $navigation-bg: #2c3840;
         justify-content: space-between;
         padding: 0 1.25rem;
 
-        .logo {
+        .logo-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -25,22 +26,27 @@ $navigation-bg: #2c3840;
             font-size: 1.5rem;
             padding: 0 0.5rem;
 
+            .logo {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                a {
+                    color: white;
+
+                    &:hover {
+                        color: $navigation-item-hover-color;
+                    }
+                }
+            }
+
             .mobile-menu {
                 display: none;
+                color: white;
             }
-        }
 
-        a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            color: $white;
-            position: relative;
-
-            &:hover {
-                color: lightblue;
-                background-color: lighten($navigation-bg, 10);
+            &:hover .mobile-menu {
+                color: $navigation-item-hover-color;
             }
         }
 
@@ -53,6 +59,17 @@ $navigation-bg: #2c3840;
 
                 .nav-list-item > a {
                     padding: 0 1rem;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    color: $white;
+                    position: relative;
+
+                    &:hover {
+                        color: $navigation-item-hover-color;
+                        background-color: lighten($navigation-bg, 10);
+                    }
                 }
             }
         }
@@ -77,7 +94,8 @@ $navigation-bg: #2c3840;
                 display: flex;
             }
 
-            .logo {
+            .logo-wrapper {
+                cursor: pointer;
                 justify-content: space-between;
                 .mobile-menu {
                     display: inline-flex;

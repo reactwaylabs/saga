@@ -25,9 +25,13 @@ export function Navigation(): JSX.Element {
     return (
         <div className="navigation">
             <div className={classNames("wrapper", { "mobile-open": mobileOpen })}>
-                <div className="logo">
-                    <span>saga</span>
-                    <span className="mobile-menu" onClick={() => setMobileOpen(!mobileOpen)}>
+                <div className="logo-wrapper" onClick={() => setMobileOpen(!mobileOpen)}>
+                    <span className="logo">
+                        <a href="#" className="logo" onClick={event => event.stopPropagation()}>
+                            saga
+                        </a>
+                    </span>
+                    <span className="mobile-menu">
                         <i className="fas fa-bars" />
                     </span>
                 </div>
