@@ -1,6 +1,14 @@
-$bg-color: #272D2D;
-$bg-color-2: #374144;
+$white: #f6f8ff;
+$black: rgba(0, 0, 0, 0.84);
 
-$main-color: #F6AE2D;
-$white: #F6F8FF;
+$light-shade: #f9fafa;
+$light-accent: #91918b;
+$brand: #f6ae2d;
+$dark-accent: #a34d36;
+$dark-shades: #262528;
 
+$grey: #999;
+$light-grey: lighten($grey, 20);
+
+$bg-color: $light-shade;
+$bg-color-2: $dark-shades;

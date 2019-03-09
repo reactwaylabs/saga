@@ -2,7 +2,8 @@
 @import "foundation";
 
 $navigation-bg: $bg-color;
-$navigation-item-hover-color: $main-color;
+$navigation-item-color: $black;
+$navigation-item-hover-color: $brand;
 
 .navigation {
     display: flex;
@@ -22,7 +23,7 @@ $navigation-item-hover-color: $main-color;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: $white;
+            color: $navigation-item-color;
             font-weight: bold;
             font-size: 1.5rem;
             padding: 0 0.5rem;
@@ -33,17 +34,17 @@ $navigation-item-hover-color: $main-color;
                 align-items: center;
                 height: 100%;
                 a {
-                    color: $main-color;
+                    color: $brand;
 
                     &:hover {
-                        color: $main-color;
+                        color: $brand;
                     }
                 }
             }
 
             .mobile-menu {
                 display: none;
-                color: white;
+                color: $navigation-item-color;
             }
 
             &:hover .mobile-menu {
@@ -64,7 +65,7 @@ $navigation-item-hover-color: $main-color;
                     justify-content: center;
                     align-items: center;
                     height: 100%;
-                    color: $white;
+                    color: $navigation-item-color;
                     position: relative;
 
                     > *:not(:last-child) {

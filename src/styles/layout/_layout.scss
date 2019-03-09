@@ -1,6 +1,11 @@
+@import "styles/config";
 @import "./navigation";
 @import "./footer";
 
 .layout {
     min-height: 100vh;
+
+    > main {
+        background-color: $light-shade;
+    }
 }

@@ -3,11 +3,12 @@
 
 .hero {
     width: 100%;
-    background-color: $bg-color-2;
-    color: white;
+    background-image: radial-gradient(circle, $light-grey, $light-grey 1px, $light-shade 1px, $light-shade);
+    background-size: 28px 28px;
+    color: $black;
     display: flex;
     justify-content: center;
-    min-height: 300px;
+    min-height: 420px;
 
     .wrapper {
         max-width: 1200px;
@@ -20,6 +21,10 @@
         .content {
             text-align: center;
             padding: 0 0.5rem;
+
+            .title {
+                color: $brand;
+            }
 
             .subtitle {
                 @each $breakpoint, $headings in $header-styles {
@@ -44,9 +49,12 @@
                 background-image: url(./ship.svg);
                 background-repeat: no-repeat;
                 background-size: 30% auto;
-                opacity: 0.04;
-                background-position: 100% 20px;
+                opacity: 0.08;
+                background-position: 100% 140px;
             }
         }
+    }
+    @include breakpoint(medium down) {
+        min-height: 250px;
     }
 }

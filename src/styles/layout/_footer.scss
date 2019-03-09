@@ -1,7 +1,7 @@
 @import "styles/config";
 
 .footer {
-    background-color: $bg-color;
+    background-color: $bg-color-2;
     color: white;
     display: flex;
     justify-content: center;
@@ -32,7 +32,7 @@
                     color: white;
 
                     &:hover {
-                        color: $main-color;
+                        color: $brand;
                     }
                 }
             }

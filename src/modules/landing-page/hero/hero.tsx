@@ -8,7 +8,7 @@ export function Hero(): JSX.Element {
             <div className="wrapper">
                 <div className="content">
                     <div className="logo">
-                        <h1>Saga</h1>
+                        <h1 className="title">Saga</h1>
                     </div>
                     <p className="subtitle">Yet Another State Management for JavaScript Apps.</p>
                 </div>
