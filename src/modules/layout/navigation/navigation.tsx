@@ -5,7 +5,7 @@ import "./navigation.scss";
 
 function NavItem(props: { href: string; className?: string; children: React.ReactNode }): JSX.Element {
     return (
-        <li className={props.className}>
+        <li className={classNames("nav-list-item", props.className)}>
             <a href={props.href}>{props.children}</a>
         </li>
     );

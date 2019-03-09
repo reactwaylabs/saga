@@ -44,89 +44,54 @@ $navigation-bg: #2c3840;
             }
         }
 
-        > nav {
+        .nav-list {
             display: flex;
-            justify-content: center;
-            align-items: center;
 
             .menu {
                 display: flex;
                 height: 100%;
 
-                li {
-                    a {
-                        padding: 0 1rem;
-                    }
-                }
-            }
-        }
-
-        .more {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0 0.5rem;
-
-            a {
-                &.github {
-                    font-size: 1.25rem;
+                .nav-list-item > a {
+                    padding: 0 1rem;
                 }
             }
         }
     }
-    @include breakpoint(medium down) {
+    @include breakpoint(small down) {
         min-height: 3rem;
 
         .wrapper {
             padding: 0;
             flex-wrap: wrap;
 
-            > nav,
-            .more {
+            > * {
+                width: 100%;
+                min-height: 3rem;
+            }
+
+            .nav-list {
                 display: none;
             }
 
-            .logo,
-            > nav,
-            .more {
-                width: 100%;
+            &.mobile-open > .nav-list {
+                display: flex;
             }
 
             .logo {
-                min-height: 3rem;
                 justify-content: space-between;
-
                 .mobile-menu {
                     display: inline-flex;
                 }
             }
 
-            &.mobile-open {
-                > nav,
-                .more {
-                    display: flex;
-                }
-
-                > nav {
-                    .menu {
-                        width: 100%;
-                        flex-flow: column;
-                        > li {
-                            min-height: 3rem;
-                            a {
-                                width: 100%;
-                            }
-                        }
-                    }
-                }
-
-                .more {
-                    padding: 0;
-
+            .nav-list {
+                .menu {
                     flex-flow: column;
-                    a {
-                        width: 100%;
+                    width: 100%;
+
+                    .nav-list-item {
                         min-height: 3rem;
+                        width: 100%;
                     }
                 }
             }
