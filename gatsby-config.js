@@ -12,7 +12,10 @@ module.exports = {
         {
             resolve: `gatsby-plugin-sass`,
             options: {
-                includePaths: [path.join(__dirname, "node_modules/foundation-sites/scss")],
+                includePaths: [
+                    path.join(__dirname, "node_modules/foundation-sites/scss"),
+                    path.join(__dirname, "src")
+                ],
             },
         },
         "gatsby-plugin-react-helmet",

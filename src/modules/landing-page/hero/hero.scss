@@ -1,8 +1,9 @@
+@import "styles/config";
 @import "foundation";
 
 .hero {
     width: 100%;
-    background-color: #282c34;
+    background-color: $bg-color-2;
     color: white;
     display: flex;
     justify-content: center;

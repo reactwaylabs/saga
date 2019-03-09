@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import classNames from "classnames";
 
-import "./navigation.scss";
-
 function NavItem(props: { href: string; className?: string; children: React.ReactNode }): JSX.Element {
     return (
         <li className={classNames("nav-list-item", props.className)}>

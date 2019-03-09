@@ -1,7 +1,8 @@
+@import "styles/config";
 @import "foundation";
 
-$navigation-bg: #2c3840;
-$navigation-item-hover-color: lightblue;
+$navigation-bg: $bg-color;
+$navigation-item-hover-color: $main-color;
 
 .navigation {
     display: flex;
@@ -32,10 +33,10 @@ $navigation-item-hover-color: lightblue;
                 align-items: center;
                 height: 100%;
                 a {
-                    color: white;
+                    color: $main-color;
 
                     &:hover {
-                        color: $navigation-item-hover-color;
+                        color: $main-color;
                     }
                 }
             }
@@ -72,7 +73,7 @@ $navigation-item-hover-color: lightblue;
 
                     &:hover {
                         color: $navigation-item-hover-color;
-                        background-color: lighten($navigation-bg, 10);
+                        // background-color: lighten($navigation-bg, 10);
                     }
                 }
             }

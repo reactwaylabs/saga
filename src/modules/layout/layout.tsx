@@ -3,8 +3,6 @@ import React from "react";
 import { Navigation } from "./navigation/navigation";
 import { Footer } from "./footer/footer";
 
-import "./layout.scss";
-
 interface Props {
     children: React.ReactNode;
 }
