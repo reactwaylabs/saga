@@ -22,5 +22,5 @@
             }
         ]
     },
-    "exclude": ["__tests__", "dist"]
+    "exclude": ["**/__tests__", "dist"]
 }
