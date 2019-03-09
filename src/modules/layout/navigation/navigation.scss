@@ -6,7 +6,7 @@ $navigation-bg: #2c3840;
     display: flex;
     width: 100%;
     background-color: $navigation-bg;
-    height: 4rem;
+    min-height: 4rem;
     justify-content: center;
 
     .wrapper {
@@ -14,6 +14,7 @@ $navigation-bg: #2c3840;
         max-width: 1200px;
         width: 100%;
         justify-content: space-between;
+        padding: 0 1.25rem;
 
         .logo {
             display: flex;
@@ -23,6 +24,10 @@ $navigation-bg: #2c3840;
             font-weight: bold;
             font-size: 1.5rem;
             padding: 0 0.5rem;
+
+            .mobile-menu {
+                display: none;
+            }
         }
 
         a {
@@ -50,6 +55,7 @@ $navigation-bg: #2c3840;
 
                 li {
                     a {
+                        padding: 0 1rem;
                     }
                 }
             }
@@ -62,10 +68,66 @@ $navigation-bg: #2c3840;
             padding: 0 0.5rem;
 
             a {
-                padding: 1.2rem 1rem;
-
                 &.github {
                     font-size: 1.25rem;
+                }
+            }
+        }
+    }
+    @include breakpoint(medium down) {
+        min-height: 3rem;
+
+        .wrapper {
+            padding: 0;
+            flex-wrap: wrap;
+
+            > nav,
+            .more {
+                display: none;
+            }
+
+            .logo,
+            > nav,
+            .more {
+                width: 100%;
+            }
+
+            .logo {
+                min-height: 3rem;
+                justify-content: space-between;
+
+                .mobile-menu {
+                    display: inline-flex;
+                }
+            }
+
+            &.mobile-open {
+                > nav,
+                .more {
+                    display: flex;
+                }
+
+                > nav {
+                    .menu {
+                        width: 100%;
+                        flex-flow: column;
+                        > li {
+                            min-height: 3rem;
+                            a {
+                                width: 100%;
+                            }
+                        }
+                    }
+                }
+
+                .more {
+                    padding: 0;
+
+                    flex-flow: column;
+                    a {
+                        width: 100%;
+                        min-height: 3rem;
+                    }
                 }
             }
         }
