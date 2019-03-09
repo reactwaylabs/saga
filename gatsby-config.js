@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = {
     siteMetadata: {
         title: "Yet Another State Management for JS Apps",
@@ -7,12 +9,18 @@ module.exports = {
     },
     plugins: [
         "gatsby-plugin-typescript",
+        {
+            resolve: `gatsby-plugin-sass`,
+            options: {
+                includePaths: [path.join(__dirname, "node_modules/foundation-sites/scss")],
+            },
+        },
         "gatsby-plugin-react-helmet",
         {
             resolve: "gatsby-source-filesystem",
             options: {
                 name: "images",
-                path: "${__dirname}/src/images",
+                path: path.join(__dirname, "/src/images"),
             },
         },
         "gatsby-transformer-sharp",
@@ -28,6 +36,6 @@ module.exports = {
                 display: "minimal-ui",
                 icon: "src/images/gatsby-icon.png", // This path is relative to the root of the site.
             },
-        }
+        },
     ],
 };
