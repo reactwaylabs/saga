@@ -44,6 +44,14 @@ module.exports = {
                 name: "docs"
             }
         },
+        {
+            resolve: "gatsby-plugin-react-svg",
+            options: {
+                rule: {
+                    include: /assets/
+                }
+            }
+        },
         "gatsby-transformer-remark"
     ]
 };

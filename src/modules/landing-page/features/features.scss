@@ -1,0 +1,26 @@
+@import "styles/config";
+
+.features {
+    display: flex;
+    justify-content: center;
+    background-color: $light-shade;
+    padding: 2rem;
+
+    .wrapper {
+        max-width: 1200px;
+        width: 100%;
+
+        .featured-item {
+            .icon > * {
+                height: 4rem;
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 1.75rem;
+                text-align: center;
+                font-weight: bold;
+            }
+        }
+    }
+}

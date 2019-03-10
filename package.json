@@ -9,6 +9,7 @@
         "gatsby-plugin-manifest": "^2.0.22",
         "gatsby-plugin-offline": "^2.0.24",
         "gatsby-plugin-react-helmet": "^3.0.8",
+        "gatsby-plugin-react-svg": "^2.1.0",
         "gatsby-plugin-sass": "^2.0.10",
         "gatsby-plugin-sharp": "^2.0.25",
         "gatsby-plugin-typescript": "^2.0.10",
@@ -23,6 +24,7 @@
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
         "react-helmet": "^5.2.0",
+        "react-icons": "^3.5.0",
         "upath": "^1.1.1"
     },
     "devDependencies": {
