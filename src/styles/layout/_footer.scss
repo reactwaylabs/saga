@@ -5,8 +5,8 @@
     color: white;
     display: flex;
     justify-content: center;
-    padding: 1rem 0.5rem;
-    font-size: 0.75rem;
+    font-size: 1rem;
+    min-height: 4rem;
 
     .wrapper {
         width: 100%;
@@ -14,19 +14,39 @@
         display: flex;
         justify-content: space-between;
 
+        .logo-wrapper,
+        .copyright {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-wrapper {
+            .logo {
+                border-right: 2px solid $grey;
+                padding-right: 1rem;
+                color: $white;
+
+                &:hover {
+                    color: $white;
+                }
+            }
+        }
+
         .copyright {
             color: #868e96;
+            font-size: 0.75rem;
+            white-space: pre;
         }
 
         .footer-nav {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-grow: 1;
 
             li {
                 display: flex;
                 justify-content: center;
                 align-items: center;
+
                 a {
                     padding: 0 1rem;
                     color: white;
