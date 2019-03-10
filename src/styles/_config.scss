@@ -1,7 +1,7 @@
-$white: #f6f8ff;
+$white: #f9fafa;
 $black: rgba(0, 0, 0, 0.84);
 
-$light-shade: #f9fafa;
+$light-shade: #f4f7f5;
 $light-accent: #e0e3e1;
 $brand: #e8b713;
 $dark-accent: #a34d36;
@@ -10,15 +10,20 @@ $dark-shades: #1f1f1f;
 $grey: #4c4c4c;
 $light-grey: lighten($grey, 20);
 
-$bg-color: $light-shade;
+$bg-color: $white;
 $bg-color-2: $dark-shades;
 
 $logo-font-family: Montserrat, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 
 // Foundation specific
+
+// Buttons
 $button-palette: (
     primary: $brand,
     grey: $grey
 );
 $button-hollow-border-width: 2px;
 $button-radius: 5px;
+
+// Anchors
+$anchor-color: $brand;

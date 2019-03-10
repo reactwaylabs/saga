@@ -3,11 +3,11 @@
 
 .hero {
     width: 100%;
-    background-size: 28px 28px;
     color: $black;
     display: flex;
     justify-content: center;
     min-height: 420px;
+    background-color: $white;
 
     .wrapper {
         max-width: 1200px;

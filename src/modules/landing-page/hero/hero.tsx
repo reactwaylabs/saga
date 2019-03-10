@@ -15,6 +15,9 @@ export function Hero(): JSX.Element {
                         <button className="button primary hollow large">Get started</button>
                         <button className="button grey hollow large">Examples</button>
                     </div>
+                    <p>
+                        Version: <a href="#">v4.0.0-alpha</a>
+                    </p>
                 </div>
             </div>
         </div>
