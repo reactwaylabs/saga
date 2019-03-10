@@ -2,13 +2,23 @@ $white: #f6f8ff;
 $black: rgba(0, 0, 0, 0.84);
 
 $light-shade: #f9fafa;
-$light-accent: #91918b;
-$brand: #f6ae2d;
+$light-accent: #e0e3e1;
+$brand: #e8b713;
 $dark-accent: #a34d36;
-$dark-shades: #262528;
+$dark-shades: #1f1f1f;
 
-$grey: #999;
+$grey: #4c4c4c;
 $light-grey: lighten($grey, 20);
 
 $bg-color: $light-shade;
 $bg-color-2: $dark-shades;
+
+$logo-font-family: Montserrat, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+// Foundation specific
+$button-palette: (
+    primary: $brand,
+    grey: $grey
+);
+$button-hollow-border-width: 2px;
+$button-radius: 5px;

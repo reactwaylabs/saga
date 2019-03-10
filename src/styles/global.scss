@@ -1,8 +1,21 @@
 @import url(//use.fontawesome.com/releases/v5.7.2/css/all.css);
+@import url(//fonts.googleapis.com/css?family=Montserrat);
 
 @import "./config";
 @import "foundation";
 
 @include foundation-everything();
+
+.logo,
+.logo * {
+    font-family: $logo-font-family;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.button,
+.button:active {
+    outline: 0;
+}
 
 @import "./layout/layout";

@@ -3,7 +3,6 @@
 
 .hero {
     width: 100%;
-    background-image: radial-gradient(circle, $light-grey, $light-grey 1px, $light-shade 1px, $light-shade);
     background-size: 28px 28px;
     color: $black;
     display: flex;
@@ -21,18 +20,34 @@
         .content {
             text-align: center;
             padding: 0 0.5rem;
+            z-index: 2;
 
             .title {
                 color: $brand;
             }
 
             .subtitle {
+                font-family: $logo-font-family;
                 @each $breakpoint, $headings in $header-styles {
                     @include breakpoint($breakpoint) {
-                        $heading-styles: map-get($headings, "h4");
+                        $heading-styles: map-get($headings, "h5");
                         $font-size: map-get($heading-styles, "font-size");
 
                         font-size: #{$font-size}px;
+                    }
+                }
+            }
+
+            .buttons {
+                display: flex;
+                justify-content: center;
+
+                .button {
+                    text-transform: uppercase;
+                    font-size: 1rem;
+
+                    &:not(:last-child) {
+                        margin-right: 1.5rem;
                     }
                 }
             }
@@ -49,8 +64,9 @@
                 background-image: url(./ship.svg);
                 background-repeat: no-repeat;
                 background-size: 30% auto;
-                opacity: 0.08;
+                opacity: 0.4;
                 background-position: 100% 140px;
+                z-index: 1;
             }
         }
     }

@@ -11,6 +11,7 @@ $navigation-item-hover-color: $brand;
     background-color: $navigation-bg;
     min-height: 4rem;
     justify-content: center;
+    border-bottom: 1px solid $light-accent;
 
     .wrapper {
         display: flex;
@@ -24,7 +25,6 @@ $navigation-item-hover-color: $brand;
             justify-content: center;
             align-items: center;
             color: $navigation-item-color;
-            font-weight: bold;
             font-size: 1.5rem;
             padding: 0 0.5rem;
 

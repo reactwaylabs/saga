@@ -11,6 +11,10 @@ export function Hero(): JSX.Element {
                         <h1 className="title">Saga</h1>
                     </div>
                     <p className="subtitle">Yet Another State Management for JavaScript Apps.</p>
+                    <div className="buttons">
+                        <button className="button primary hollow large">Get started</button>
+                        <button className="button grey hollow large">Examples</button>
+                    </div>
                 </div>
             </div>
         </div>
