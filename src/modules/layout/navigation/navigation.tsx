@@ -34,15 +34,11 @@ export function Navigation(): JSX.Element {
                     </span>
                 </div>
                 <Nav className="main-nav">
-                    <NavItem href="#">One</NavItem>
-                    <NavItem href="#">Two</NavItem>
-                    <NavItem href="#">Three</NavItem>
-                </Nav>
-                <Nav className="more">
-                    <NavItem href="#">v4.0.0-alpha</NavItem>
+                    <NavItem href="#">Get started</NavItem>
+                    <NavItem href="#">API</NavItem>
                     <NavItem href="#">
                         <span className="fab fa-github" />
-                        <span>Github</span>
+                        <span style={{marginTop: "2px"}}>Github</span>
                     </NavItem>
                 </Nav>
             </div>
