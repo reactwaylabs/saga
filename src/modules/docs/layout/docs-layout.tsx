@@ -7,6 +7,7 @@ import "./docs-layout.scss";
 
 interface Props {
     children: React.ReactNode;
+    headings: Array<{ value: string; depth: number }>;
 }
 
 export function DocsLayout(props: Props): JSX.Element {
@@ -14,7 +15,7 @@ export function DocsLayout(props: Props): JSX.Element {
         <div className="docs-layout">
             <Sidebar className="docs-navigation" />
             <main className="docs-content">{props.children}</main>
-            <Toc className="docs-toc" />
+            <Toc className="docs-toc" headings={props.headings} />
         </div>
     );
 }
