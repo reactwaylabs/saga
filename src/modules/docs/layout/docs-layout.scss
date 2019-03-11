@@ -1,0 +1,31 @@
+@import "styles/config";
+
+.docs-layout {
+    display: flex;
+    justify-content: center;
+    padding-top: 3rem;
+
+    .docs-navigation {
+        max-width: 240px;
+        width: 100%;
+
+        a {
+            color: $grey;
+            font-weight: bold;
+
+            &.active {
+                color: $brand;
+            }
+        }
+    }
+
+    .docs-content {
+        max-width: 700px;
+        width: 100%;
+    }
+
+    .docs-toc {
+        max-width: 240px;
+        width: 100%;
+    }
+}
