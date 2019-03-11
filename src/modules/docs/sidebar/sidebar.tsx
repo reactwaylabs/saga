@@ -17,7 +17,7 @@ export function Sidebar(props: Props): JSX.Element {
                         return (
                             <li key={item.path}>
                                 <Link to={item.path} activeClassName="active">
-                                    {item.title[0] != null ? item.title[0].value : null}
+                                    {item.title}
                                 </Link>
                             </li>
                         );

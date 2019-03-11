@@ -14,6 +14,9 @@ exports.createPages = ({ actions, graphql }) => {
                     node {
                         fileAbsolutePath
                         html
+                        headings(depth: h1) {
+                            value
+                        }
                     }
                 }
             }
@@ -35,7 +38,8 @@ exports.createPages = ({ actions, graphql }) => {
                 path: nodePath,
                 component: blogPostTemplate,
                 context: {
-                    markdownAbsolutePath: node.fileAbsolutePath
+                    markdownAbsolutePath: node.fileAbsolutePath,
+                    title: node.headings[0] != null ? node.headings[0].value : null
                 }
             });
         });
