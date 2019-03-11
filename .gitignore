@@ -64,3 +64,6 @@ package-deps.json
 
 # Tests
 merged-test-results.xml
+
+# Additional scrips
+versions.json

@@ -95,6 +95,13 @@
             "name": "test",
             "summary": "Run tests for projects.",
             "enableParallelism": true
+        },
+        {
+            "commandKind": "global",
+            "name": "export-versions",
+            "description": "Exports version policies to a separate file.",
+            "summary": "Exports version policies to a separate file.",
+            "shellCommand": "node common/scripts/versions.js"
         }
     ],
 
