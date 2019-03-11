@@ -1,5 +1,5 @@
 <div align="center">
-    <img width="200" src="./assets/ship.png" />
+    <img width="300" src="./assets/ship.png" />
 </div>
 <h1 align="center">saga</h1>
 
