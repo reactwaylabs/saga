@@ -80,7 +80,7 @@
     // }
     {
         "definitionName": "lockStepVersion",
-        "policyName": "Saga",
+        "policyName": "SagaPolicy",
         "mainProject": "saga",
         "nextBump": "prerelease",
         "version": "4.0.0-alpha"
