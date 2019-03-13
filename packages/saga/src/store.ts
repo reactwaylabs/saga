@@ -3,21 +3,21 @@ import { TinyEmitter, Callback } from "./emitter";
 
 class StoreClass<TState, TPayload> implements Store<TState, TPayload> {
     constructor(
-        private readonly name: string,
         private readonly initialState: TState,
         private dispatcher: Dispatcher<TPayload>,
         protected reducer: StoreReduceHandler<TState, TPayload>,
         protected areEqual: StoreAreEqualHandler<TState>
     ) {
-        this.dispatcher.register(this.name, this.onDispatch);
+        this.dispatchToken = this.dispatcher.register(this.onDispatch);
     }
 
     protected state: TState = { ...this.initialState };
     private hasStoreChanged: boolean = false;
     private emitter: TinyEmitter<Callback> = new TinyEmitter();
+    private readonly dispatchToken: string;
 
-    public getName(): string {
-        return this.name;
+    public getDispatchToken(): string {
+        return this.dispatchToken;
     }
 
     public getState(): TState {
@@ -65,7 +65,7 @@ export type StoreAreEqualHandler<TState> = (state: TState, nextState: TState) =>
 export interface Store<TState, TPayload> {
     getState(): TState;
     getDispatcher(): Dispatcher<TPayload>;
-    getName(): string;
+    getDispatchToken(): string;
     hasChanged(): boolean;
     subscribe(callback: () => void): () => void;
     unsubscribe(callback: () => void): void;
@@ -83,5 +83,5 @@ export interface StoreOptions<TState, TPayload> {
 export function createStore<TState, TPayload>(options: StoreOptions<TState, TPayload>): Store<TState, TPayload> {
     const areEqual: StoreAreEqualHandler<TState> = options.areEqual != null ? options.areEqual : (state, nextState) => state === nextState;
 
-    return new StoreClass<TState, TPayload>(options.name, options.initialState, options.dispatcher, options.reducer, areEqual);
+    return new StoreClass<TState, TPayload>(options.initialState, options.dispatcher, options.reducer, areEqual);
 }
