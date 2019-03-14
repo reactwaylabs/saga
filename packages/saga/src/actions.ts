@@ -1,6 +1,6 @@
 import { generateRandomString, instanceOfClass } from "./helpers";
 
-export interface FluxStandardAction<TPayload, TMeta = undefined> {
+export interface FluxStandardAction<TPayload = any, TMeta = any> {
     /**
      * The `type` of an action identifies to the consumer the nature of the action that has occurred.
      * Two actions with the same `type` MUST be strictly equivalent (using `===`)
@@ -35,7 +35,7 @@ export interface ErrorFluxStandardAction<TCustomError extends Error, TMeta = und
 /**
  * Alias for FluxStandardAction.
  */
-export type FSA<TPayload, TMeta = undefined> = FluxStandardAction<TPayload, TMeta>;
+export type FSA<TPayload = any, TMeta = any> = FluxStandardAction<TPayload, TMeta>;
 
 /**
  * Alias for ErrorFluxStandardAction.
@@ -46,7 +46,10 @@ export type ClassAction = new (...args: any[]) => any;
 
 const SAGA_ACTION_TYPE: string = `SAGA_${generateRandomString()}`;
 
-export function createSagaAction<TClassAction extends object>(action: TClassAction): FluxStandardAction<TClassAction> {
+export function createSagaAction<TClassAction extends object, TMeta = undefined>(
+    action: TClassAction,
+    meta?: TMeta
+): FSA<TClassAction, TMeta> {
     // TODO: Omit this code in production.
     if (!instanceOfClass(action)) {
         throw new Error("createSagaAction(...): Action must be initialized from a class.");
@@ -57,27 +60,45 @@ export function createSagaAction<TClassAction extends object>(action: TClassActi
     return {
         type: SAGA_ACTION_TYPE,
         payload: action,
-        error: isError
+        error: isError,
+        meta: meta
     };
 }
 
-export function isSagaAction<TPayload>(action: any): action is FluxStandardAction<TPayload> {
+export function createFluxAction<TAction extends FSA, TMeta = undefined>(
+    type: TAction["type"],
+    payload: TAction["payload"],
+    meta?: TMeta
+): TAction {
+    if (payload != null && typeof payload != "object") {
+        throw new Error("createFluxAction(...): Payload can only be object or undefined/null.");
+    }
+
+    const isError = (payload as object) instanceof Error;
+
+    return {
+        type: type,
+        payload: payload,
+        error: isError,
+        meta: meta
+    } as TAction;
+}
+
+export function isSagaAction<TPayload>(action: any): action is FSA<TPayload> {
     return action.type === SAGA_ACTION_TYPE;
 }
 
 /**
  * Returns `true` if `action` is FSA compliant.
  */
-export function isFSA<TPayload, TMeta = undefined>(action: any): action is FluxStandardAction<TPayload, TMeta> {
+export function isFSA<TPayload, TMeta = undefined>(action: any): action is FSA<TPayload, TMeta> {
     return typeof action === "object" && typeof action.type === "string" && Object.keys(action).every(isValidKey);
 }
 
 /**
  * Returns `true` if `action` is FSA compliant error.
  */
-export function isErrorFSA<TCustomError extends Error, TMeta = undefined>(
-    action: any
-): action is ErrorFluxStandardAction<TCustomError, TMeta> {
+export function isErrorFSA<TCustomError extends Error, TMeta = undefined>(action: any): action is ErrorFSA<TCustomError, TMeta> {
     return isFSA(action) && action.error === true;
 }
 

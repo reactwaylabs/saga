@@ -1,11 +1,11 @@
 import { generateRandomString, instanceOfClass } from "./helpers";
-import { createSagaAction, FluxStandardAction } from "./actions";
+import { createSagaAction, FSA } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
-export type DispatcherRegisterHandler<TPayload extends FluxStandardAction<any, any>> = (payload: TPayload) => void;
+export type DispatcherRegisterHandler<TPayload extends FSA> = (payload: TPayload) => void;
 
-export interface Dispatcher<TPayload extends FluxStandardAction<any, any>> {
+export interface Dispatcher<TPayload extends FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
@@ -15,13 +15,13 @@ export interface Dispatcher<TPayload extends FluxStandardAction<any, any>> {
     isDispatching: boolean;
 }
 
-interface ListenerItem<TPayload extends FluxStandardAction<any, any>> {
+interface ListenerItem<TPayload extends FSA> {
     callback: DispatcherRegisterHandler<TPayload>;
     isHandled: boolean;
     isPending: boolean;
 }
 
-class DispatcherClass<TPayload extends FluxStandardAction<any, any>> implements Dispatcher<TPayload> {
+class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
     private listeners: { [dispatchToken: string]: ListenerItem<TPayload> | undefined } = {};
     private _isDispatching: boolean = false;
     private pendingPayload?: TPayload;
@@ -127,6 +127,6 @@ class DispatcherClass<TPayload extends FluxStandardAction<any, any>> implements 
     }
 }
 
-export function createDispatcher<TPayload extends FluxStandardAction<any, any> = FluxStandardAction<any, any>>(): Dispatcher<TPayload> {
+export function createDispatcher<TPayload extends FSA = FSA>(): Dispatcher<TPayload> {
     return new DispatcherClass<TPayload>();
 }

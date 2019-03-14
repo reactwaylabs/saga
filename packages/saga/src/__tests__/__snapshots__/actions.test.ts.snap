@@ -3,6 +3,7 @@
 exports[`creates saga action from class payload 1`] = `
 Object {
   "error": false,
+  "meta": undefined,
   "payload": [Function],
   "type": "SAGA_RANDOM",
 }

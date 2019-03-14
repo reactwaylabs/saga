@@ -2,7 +2,7 @@ import { Dispatcher, DispatcherRegisterHandler } from "./dispatcher";
 import { TinyEmitter, Callback } from "./emitter";
 import { FSA, isSagaAction, ClassAction } from "./actions";
 
-class StoreClass<TState, TPayload extends FSA<any, any> = FSA<any, any>> implements Store<TState, TPayload> {
+class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState, TPayload> {
     constructor(
         private readonly initialState: TState,
         private dispatcher: Dispatcher<TPayload>,
@@ -60,10 +60,10 @@ class StoreClass<TState, TPayload extends FSA<any, any> = FSA<any, any>> impleme
     };
 }
 
-export type StoreReduceHandler<TState, TPayload extends FSA<any, any> = FSA<any, any>> = (state: TState, payload: TPayload) => TState;
+export type StoreReduceHandler<TState, TPayload extends FSA = FSA> = (state: TState, payload: TPayload) => TState;
 export type StoreAreEqualHandler<TState> = (state: TState, nextState: TState) => boolean;
 
-export interface Store<TState, TPayload extends FSA<any, any> = FSA<any, any>> {
+export interface Store<TState, TPayload extends FSA = FSA> {
     getState(): TState;
     getDispatcher(): Dispatcher<TPayload>;
     getDispatchToken(): string;
@@ -73,7 +73,7 @@ export interface Store<TState, TPayload extends FSA<any, any> = FSA<any, any>> {
     getSubscribersCount(): number;
 }
 
-export interface StoreOptions<TState, TPayload extends FSA<any, any> = FSA<any, any>> {
+export interface StoreOptions<TState, TPayload extends FSA = FSA> {
     name: string;
     initialState: TState;
     dispatcher: Dispatcher<TPayload>;
@@ -81,9 +81,7 @@ export interface StoreOptions<TState, TPayload extends FSA<any, any> = FSA<any, 
     areEqual?: StoreAreEqualHandler<TState>;
 }
 
-export function createStore<TState, TPayload extends FSA<any, any> = FSA<any, any>>(
-    options: StoreOptions<TState, TPayload>
-): Store<TState, TPayload> {
+export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOptions<TState, TPayload>): Store<TState, TPayload> {
     const areEqual: StoreAreEqualHandler<TState> = options.areEqual != null ? options.areEqual : (state, nextState) => state === nextState;
 
     return new StoreClass<TState, TPayload>(options.initialState, options.dispatcher, options.reducer, areEqual);
@@ -114,12 +112,11 @@ export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TStat
     };
 }
 
-// prettier-ignore
-export type ActionHandler<TState, TActions extends FSA<any>> = {
-    [TType in TActions["type"]]: (state: TState, action: Extract<TActions, {type: TType}>) => TState
+export type ActionHandler<TState, TActions extends FSA> = {
+    [TType in TActions["type"]]: (state: TState, action: Extract<TActions, { type: TType }>) => TState
 };
 
-export function handleFluxActions<TState, TActions extends FSA<any>>(
+export function handleFluxActions<TState, TActions extends FSA>(
     handlers: ActionHandler<TState, TActions>
 ): StoreReduceHandler<TState, TActions> {
     return (state: TState, action: TActions): TState => {
@@ -132,47 +129,3 @@ export function handleFluxActions<TState, TActions extends FSA<any>>(
         return state;
     };
 }
-
-export interface IncrementAction
-    extends FSA<{
-        amount: string;
-    }> {
-    type: "INCREMENT";
-}
-
-export interface DecrementAction
-    extends FSA<{
-        amount: number;
-    }> {
-    type: "DECREMENT";
-}
-
-class IncrementClassAction {
-    public amount: number = 1;
-}
-
-type Actions = IncrementAction | DecrementAction;
-
-interface StoreState {
-    counter: number;
-}
-
-combineHandlers<StoreState>([
-    handleFluxActions<StoreState, Actions>({
-        INCREMENT: (state, action) => {
-            action.payload.amount;
-            return state;
-        },
-        DECREMENT: (state, action) => {
-            action.payload.amount;
-            return state;
-        }
-    }),
-    registerActionHandler(IncrementClassAction, (state, action) => {
-        action.amount;
-        return {
-            ...state,
-            counter: state.counter + action.amount
-        };
-    })
-]);
