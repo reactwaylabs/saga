@@ -1,6 +1,6 @@
 {
     "name": "saga",
-    "version": "4.0.0-alpha",
+    "version": "4.0.0-alpha.2",
     "publishConfig": {
         "tag": "alpha"
     },
