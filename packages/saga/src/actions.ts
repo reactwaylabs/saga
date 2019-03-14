@@ -1,5 +1,8 @@
 import { generateRandomString, instanceOfClass } from "./helpers";
 
+/**
+ * @see @url https://github.com/redux-utilities/flux-standard-action
+ */
 export interface FluxStandardAction<TPayload = any, TMeta = any> {
     /**
      * The `type` of an action identifies to the consumer the nature of the action that has occurred.
