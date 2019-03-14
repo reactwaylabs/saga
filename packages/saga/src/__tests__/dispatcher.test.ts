@@ -44,7 +44,7 @@ it("waitFor to resolve in specific store order", () => {
     expect(callOrder).toEqual([dispatchToken3, dispatchToken2, dispatchToken1]);
 });
 
-it("waitFor must throw while not being in middle of dispatch", () => {
+it("waitFor must throw while not being in the middle of dispatch", () => {
     expect(() => dispatcher.waitFor(["hello"])).toThrow();
 });
 
