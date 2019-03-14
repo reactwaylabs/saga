@@ -13,7 +13,7 @@ export interface FluxStandardAction<TPayload, TMeta = undefined> {
      * By convention, if `error` is `true`, the `payload` SHOULD be an error object.
      * This is akin to rejecting a promise with an error object.
      */
-    payload?: TPayload;
+    payload: TPayload;
     /**
      * The optional `error` property MAY be set to true if the action represents an error.
      * An action whose `error` is true is analogous to a rejected Promise.
@@ -41,6 +41,8 @@ export type FSA<TPayload, TMeta = undefined> = FluxStandardAction<TPayload, TMet
  * Alias for ErrorFluxStandardAction.
  */
 export type ErrorFSA<TCustomError extends Error, TMeta = undefined> = ErrorFluxStandardAction<TCustomError, TMeta>;
+
+export type ClassAction = new (...args: any[]) => any;
 
 const SAGA_ACTION_TYPE: string = `SAGA_${generateRandomString()}`;
 
