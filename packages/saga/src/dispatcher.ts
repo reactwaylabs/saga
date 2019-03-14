@@ -1,24 +1,26 @@
 import { generateRandomString } from "./helpers";
+import { createSagaAction, FluxStandardAction } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
-export type DispatcherRegisterHandler<TPayload> = (payload: TPayload) => void;
+export type DispatcherRegisterHandler<TPayload extends FluxStandardAction<any, any>> = (payload: TPayload) => void;
 
-export interface Dispatcher<TPayload> {
+export interface Dispatcher<TPayload extends FluxStandardAction<any, any>> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
-    dispatch<TDPayload extends TPayload>(payload: TDPayload): void;
+    dispatchFSA<TDPayload extends TPayload>(payload: TDPayload): void;
+    dispatch<TClassAction extends object>(classAction: TClassAction): void;
     isDispatching: boolean;
 }
 
-interface ListenerItem<TPayload> {
-    callback: (payload: TPayload) => void;
+interface ListenerItem<TPayload extends FluxStandardAction<any, any>> {
+    callback: DispatcherRegisterHandler<TPayload>;
     isHandled: boolean;
     isPending: boolean;
 }
 
-class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
+class DispatcherClass<TPayload extends FluxStandardAction<any, any>> implements Dispatcher<TPayload> {
     private listeners: { [dispatchToken: string]: ListenerItem<TPayload> | undefined } = {};
     private _isDispatching: boolean = false;
     private pendingPayload?: TPayload;
@@ -60,7 +62,7 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
         }
     }
 
-    public dispatch(payload: TPayload): void {
+    public dispatchFSA(payload: TPayload): void {
         if (this._isDispatching) {
             throw new Error("Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.");
         }
@@ -78,6 +80,11 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
         } finally {
             this.stopDispatching();
         }
+    }
+
+    public dispatch<TClassAction extends object>(classAction: TClassAction): void {
+        const sagaAction = createSagaAction(classAction) as TPayload;
+        this.dispatchFSA(sagaAction);
     }
 
     public get isDispatching(): boolean {
@@ -114,6 +121,6 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
     }
 }
 
-export function createDispatcher<TPayload>(): Dispatcher<TPayload> {
+export function createDispatcher<TPayload extends FluxStandardAction<any, any> = FluxStandardAction<any, any>>(): Dispatcher<TPayload> {
     return new DispatcherClass<TPayload>();
 }

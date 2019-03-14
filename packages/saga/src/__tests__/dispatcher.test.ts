@@ -1,23 +1,22 @@
 import { createDispatcher } from "../dispatcher";
 
-interface Action {
-    type: string;
-}
+import "./test-utils";
 
-let dispatcher = createDispatcher<Action>();
-const TEST_ACTION: Action = { type: "test" };
+let dispatcher = createDispatcher();
+
+class TestAction {}
 
 beforeEach(() => {
-    dispatcher = createDispatcher<Action>();
+    dispatcher = createDispatcher();
 });
 
 it("register store and dispatch action and then unregister store", () => {
     const mock = jest.fn();
 
     const dispatchToken = dispatcher.register(mock);
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 
-    expect(mock).toBeCalledWith(TEST_ACTION);
+    expect(mock.mock.calls[0][0]).toBeSagaAction();
 
     dispatcher.unregister(dispatchToken);
 });
@@ -40,7 +39,7 @@ it("waitFor to resolve in specific store order", () => {
     dispatchToken2 = dispatcher.register(store2);
     dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 
     expect(callOrder).toEqual([dispatchToken3, dispatchToken2, dispatchToken1]);
 });
@@ -56,7 +55,7 @@ it("waitFor store that does not exist", () => {
 
     dispatcher.register(store1);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("waitFor circular store", () => {
@@ -73,7 +72,7 @@ it("waitFor circular store", () => {
     dispatchToken1 = dispatcher.register(store1);
     dispatchToken2 = dispatcher.register(store2);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("waitFor bigger circular store", () => {
@@ -95,15 +94,15 @@ it("waitFor bigger circular store", () => {
     dispatchToken2 = dispatcher.register(store2);
     dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("dispatch in the middle of dispatch", () => {
     const store1 = () => {
-        expect(() => dispatcher.dispatch(TEST_ACTION)).toThrow();
+        expect(() => dispatcher.dispatch(new TestAction())).toThrow();
     };
 
     dispatcher.register(store1);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });

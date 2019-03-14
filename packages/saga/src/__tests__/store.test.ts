@@ -1,31 +1,28 @@
 import { createStore, Store } from "../store";
 import { createDispatcher, Dispatcher } from "../dispatcher";
+import { FSA } from "../actions";
 
-interface Action {
-    type: string;
-}
-
-interface ActionIncrement extends Action {
+interface ActionIncrement extends FSA<undefined> {
     type: "COUNTER_INCREMENT";
 }
 
-interface ActionDecrement extends Action {
+interface ActionDecrement extends FSA<undefined> {
     type: "COUNTER_DECREMENT";
 }
 
 type StoreActions = ActionIncrement | ActionDecrement;
 
-let dispatcher = createDispatcher<Action>();
+let dispatcher = createDispatcher();
 let store = createTestStore(dispatcher);
 
 interface StoreState {
     counter: number;
 }
 
-function createTestStore(_dispatcher: Dispatcher<Action>): Store<StoreState, StoreActions> {
+function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState, StoreActions> {
     return createStore<StoreState, StoreActions>({
         name: "test",
-        dispatcher: _dispatcher as Dispatcher<StoreActions>,
+        dispatcher: _dispatcher,
         initialState: {
             counter: 0
         },
@@ -50,7 +47,7 @@ function createTestStore(_dispatcher: Dispatcher<Action>): Store<StoreState, Sto
 }
 
 beforeEach(() => {
-    dispatcher = createDispatcher<Action>();
+    dispatcher = createDispatcher();
     store = createTestStore(dispatcher);
 });
 
