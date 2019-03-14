@@ -57,7 +57,7 @@ it("dispatched action updates store state", () => {
     store.subscribe(stub);
     expect(store.getState().counter).toBe(0);
 
-    dispatcher.dispatch<ActionIncrement>({
+    dispatcher.dispatchFSA<ActionIncrement>({
         type: "COUNTER_INCREMENT"
     });
 
@@ -72,7 +72,7 @@ it("dispatched action updates state and store emits change", () => {
     store.subscribe(stub);
     expect(store.getSubscribersCount()).toBe(1);
 
-    dispatcher.dispatch<ActionIncrement>({
+    dispatcher.dispatchFSA<ActionIncrement>({
         type: "COUNTER_INCREMENT"
     });
 

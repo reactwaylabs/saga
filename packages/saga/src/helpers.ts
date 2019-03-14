@@ -5,5 +5,15 @@ export function generateRandomString(): string {
 }
 
 export function instanceOfClass(obj: object): boolean {
-    return obj.constructor instanceof Function;
+    let current = obj.constructor;
+
+    while (true) {
+        if (current === Function) {
+            return true;
+        }
+        if (current === Object) {
+            return false;
+        }
+        current = current.constructor;
+    }
 }

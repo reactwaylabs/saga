@@ -1,4 +1,4 @@
-import { generateRandomString } from "./helpers";
+import { generateRandomString, instanceOfClass } from "./helpers";
 import { createSagaAction, FluxStandardAction } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
@@ -9,6 +9,7 @@ export interface Dispatcher<TPayload extends FluxStandardAction<any, any>> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
+    // tslint:disable-next-line
     dispatchFSA<TDPayload extends TPayload>(payload: TDPayload): void;
     dispatch<TClassAction extends object>(classAction: TClassAction): void;
     isDispatching: boolean;
@@ -64,7 +65,7 @@ class DispatcherClass<TPayload extends FluxStandardAction<any, any>> implements 
 
     public dispatchFSA(payload: TPayload): void {
         if (this._isDispatching) {
-            throw new Error("Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.");
+            throw new Error("Dispatch.dispatchFSA(...): Cannot dispatch in the middle of a dispatch.");
         }
 
         this.startDispatching(payload);
@@ -83,7 +84,12 @@ class DispatcherClass<TPayload extends FluxStandardAction<any, any>> implements 
     }
 
     public dispatch<TClassAction extends object>(classAction: TClassAction): void {
+        if (!instanceOfClass(classAction)) {
+            throw new Error("Dispatcher.dispatch(...): Action must be initialized from a class.");
+        }
+
         const sagaAction = createSagaAction(classAction) as TPayload;
+
         this.dispatchFSA(sagaAction);
     }
 

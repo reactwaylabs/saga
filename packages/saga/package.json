@@ -36,10 +36,11 @@
             "default",
             "jest-junit"
         ],
-        "collectCoverage": false,
+        "collectCoverage": true,
         "testRegex": "/__tests__/.*\\.(test|spec).(ts|tsx)$",
         "collectCoverageFrom": [
             "src/**/*.{ts,tsx}",
+            "!src/**/__tests__/*",
             "!src/index.ts"
         ],
         "coverageReporters": [
