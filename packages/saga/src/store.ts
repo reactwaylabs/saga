@@ -113,12 +113,12 @@ export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TStat
     };
 }
 
-export type ActionHandler<TState, TActions extends FSA> = {
+export type ActionsHandlersObject<TState, TActions extends FSA> = {
     [TType in TActions["type"]]: (state: TState, action: Extract<TActions, { type: TType }>) => TState
 };
 
 export function handleActions<TState, TActions extends FSA>(
-    handlers: ActionHandler<TState, TActions>
+    handlers: ActionsHandlersObject<TState, TActions>
 ): StoreReduceHandler<TState, TActions> {
     return (state: TState, action: TActions): TState => {
         for (const key in handlers) {
