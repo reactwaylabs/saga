@@ -46,23 +46,6 @@ function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState> {
         initialState: {
             counter: 0
         },
-        // reducer: (state, action) => {
-        //     switch (action.type) {
-        //         case "COUNTER_INCREMENT": {
-        //             return {
-        //                 counter: state.counter + 1
-        //             };
-        //         }
-        //         case "COUNTER_DECREMENT": {
-        //             return {
-        //                 counter: state.counter - 1
-        //             };
-        //         }
-        //         default: {
-        //             return state;
-        //         }
-        //     }
-        // }
         reducer: handleFluxActions<StoreState, StoreActions>({
             COUNTER_INCREMENT: (state, action) => {
                 return {
