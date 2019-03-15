@@ -1,7 +1,7 @@
-import React, { createContext } from "react";
-import { Dispatcher, AppDispatcher } from "saga";
+import React from "react";
+import { Dispatcher } from "saga";
 
-export const DispatcherContext = createContext<Dispatcher>(AppDispatcher);
+import { DispatcherContext } from "../contexts/dispatcher-context";
 
 interface Props {
     dispatcher: Dispatcher;

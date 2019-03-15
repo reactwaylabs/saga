@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Dispatcher } from "saga";
 
-import { DispatcherContext } from "../components/saga-dispatcher";
+import { DispatcherContext } from "../contexts/dispatcher-context";
 
 export function useDispatcher(): Dispatcher {
     const dispatcher = useContext(DispatcherContext);
