@@ -85,7 +85,7 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
 
     public dispatch<TClassAction extends object>(classAction: TClassAction): void {
         if (!instanceOfClass(classAction)) {
-            throw new Error("Dispatcher.dispatch(...): Action must be initialized from a class.");
+            throw new Error("Dispatcher.dispatch(...): Action must be initialized from a class. Use 'dispatchFSA' method or create an action class.");
         }
 
         const sagaAction = createSagaAction(classAction) as TPayload;
