@@ -1,6 +1,6 @@
 import { createStore, Store, combineHandlers } from "../store";
 import { createDispatcher, Dispatcher } from "../dispatcher";
-import { FSA, createFluxAction, createSagaAction } from "../actions";
+import { FSA, createAction, createSagaAction } from "../actions";
 
 import { handleFluxActions, registerActionHandler } from "../store";
 
@@ -72,7 +72,7 @@ it("dispatched action updates store state", () => {
     store.subscribe(stub);
     expect(store.getState().counter).toBe(0);
 
-    dispatcher.dispatchFSA(createFluxAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
+    dispatcher.dispatchAction(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(store.getState().counter).toBe(1);
     expect(store.hasChanged()).toBe(true);
@@ -85,7 +85,7 @@ it("dispatched action updates state and store emits change", () => {
     store.subscribe(stub);
     expect(store.getSubscribersCount()).toBe(1);
 
-    dispatcher.dispatchFSA(createFluxAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
+    dispatcher.dispatchAction(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(stub).toBeCalled();
     store.unsubscribe(stub);
@@ -161,10 +161,10 @@ it("mixed class action handler and FSA handler", () => {
         counter: 0
     };
 
-    state = handlers(state, createFluxAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 2 }));
+    state = handlers(state, createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 2 }));
     expect(state.counter).toBe(2);
     state = handlers(state, createSagaAction(new ResetClassAction()));
     expect(state.counter).toBe(0);
-    state = handlers(state, createFluxAction<DecrementAction>("COUNTER_DECREMENT", { minusCount: 2 }));
+    state = handlers(state, createAction<DecrementAction>("COUNTER_DECREMENT", { minusCount: 2 }));
     expect(state.counter).toBe(-2);
 });

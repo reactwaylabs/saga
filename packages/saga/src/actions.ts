@@ -1,5 +1,7 @@
 import { generateRandomString, instanceOfClass } from "./helpers";
 
+// tslint:disable:no-any
+
 /**
  * @see @url https://github.com/redux-utilities/flux-standard-action
  */
@@ -73,7 +75,7 @@ export function createAction<TAction extends FSA, TMeta = undefined>(
     payload: TAction["payload"],
     meta?: TMeta
 ): TAction {
-    if (payload != null && typeof payload != "object") {
+    if (payload != null && typeof payload !== "object") {
         throw new Error("createFluxAction(...): Payload can only be object or undefined/null.");
     }
 

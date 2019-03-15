@@ -100,6 +100,7 @@ export function registerActionHandler<TState, TAction extends ClassAction>(
     };
 }
 
+// tslint:disable-next-line:no-any
 export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TState, any>>): StoreReduceHandler<TState, any> {
     return (state, payload) => {
         let nextState = state;
@@ -123,6 +124,7 @@ export function handleFluxActions<TState, TActions extends FSA>(
         for (const key in handlers) {
             if (action.type === key) {
                 const handler = handlers[key as TActions["type"]];
+                // tslint:disable-next-line:no-any
                 return handler(state, action as any);
             }
         }

@@ -1,4 +1,4 @@
-import { createSagaAction, createFluxAction, FSA, isFSA, isErrorFSA, isSagaAction } from "../actions";
+import { createSagaAction, createAction, FSA, isAction, isErrorAction, isSagaAction } from "../actions";
 
 jest.mock("../helpers", () => ({
     ...jest.requireActual("../helpers"),
@@ -22,28 +22,28 @@ it("throw when creating saga action from object payload", () => {
 });
 
 it("creates FSA action", () => {
-    const fluxAction = createFluxAction<TestFSA>("TEST", undefined);
+    const fluxAction = createAction<TestFSA>("TEST", undefined);
 
     expect(fluxAction).toMatchSnapshot();
 });
 
 it("check if FSA object is FSA", () => {
-    const fluxAction = createFluxAction<TestFSA>("TEST", undefined);
+    const fluxAction = createAction<TestFSA>("TEST", undefined);
 
-    expect(isFSA(fluxAction)).toBe(true);
+    expect(isAction(fluxAction)).toBe(true);
 });
 
 it("check if FSA object is Error FSA", () => {
     const actionPayload = new Error("Test Error");
-    const fluxAction = createFluxAction<TestFSA>("TEST", actionPayload);
+    const fluxAction = createAction<TestFSA>("TEST", actionPayload);
 
-    expect(isErrorFSA(fluxAction)).toBe(true);
+    expect(isErrorAction(fluxAction)).toBe(true);
 });
 
 it("check if empty object is FSA", () => {
     const action = {};
 
-    expect(isFSA(action)).toBe(false);
+    expect(isAction(action)).toBe(false);
 });
 
 it("check if Saga Action is Saga action", () => {

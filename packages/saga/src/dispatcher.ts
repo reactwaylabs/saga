@@ -9,7 +9,6 @@ export interface Dispatcher<TPayload extends FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
-    // tslint:disable-next-line
     dispatchAction<TDPayload extends TPayload>(payload: TDPayload): void;
     dispatch<TClassAction extends object>(classAction: TClassAction): void;
     isDispatching: boolean;
