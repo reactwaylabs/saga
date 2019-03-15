@@ -1,8 +1,8 @@
 import { printReceived } from "jest-matcher-utils";
-import { isFSA, isSagaAction } from "../actions";
+import { isAction, isSagaAction } from "../actions";
 
 function toBeFSA(item: object) {
-    const isFluxAction = isFSA(item);
+    const isFluxAction = isAction(item);
 
     return {
         pass: isFluxAction,
