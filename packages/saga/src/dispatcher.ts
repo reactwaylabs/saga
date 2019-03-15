@@ -131,3 +131,5 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
 export function createDispatcher<TPayload extends FSA = FSA>(): Dispatcher<TPayload> {
     return new DispatcherClass<TPayload>();
 }
+
+export const AppDispatcher = createDispatcher();
