@@ -10,7 +10,7 @@ export interface Dispatcher<TPayload extends FSA> {
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
     // tslint:disable-next-line
-    dispatchFSA<TDPayload extends TPayload>(payload: TDPayload): void;
+    dispatchAction<TDPayload extends TPayload>(payload: TDPayload): void;
     dispatch<TClassAction extends object>(classAction: TClassAction): void;
     isDispatching: boolean;
 }
@@ -63,9 +63,9 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
         }
     }
 
-    public dispatchFSA(payload: TPayload): void {
+    public dispatchAction(payload: TPayload): void {
         if (this._isDispatching) {
-            throw new Error("Dispatch.dispatchFSA(...): Cannot dispatch in the middle of dispatch.");
+            throw new Error("Dispatch.dispatchAction(...): Cannot dispatch in the middle of dispatch.");
         }
 
         this.startDispatching(payload);
@@ -85,12 +85,14 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
 
     public dispatch<TClassAction extends object>(classAction: TClassAction): void {
         if (!instanceOfClass(classAction)) {
-            throw new Error("Dispatcher.dispatch(...): Action must be initialized from a class. Use 'dispatchFSA' method or create an action class.");
+            throw new Error(
+                "Dispatcher.dispatch(...): Action must be initialized from a class. Use 'dispatchAction' method or create an action class."
+            );
         }
 
         const sagaAction = createSagaAction(classAction) as TPayload;
 
-        this.dispatchFSA(sagaAction);
+        this.dispatchAction(sagaAction);
     }
 
     public get isDispatching(): boolean {

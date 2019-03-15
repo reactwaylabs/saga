@@ -68,7 +68,7 @@ export function createSagaAction<TClassAction extends object, TMeta = undefined>
     };
 }
 
-export function createFluxAction<TAction extends FSA, TMeta = undefined>(
+export function createAction<TAction extends FSA, TMeta = undefined>(
     type: TAction["type"],
     payload: TAction["payload"],
     meta?: TMeta
@@ -94,15 +94,15 @@ export function isSagaAction<TPayload>(action: any): action is FSA<TPayload> {
 /**
  * Returns `true` if `action` is FSA compliant.
  */
-export function isFSA<TPayload, TMeta = undefined>(action: any): action is FSA<TPayload, TMeta> {
+export function isAction<TPayload, TMeta = undefined>(action: any): action is FSA<TPayload, TMeta> {
     return typeof action === "object" && typeof action.type === "string" && Object.keys(action).every(isValidKey);
 }
 
 /**
  * Returns `true` if `action` is FSA compliant error.
  */
-export function isErrorFSA<TCustomError extends Error, TMeta = undefined>(action: any): action is ErrorFSA<TCustomError, TMeta> {
-    return isFSA(action) && action.error === true;
+export function isErrorAction<TCustomError extends Error, TMeta = undefined>(action: any): action is ErrorFSA<TCustomError, TMeta> {
+    return isAction(action) && action.error === true;
 }
 
 function isValidKey(key: string): boolean {
