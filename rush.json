@@ -12,6 +12,12 @@
             "projectFolder": "packages/saga",
             "versionPolicyName": "SagaPolicy",
             "shouldPublish": true
+        },
+        {
+            "packageName": "saga-react",
+            "projectFolder": "packages/saga-react",
+            "versionPolicyName": "SagaPolicy",
+            "shouldPublish": true
         }
     ]
 }
