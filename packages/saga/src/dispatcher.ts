@@ -5,7 +5,7 @@ const RANDOM_ID: string = generateRandomString();
 
 export type DispatcherRegisterHandler<TPayload extends FSA> = (payload: TPayload) => void;
 
-export interface Dispatcher<TPayload extends FSA> {
+export interface Dispatcher<TPayload extends FSA = FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
