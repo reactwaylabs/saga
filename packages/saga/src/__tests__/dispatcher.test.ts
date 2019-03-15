@@ -1,101 +1,108 @@
 import { createDispatcher } from "../dispatcher";
 
-interface Action {
-    type: string;
-}
+import "./test-utils";
 
-let dispatcher = createDispatcher<Action>();
-const TEST_ACTION: Action = { type: "test" };
+let dispatcher = createDispatcher();
 
-const STORE_NAME1: string = "name-1";
-const STORE_NAME2: string = "name-2";
-const STORE_NAME3: string = "name-3";
+class TestAction {}
 
 beforeEach(() => {
-    dispatcher = createDispatcher<Action>();
+    dispatcher = createDispatcher();
 });
 
 it("register store and dispatch action and then unregister store", () => {
     const mock = jest.fn();
 
-    dispatcher.register(STORE_NAME1, mock);
-    dispatcher.dispatch(TEST_ACTION);
+    const dispatchToken = dispatcher.register(mock);
+    dispatcher.dispatch(new TestAction());
 
-    expect(mock).toBeCalledWith(TEST_ACTION);
+    expect(mock.mock.calls[0][0]).toBeSagaAction();
 
-    dispatcher.unregister(STORE_NAME1);
+    dispatcher.unregister(dispatchToken);
 });
 
 it("waitFor to resolve in specific store order", () => {
     const callOrder: string[] = [];
+
+    let dispatchToken1: string = "";
+    let dispatchToken2: string = "";
+    let dispatchToken3: string = "";
+
     const store1 = () => {
-        dispatcher.waitFor([STORE_NAME3, STORE_NAME2]);
-        callOrder.push(STORE_NAME1);
+        dispatcher.waitFor([dispatchToken3, dispatchToken2]);
+        callOrder.push(dispatchToken1);
     };
-    const store2 = () => callOrder.push(STORE_NAME2);
-    const store3 = () => callOrder.push(STORE_NAME3);
+    const store2 = () => callOrder.push(dispatchToken2);
+    const store3 = () => callOrder.push(dispatchToken3);
 
-    dispatcher.register(STORE_NAME1, store1);
-    dispatcher.register(STORE_NAME2, store2);
-    dispatcher.register(STORE_NAME3, store3);
+    dispatchToken1 = dispatcher.register(store1);
+    dispatchToken2 = dispatcher.register(store2);
+    dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 
-    expect(callOrder).toEqual([STORE_NAME3, STORE_NAME2, STORE_NAME1]);
+    expect(callOrder).toEqual([dispatchToken3, dispatchToken2, dispatchToken1]);
 });
 
-it("waitFor must throw while not being in middle of dispatch", () => {
-    expect(() => dispatcher.waitFor([STORE_NAME1])).toThrow();
+it("waitFor must throw while not being in the middle of dispatch", () => {
+    expect(() => dispatcher.waitFor(["hello"])).toThrow();
 });
 
 it("waitFor store that does not exist", () => {
     const store1 = () => {
-        expect(() => dispatcher.waitFor([STORE_NAME2])).toThrow();
+        expect(() => dispatcher.waitFor(["hello"])).toThrow();
     };
 
-    dispatcher.register(STORE_NAME1, store1);
+    dispatcher.register(store1);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("waitFor circular store", () => {
+    let dispatchToken1: string = "";
+    let dispatchToken2: string = "";
+
     const store1 = () => {
-        dispatcher.waitFor([STORE_NAME2]);
+        dispatcher.waitFor([dispatchToken2]);
     };
     const store2 = () => {
-        expect(() => dispatcher.waitFor([STORE_NAME1])).toThrow();
+        expect(() => dispatcher.waitFor([dispatchToken1])).toThrow();
     };
 
-    dispatcher.register(STORE_NAME1, store1);
-    dispatcher.register(STORE_NAME2, store2);
+    dispatchToken1 = dispatcher.register(store1);
+    dispatchToken2 = dispatcher.register(store2);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("waitFor bigger circular store", () => {
+    let dispatchToken1: string = "";
+    let dispatchToken2: string = "";
+    let dispatchToken3: string = "";
+
     const store1 = () => {
-        dispatcher.waitFor([STORE_NAME2]);
+        dispatcher.waitFor([dispatchToken2]);
     };
     const store2 = () => {
-        dispatcher.waitFor([STORE_NAME3]);
+        dispatcher.waitFor([dispatchToken3]);
     };
     const store3 = () => {
-        expect(() => dispatcher.waitFor([STORE_NAME1])).toThrow();
+        expect(() => dispatcher.waitFor([dispatchToken1])).toThrow();
     };
 
-    dispatcher.register(STORE_NAME1, store1);
-    dispatcher.register(STORE_NAME2, store2);
-    dispatcher.register(STORE_NAME3, store3);
+    dispatchToken1 = dispatcher.register(store1);
+    dispatchToken2 = dispatcher.register(store2);
+    dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });
 
 it("dispatch in the middle of dispatch", () => {
     const store1 = () => {
-        expect(() => dispatcher.dispatch(TEST_ACTION)).toThrow();
+        expect(() => dispatcher.dispatch(new TestAction())).toThrow();
     };
 
-    dispatcher.register(STORE_NAME1, store1);
+    dispatcher.register(store1);
 
-    dispatcher.dispatch(TEST_ACTION);
+    dispatcher.dispatch(new TestAction());
 });

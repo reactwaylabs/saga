@@ -1,56 +1,68 @@
-import { createStore, Store } from "../store";
+import { createStore, Store, combineHandlers } from "../store";
 import { createDispatcher, Dispatcher } from "../dispatcher";
+import { FSA, createAction, createSagaAction } from "../actions";
 
-interface Action {
-    type: string;
-}
+import { handleActions, handleClassAction } from "../store";
 
-interface ActionIncrement extends Action {
+interface IncrementAction extends FSA<{ plusCount: number }> {
     type: "COUNTER_INCREMENT";
 }
 
-interface ActionDecrement extends Action {
+interface DecrementAction extends FSA<{ minusCount: number }> {
     type: "COUNTER_DECREMENT";
 }
 
-type StoreActions = ActionIncrement | ActionDecrement;
+class IncrementClassAction {
+    constructor(private _plusCount: number = 1) {}
 
-let dispatcher = createDispatcher<Action>();
+    public get plusCount(): number {
+        return this._plusCount;
+    }
+}
+
+class DecrementClassAction {
+    constructor(private _minusCount: number = 1) {}
+
+    public get minusCount(): number {
+        return this._minusCount;
+    }
+}
+
+class ResetClassAction {}
+
+type StoreActions = IncrementAction | DecrementAction;
+
+let dispatcher = createDispatcher();
 let store = createTestStore(dispatcher);
 
 interface StoreState {
     counter: number;
 }
 
-function createTestStore(_dispatcher: Dispatcher<Action>): Store<StoreState, StoreActions> {
+function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState> {
     return createStore<StoreState, StoreActions>({
         name: "test",
-        dispatcher: _dispatcher as Dispatcher<StoreActions>,
+        dispatcher: _dispatcher,
         initialState: {
             counter: 0
         },
-        reducer: (state, action) => {
-            switch (action.type) {
-                case "COUNTER_INCREMENT": {
-                    return {
-                        counter: state.counter + 1
-                    };
-                }
-                case "COUNTER_DECREMENT": {
-                    return {
-                        counter: state.counter - 1
-                    };
-                }
-                default: {
-                    return state;
-                }
+        reducer: handleActions<StoreState, StoreActions>({
+            COUNTER_INCREMENT: (state, action) => {
+                return {
+                    counter: state.counter + 1
+                };
+            },
+            COUNTER_DECREMENT: (state, action) => {
+                return {
+                    counter: state.counter - 1
+                };
             }
-        }
+        })
     });
 }
 
 beforeEach(() => {
-    dispatcher = createDispatcher<Action>();
+    dispatcher = createDispatcher();
     store = createTestStore(dispatcher);
 });
 
@@ -60,9 +72,7 @@ it("dispatched action updates store state", () => {
     store.subscribe(stub);
     expect(store.getState().counter).toBe(0);
 
-    dispatcher.dispatch<ActionIncrement>({
-        type: "COUNTER_INCREMENT"
-    });
+    dispatcher.dispatchAction(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(store.getState().counter).toBe(1);
     expect(store.hasChanged()).toBe(true);
@@ -75,11 +85,86 @@ it("dispatched action updates state and store emits change", () => {
     store.subscribe(stub);
     expect(store.getSubscribersCount()).toBe(1);
 
-    dispatcher.dispatch<ActionIncrement>({
-        type: "COUNTER_INCREMENT"
-    });
+    dispatcher.dispatchAction(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(stub).toBeCalled();
     store.unsubscribe(stub);
     expect(store.getSubscribersCount()).toBe(0);
+});
+
+it("register action handler with class increment action", () => {
+    const handler = handleClassAction<StoreState, typeof IncrementClassAction>(IncrementClassAction, (state, action) => {
+        return {
+            counter: state.counter + action.plusCount
+        };
+    });
+
+    let state: StoreState = {
+        counter: 0
+    };
+
+    state = handler(state, createSagaAction(new IncrementClassAction(2)));
+    expect(state.counter).toBe(2);
+});
+
+it("combined class action handlers", () => {
+    const handlers = combineHandlers<StoreState>([
+        handleClassAction(IncrementClassAction, (state, action) => {
+            return {
+                counter: state.counter + action.plusCount
+            };
+        }),
+        handleClassAction(DecrementClassAction, (state, action) => {
+            return {
+                counter: state.counter - action.minusCount
+            };
+        })
+    ]);
+
+    let state: StoreState = {
+        counter: 0
+    };
+
+    state = handlers(state, createSagaAction(new IncrementClassAction(2)));
+    expect(state.counter).toBe(2);
+    state = handlers(state, createSagaAction(new DecrementClassAction(1)));
+    expect(state.counter).toBe(1);
+});
+
+it("mixed class action handler and FSA handler", () => {
+    type Actions = IncrementAction | DecrementAction;
+
+    const handlers = combineHandlers<StoreState>([
+        handleActions<StoreState, Actions>({
+            COUNTER_INCREMENT: (state, action) => {
+                return {
+                    ...state,
+                    counter: state.counter + action.payload.plusCount
+                };
+            },
+            COUNTER_DECREMENT: (state, action) => {
+                return {
+                    ...state,
+                    counter: state.counter - action.payload.minusCount
+                };
+            }
+        }),
+        handleClassAction(ResetClassAction, (state, _action) => {
+            return {
+                ...state,
+                counter: 0
+            };
+        })
+    ]);
+
+    let state: StoreState = {
+        counter: 0
+    };
+
+    state = handlers(state, createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 2 }));
+    expect(state.counter).toBe(2);
+    state = handlers(state, createSagaAction(new ResetClassAction()));
+    expect(state.counter).toBe(0);
+    state = handlers(state, createAction<DecrementAction>("COUNTER_DECREMENT", { minusCount: 2 }));
+    expect(state.counter).toBe(-2);
 });
