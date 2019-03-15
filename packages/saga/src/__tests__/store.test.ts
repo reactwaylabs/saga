@@ -2,7 +2,7 @@ import { createStore, Store, combineHandlers } from "../store";
 import { createDispatcher, Dispatcher } from "../dispatcher";
 import { FSA, createAction, createSagaAction } from "../actions";
 
-import { handleFluxActions, registerActionHandler } from "../store";
+import { handleActions, handleClassAction } from "../store";
 
 interface IncrementAction extends FSA<{ plusCount: number }> {
     type: "COUNTER_INCREMENT";
@@ -46,7 +46,7 @@ function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState> {
         initialState: {
             counter: 0
         },
-        reducer: handleFluxActions<StoreState, StoreActions>({
+        reducer: handleActions<StoreState, StoreActions>({
             COUNTER_INCREMENT: (state, action) => {
                 return {
                     counter: state.counter + 1
@@ -93,7 +93,7 @@ it("dispatched action updates state and store emits change", () => {
 });
 
 it("register action handler with class increment action", () => {
-    const handler = registerActionHandler<StoreState, typeof IncrementClassAction>(IncrementClassAction, (state, action) => {
+    const handler = handleClassAction<StoreState, typeof IncrementClassAction>(IncrementClassAction, (state, action) => {
         return {
             counter: state.counter + action.plusCount
         };
@@ -109,12 +109,12 @@ it("register action handler with class increment action", () => {
 
 it("combined class action handlers", () => {
     const handlers = combineHandlers<StoreState>([
-        registerActionHandler(IncrementClassAction, (state, action) => {
+        handleClassAction(IncrementClassAction, (state, action) => {
             return {
                 counter: state.counter + action.plusCount
             };
         }),
-        registerActionHandler(DecrementClassAction, (state, action) => {
+        handleClassAction(DecrementClassAction, (state, action) => {
             return {
                 counter: state.counter - action.minusCount
             };
@@ -135,7 +135,7 @@ it("mixed class action handler and FSA handler", () => {
     type Actions = IncrementAction | DecrementAction;
 
     const handlers = combineHandlers<StoreState>([
-        handleFluxActions<StoreState, Actions>({
+        handleActions<StoreState, Actions>({
             COUNTER_INCREMENT: (state, action) => {
                 return {
                     ...state,
@@ -149,7 +149,7 @@ it("mixed class action handler and FSA handler", () => {
                 };
             }
         }),
-        registerActionHandler(ResetClassAction, (state, _action) => {
+        handleClassAction(ResetClassAction, (state, _action) => {
             return {
                 ...state,
                 counter: 0

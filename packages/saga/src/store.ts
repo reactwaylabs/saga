@@ -87,7 +87,7 @@ export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOp
     return new StoreClass<TState, TPayload>(options.initialState, options.dispatcher, options.reducer, areEqual);
 }
 
-export function registerActionHandler<TState, TAction extends ClassAction>(
+export function handleClassAction<TState, TAction extends ClassAction>(
     action: TAction,
     callback: (state: TState, action: InstanceType<TAction>) => TState
 ): StoreReduceHandler<TState> {
@@ -117,7 +117,7 @@ export type ActionHandler<TState, TActions extends FSA> = {
     [TType in TActions["type"]]: (state: TState, action: Extract<TActions, { type: TType }>) => TState
 };
 
-export function handleFluxActions<TState, TActions extends FSA>(
+export function handleActions<TState, TActions extends FSA>(
     handlers: ActionHandler<TState, TActions>
 ): StoreReduceHandler<TState, TActions> {
     return (state: TState, action: TActions): TState => {
