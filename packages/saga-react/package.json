@@ -48,12 +48,12 @@
             "istanbul-azure-reporter"
         ]
     },
-    "dependencies": {
-        "tslib": "^1.9.3",
-        "saga": "4.0.0-alpha.2"
-    },
     "peerDependencies": {
         "react": "^16.8.4"
+    },
+    "dependencies": {
+        "saga": "4.0.0-alpha.2",
+        "tslib": "^1.9.3"
     },
     "devDependencies": {
         "@types/jest": "^24.0.9",
@@ -68,6 +68,7 @@
         "ts-jest": "^24.0.0",
         "tslint": "^5.13.1",
         "tslint-language-service": "^0.9.9",
+        "tslint-react-hooks": "~2.0.0",
         "typescript": "^3.3.3333"
     }
 }

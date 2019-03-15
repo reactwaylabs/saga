@@ -1,6 +1,7 @@
 {
-    "extends": "simplr-tslint",
+    "extends": ["simplr-tslint", "tslint-react-hooks"],
     "rules": {
-        "backing-field": false
+        "backing-field": false,
+        "react-hooks-nesting": "error"
     }
 }
