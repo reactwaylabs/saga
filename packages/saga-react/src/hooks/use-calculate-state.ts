@@ -3,6 +3,13 @@ import { Store } from "saga";
 
 export type CalculcateStateHandler<TState> = (prevState?: TState) => TState;
 
+/**
+ * A hook that subscribes to stores and on every change calls callback to calculate newest state.
+ * @param _callback Callback that will be called when any of stores emits change.
+ * @param storesDependencies Stores list to listen to changes.
+ * @param deps Callback dependencies.
+ * @param initialState An object is given in callback at first call.
+ */
 export function useCalculateState<TState>(
     _callback: CalculcateStateHandler<TState>,
     storesDependencies: Array<Store<any>>,
