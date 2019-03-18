@@ -16,7 +16,7 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-it("", () => {
+it("get state from store", () => {
     function TestApp(): JSX.Element {
         const { counter } = useStore(TestStore);
         return <span>{counter}</span>;
