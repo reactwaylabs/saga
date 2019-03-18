@@ -3,7 +3,7 @@ import { createSagaAction, FSA } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
-export type DispatcherRegisterHandler<TPayload extends FSA> = (payload: TPayload) => void;
+export type DispatcherRegisterHandler<TPayload extends FSA = FSA> = (payload: TPayload) => void;
 
 export interface Dispatcher<TPayload extends FSA = FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;

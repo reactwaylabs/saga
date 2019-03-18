@@ -1,11 +1,11 @@
-import { Dispatcher, DispatcherRegisterHandler } from "./dispatcher";
+import { Dispatcher, DispatcherRegisterHandler, AppDispatcher } from "./dispatcher";
 import { TinyEmitter, Callback } from "./emitter";
 import { FSA, isSagaAction, ClassAction } from "./actions";
 
-class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState, TPayload> {
+class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     constructor(
         private readonly initialState: TState,
-        private dispatcher: Dispatcher<TPayload>,
+        private dispatcher: Dispatcher,
         protected reducer: StoreReduceHandler<TState, TPayload>,
         protected areEqual: StoreAreEqualHandler<TState>
     ) {
@@ -25,7 +25,7 @@ class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState, TP
         return this.state;
     }
 
-    public getDispatcher(): Dispatcher<TPayload> {
+    public getDispatcher(): Dispatcher {
         return this.dispatcher;
     }
 
@@ -45,11 +45,11 @@ class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState, TP
         return this.emitter.getCount();
     }
 
-    private onDispatch: DispatcherRegisterHandler<TPayload> = payload => {
+    private onDispatch: DispatcherRegisterHandler = payload => {
         this.hasStoreChanged = false;
 
         const currentState = this.state;
-        const nextState = this.reducer(currentState, payload);
+        const nextState = this.reducer(currentState, payload as TPayload);
 
         if (!this.areEqual(currentState, nextState)) {
             this.state = nextState;
@@ -63,9 +63,9 @@ class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState, TP
 export type StoreReduceHandler<TState, TPayload extends FSA = FSA> = (state: TState, payload: TPayload) => TState;
 export type StoreAreEqualHandler<TState> = (state: TState, nextState: TState) => boolean;
 
-export interface Store<TState, TPayload extends FSA = FSA> {
+export interface Store<TState> {
     getState(): TState;
-    getDispatcher(): Dispatcher<TPayload>;
+    getDispatcher(): Dispatcher;
     getDispatchToken(): string;
     hasChanged(): boolean;
     subscribe(callback: () => void): () => void;
@@ -76,15 +76,16 @@ export interface Store<TState, TPayload extends FSA = FSA> {
 export interface StoreOptions<TState, TPayload extends FSA = FSA> {
     name: string;
     initialState: TState;
-    dispatcher: Dispatcher<TPayload>;
+    dispatcher?: Dispatcher;
     reducer: StoreReduceHandler<TState, TPayload>;
     areEqual?: StoreAreEqualHandler<TState>;
 }
 
-export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOptions<TState, TPayload>): Store<TState, TPayload> {
+export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOptions<TState, TPayload>): Store<TState> {
     const areEqual: StoreAreEqualHandler<TState> = options.areEqual != null ? options.areEqual : (state, nextState) => state === nextState;
+    const dispatcher = options.dispatcher != null ? options.dispatcher : AppDispatcher;
 
-    return new StoreClass<TState, TPayload>(options.initialState, options.dispatcher, options.reducer, areEqual);
+    return new StoreClass<TState, TPayload>(options.initialState, dispatcher, options.reducer, areEqual);
 }
 
 export function handleClassAction<TState, TAction extends ClassAction>(

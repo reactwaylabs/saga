@@ -6,6 +6,7 @@ dependencies:
   '@types/react-dom': 16.8.2
   istanbul-azure-reporter: 0.1.4
   jest: 24.5.0
+  jest-dom: 3.1.3
   jest-junit: 6.3.0
   jest-matcher-utils: 24.5.0
   react: 16.8.4
@@ -972,6 +973,10 @@ packages:
       node: '>=4.8'
     resolution:
       integrity: sha512-eTVLrBSt7fjbDygz805pMnstIs2VTBNkRm0qxZd+M7A5XDdxVRWO5MxGBXZhjY4cqLYLdtrGqRf8mBPmzwSpWQ==
+  /css.escape/1.5.1:
+    dev: false
+    resolution:
+      integrity: sha1-QuJ9T6BK4y+TGktNQZH6nN3ul8s=
   /css/2.2.4:
     dependencies:
       inherits: 2.0.3
@@ -1613,6 +1618,12 @@ packages:
       node: '>=0.8.19'
     resolution:
       integrity: sha1-khi5srkoojixPcT7a21XbyMUU+o=
+  /indent-string/3.2.0:
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha1-Sl/W0nzDMvN+VBmlBNu4NxBckok=
   /inflight/1.0.6:
     dependencies:
       once: 1.4.0
@@ -1887,6 +1898,13 @@ packages:
     dev: false
     resolution:
       integrity: sha512-zJrrlfLqkegcP85HiZbbCRz+ivUc4byLrrq3F1etfhFfOSIIo7ckiWsk8wBLEzp45kaF+q7E0c77v7XX/Pf7gw==
+  /istanbul-azure-reporter/0.1.4/react@16.8.4:
+    dependencies:
+      react-dom: /react-dom/16.8.4/react@16.8.4
+    dev: false
+    id: registry.npmjs.org/istanbul-azure-reporter/0.1.4
+    resolution:
+      integrity: sha512-zJrrlfLqkegcP85HiZbbCRz+ivUc4byLrrq3F1etfhFfOSIIo7ckiWsk8wBLEzp45kaF+q7E0c77v7XX/Pf7gw==
   /istanbul-lib-coverage/2.0.3:
     dev: false
     engines:
@@ -2042,6 +2060,22 @@ packages:
       node: '>= 6'
     resolution:
       integrity: sha512-nlANmF9Yq1dufhFlKG9rasfQlrY7wINJbo3q01tu56Jv5eBU5jirylhF2O5ZBnLxzOVBGRDz/9NAwNyBtG4Nyg==
+  /jest-dom/3.1.3:
+    dependencies:
+      chalk: 2.4.2
+      css: 2.2.4
+      css.escape: 1.5.1
+      jest-diff: 24.5.0
+      jest-matcher-utils: 24.5.0
+      lodash: 4.17.11
+      pretty-format: 24.5.0
+      redent: 2.0.0
+    dev: false
+    engines:
+      node: '> 4'
+      npm: '> 3'
+    resolution:
+      integrity: sha512-V9LdySiA74/spcAKEG3FRMRKnisKlcYr3EeCNYI4n7CWNE7uYg5WoBUHeGXirjWjRYLLZ5vx8rUaR/6x6o75oQ==
   /jest-each/24.5.0:
     dependencies:
       '@jest/types': 24.5.0
@@ -3300,6 +3334,15 @@ packages:
       node: '>=4'
     resolution:
       integrity: sha512-wlgPA6cCIIg9gKz0fgAPjnzh4yR/LnXovwuo9hvyGvx3h8nX4+/iLZplfUWasXpqD8BdnGnP5njOFjkUwPzvjA==
+  /redent/2.0.0:
+    dependencies:
+      indent-string: 3.2.0
+      strip-indent: 2.0.0
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha1-wbIAe0LVfrE4kHmzyDM2OdXhzKo=
   /regenerator-runtime/0.12.1:
     dev: false
     resolution:
@@ -3566,7 +3609,7 @@ packages:
   /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0:
     dependencies:
       change-case: 3.1.0
-      tslint: /tslint/5.14.0/typescript@3.3.3333
+      tslint: 5.14.0
     dev: false
     id: registry.npmjs.org/simplr-tslint/1.0.0-alpha.14
     peerDependencies:
@@ -3807,6 +3850,12 @@ packages:
       node: '>=0.10.0'
     resolution:
       integrity: sha1-u0P/VZim6wXYm1n80SnJgzE2Br8=
+  /strip-indent/2.0.0:
+    dev: false
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha1-XvjbKV0B5u1sv3qrlpmNeCJSe2g=
   /style-to-object/0.2.2:
     dependencies:
       css: 2.2.4
@@ -4002,6 +4051,16 @@ packages:
       mock-require: 2.0.2
       tslint: /tslint/5.14.0/typescript@3.3.3333
       typescript: 3.3.3333
+    dev: false
+    id: registry.npmjs.org/tslint-language-service/0.9.9
+    peerDependencies:
+      tslint: '>= 4 < 6'
+      typescript: '>= 2.3.1 < 3'
+    resolution:
+      integrity: sha1-9UbcOEg5eeb7PPpZWErYUls61No=
+  /tslint-language-service/0.9.9/tslint@5.14.0:
+    dependencies:
+      tslint: 5.14.0
     dev: false
     id: registry.npmjs.org/tslint-language-service/0.9.9
     peerDependencies:
@@ -4411,8 +4470,9 @@ packages:
       '@types/jest': 24.0.11
       '@types/react': 16.8.8
       '@types/react-dom': 16.8.2
-      istanbul-azure-reporter: 0.1.4
+      istanbul-azure-reporter: /istanbul-azure-reporter/0.1.4/react@16.8.4
       jest: 24.5.0
+      jest-dom: 3.1.3
       jest-junit: 6.3.0
       react: 16.8.4
       react-dom: /react-dom/16.8.4/react@16.8.4
@@ -4427,7 +4487,7 @@ packages:
     dev: false
     name: '@rush-temp/saga-react'
     resolution:
-      integrity: sha512-5pYNtxCKnojOIiP0n6z8b91jRx1inu2CQAObMP7FSGV2qg1Ya/+G+gpgXX+M19+gGVqsRTunyZ914oVabHUETw==
+      integrity: sha512-daq4K7+HXnmEKKV4NX7bSWs74cVY0Cjse0BgzqAqbmvn3QA3jP23HO3cyqktq7SCFVUoMXUfLpMzBdmKpEw+jg==
       tarball: 'file:projects/saga-react.tgz'
     version: 0.0.0
   'file:projects/saga.tgz':
@@ -4438,10 +4498,10 @@ packages:
       jest-junit: 6.3.0
       jest-matcher-utils: 24.5.0
       simplr-tslint: /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0
-      ts-jest: /ts-jest/24.0.0/jest@24.5.0
+      ts-jest: 24.0.0
       tslib: 1.9.3
-      tslint: /tslint/5.14.0/typescript@3.3.3333
-      tslint-language-service: /tslint-language-service/0.9.9/6921bdfbb1407821bef8c0bfffda7652
+      tslint: 5.14.0
+      tslint-language-service: /tslint-language-service/0.9.9/tslint@5.14.0
       typescript: 3.3.3333
     dev: false
     name: '@rush-temp/saga'
@@ -4460,6 +4520,7 @@ specifiers:
   '@types/react-dom': ^16.8.2
   istanbul-azure-reporter: ^0.1.4
   jest: ^24.1.0
+  jest-dom: ~3.1.3
   jest-junit: ^6.3.0
   jest-matcher-utils: ^24.5.0
   react: ^16.8.4
