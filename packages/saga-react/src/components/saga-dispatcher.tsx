@@ -5,9 +5,9 @@ import { DispatcherContext } from "../contexts/dispatcher-context";
 
 interface Props {
     dispatcher: Dispatcher;
-    children: React.ReactNode;
+    children: React.ReactNode
 }
 
-export function SagaDispatcher(props: Props): React.ReactNode {
+export function SagaDispatcher(props: Props): JSX.Element {
     return <DispatcherContext.Provider value={props.dispatcher}>{props.children}</DispatcherContext.Provider>;
 }
