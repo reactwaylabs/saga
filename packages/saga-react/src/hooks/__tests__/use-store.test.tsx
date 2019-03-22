@@ -6,7 +6,7 @@ import { render, cleanup } from "react-testing-library";
 import { AppDispatcher } from "saga";
 
 import { useStore } from "../use-store";
-import { createTestStore, IncrementAction } from "./test-helpers";
+import { createTestStore, incrementActionCreator } from "./test-helpers";
 
 let TestStore = createTestStore();
 
@@ -27,7 +27,7 @@ it("get state from store", () => {
     expect(baseElement).toHaveTextContent("0");
 
     act(() => {
-        AppDispatcher.dispatch(new IncrementAction());
+        AppDispatcher.dispatch(incrementActionCreator());
     });
 
     expect(baseElement).toHaveTextContent("1");

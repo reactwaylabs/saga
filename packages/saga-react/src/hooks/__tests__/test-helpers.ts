@@ -1,42 +1,45 @@
-import { createStore, Store, combineHandlers, handleClassAction } from "saga";
+import { createStore, Store, handleActions, FSA, createAction } from "saga";
 
-export class IncrementAction {
-    constructor(private _plusCount: number = 1) {}
-
-    public get plusCount(): number {
-        return this._plusCount;
-    }
+interface Increment extends FSA {
+    type: "INCREMENT";
+    payload: {
+        plusCount: number;
+    };
 }
 
-export class DecrementAction {
-    constructor(private _minusCount: number = 1) {}
-
-    public get minusCount(): number {
-        return this._minusCount;
-    }
+interface Decrement extends FSA {
+    type: "DECREMENT";
+    payload: {
+        minusCount: number;
+    };
 }
+
+export const incrementActionCreator = (amount = 1) => createAction<Increment>("INCREMENT", { plusCount: amount });
+export const decrementActionCreator = (amount = 1) => createAction<Decrement>("DECREMENT", { minusCount: amount });
+
+type StoreActions = Increment | Decrement;
 
 export interface TestStoreState {
     counter: number;
 }
 
 export function createTestStore(): Store<TestStoreState> {
-    return createStore<TestStoreState>({
+    return createStore<TestStoreState, StoreActions>({
         name: "test-store",
         initialState: {
             counter: 0
         },
-        reducer: combineHandlers([
-            handleClassAction(IncrementAction, (state, action) => {
+        reducer: handleActions<TestStoreState, StoreActions>({
+            INCREMENT: (state, action) => {
                 return {
-                    counter: state.counter + action.plusCount
+                    counter: state.counter + action.payload.plusCount
                 };
-            }),
-            handleClassAction(DecrementAction, (state, action) => {
+            },
+            DECREMENT: (state, action) => {
                 return {
-                    counter: state.counter - action.minusCount
+                    counter: state.counter - action.payload.minusCount
                 };
-            })
-        ])
+            }
+        })
     });
-} 
+}
