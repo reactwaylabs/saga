@@ -63,7 +63,7 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
 
     public dispatch(payload: TPayload): void {
         if (this._isDispatching) {
-            throw new Error("Dispatch.dispatchAction(...): Cannot dispatch in the middle of dispatch.");
+            throw new Error("Dispatch.dispatch(...): Cannot dispatch in the middle of dispatch.");
         }
 
         this.startDispatching(payload);
