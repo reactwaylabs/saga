@@ -23,6 +23,12 @@ React bindings for Saga.
 
 [![NPM version](https://img.shields.io/npm/v/saga-react.svg?logo=npm)](https://www.npmjs.com/package/saga-react) [![David Dependencies](https://img.shields.io/david/reactway/saga.svg?path=packages%2Fsaga-react)](https://david-dm.org/reactway/saga?path=packages%2Fsaga-react) [![David Dev Dependencies](https://img.shields.io/david/dev/reactway/saga.svg?path=packages%2Fsaga-react)](https://david-dm.org/reactway/saga?path=packages%2Fsaga-react&type=dev)
 
+### [saga-react](/packages/saga-async)
+
+Helpers to handle promises in Saga.
+
+[![NPM version](https://img.shields.io/npm/v/saga-async.svg?logo=npm)](https://www.npmjs.com/package/saga-async) [![David Dependencies](https://img.shields.io/david/reactway/saga.svg?path=packages%2Fsaga-async)](https://david-dm.org/reactway/saga?path=packages%2Fsaga-async) [![David Dev Dependencies](https://img.shields.io/david/dev/reactway/saga.svg?path=packages%2Fsaga-async)](https://david-dm.org/reactway/saga?path=packages%2Fsaga-async&type=dev)
+
 ## License
 
 Released under the [MIT license](LICENSE).
