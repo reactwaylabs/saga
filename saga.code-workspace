@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "packages\\saga-react"
+		},
+		{
+			"path": "packages\\saga-async"
 		}
 	]
 }
