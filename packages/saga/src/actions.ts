@@ -1,4 +1,4 @@
-import { generateRandomString, instanceOfClass } from "./helpers";
+// import { generateRandomString, instanceOfClass } from "./helpers";
 
 // tslint:disable:no-any
 
@@ -47,28 +47,32 @@ export type FSA<TPayload = any, TMeta = any> = FluxStandardAction<TPayload, TMet
  */
 export type ErrorFSA<TCustomError extends Error, TMeta = undefined> = ErrorFluxStandardAction<TCustomError, TMeta>;
 
-export type ClassAction = new (...args: any[]) => any;
+// export type ClassAction = new (...args: any[]) => any;
 
-const SAGA_ACTION_TYPE: string = `SAGA_${generateRandomString()}`;
+// const SAGA_ACTION_TYPE: string = `SAGA_${generateRandomString()}`;
 
-export function createSagaAction<TClassAction extends object, TMeta = undefined>(
-    action: TClassAction,
-    meta?: TMeta
-): FSA<TClassAction, TMeta> {
-    // TODO: Omit this code in production.
-    if (!instanceOfClass(action)) {
-        throw new Error("createSagaAction(...): Action must be initialized from a class.");
-    }
+// export function createSagaAction<TClassAction extends object, TMeta = undefined>(
+//     action: TClassAction,
+//     meta?: TMeta
+// ): FSA<TClassAction, TMeta> {
+//     // TODO: Omit this code in production.
+//     if (!instanceOfClass(action)) {
+//         throw new Error("createSagaAction(...): Action must be initialized from a class.");
+//     }
 
-    const isError = action instanceof Error;
+//     const isError = action instanceof Error;
 
-    return {
-        type: SAGA_ACTION_TYPE,
-        payload: action,
-        error: isError,
-        meta: meta
-    };
-}
+//     return {
+//         type: SAGA_ACTION_TYPE,
+//         payload: action,
+//         error: isError,
+//         meta: meta
+//     };
+// }
+
+// export function isSagaAction<TPayload>(action: any): action is FSA<TPayload> {
+//     return action.type === SAGA_ACTION_TYPE;
+// }
 
 export function createAction<TAction extends FSA, TMeta = undefined>(
     type: TAction["type"],
@@ -76,7 +80,7 @@ export function createAction<TAction extends FSA, TMeta = undefined>(
     meta?: TMeta
 ): TAction {
     if (payload != null && typeof payload !== "object") {
-        throw new Error("createFluxAction(...): Payload can only be object or undefined/null.");
+        throw new Error("createAction(...): Payload can only be object or undefined/null.");
     }
 
     const isError = (payload as object) instanceof Error;
@@ -87,10 +91,6 @@ export function createAction<TAction extends FSA, TMeta = undefined>(
         error: isError,
         meta: meta
     } as TAction;
-}
-
-export function isSagaAction<TPayload>(action: any): action is FSA<TPayload> {
-    return action.type === SAGA_ACTION_TYPE;
 }
 
 /**
