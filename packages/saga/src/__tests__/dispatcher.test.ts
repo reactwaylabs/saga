@@ -1,10 +1,18 @@
 import { createDispatcher } from "../dispatcher";
+import { FSA, createAction } from "../actions";
 
 import "./test-utils";
 
 let dispatcher = createDispatcher();
 
-class TestAction {}
+interface TestAction extends FSA {
+    type: "TEST";
+    payload: {
+        text: string;
+    };
+}
+
+const testActionCreator = () => createAction<TestAction>("TEST", { text: "string" });
 
 beforeEach(() => {
     dispatcher = createDispatcher();
@@ -14,9 +22,9 @@ it("register store and dispatch action and then unregister store", () => {
     const mock = jest.fn();
 
     const dispatchToken = dispatcher.register(mock);
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch<TestAction>(testActionCreator());
 
-    expect(mock.mock.calls[0][0]).toBeSagaAction();
+    expect(mock.mock.calls[0][0]).toBeFSA();
 
     dispatcher.unregister(dispatchToken);
 });
@@ -39,7 +47,7 @@ it("waitFor to resolve in specific store order", () => {
     dispatchToken2 = dispatcher.register(store2);
     dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch(testActionCreator());
 
     expect(callOrder).toEqual([dispatchToken3, dispatchToken2, dispatchToken1]);
 });
@@ -55,7 +63,7 @@ it("waitFor store that does not exist", () => {
 
     dispatcher.register(store1);
 
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch(testActionCreator());
 });
 
 it("waitFor circular store", () => {
@@ -72,7 +80,7 @@ it("waitFor circular store", () => {
     dispatchToken1 = dispatcher.register(store1);
     dispatchToken2 = dispatcher.register(store2);
 
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch(testActionCreator());
 });
 
 it("waitFor bigger circular store", () => {
@@ -94,15 +102,20 @@ it("waitFor bigger circular store", () => {
     dispatchToken2 = dispatcher.register(store2);
     dispatchToken3 = dispatcher.register(store3);
 
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch<TestAction>({
+        type: "TEST",
+        payload: {
+            text: "test"
+        }
+    });
 });
 
 it("dispatch in the middle of dispatch", () => {
     const store1 = () => {
-        expect(() => dispatcher.dispatch(new TestAction())).toThrow();
+        expect(() => dispatcher.dispatch(testActionCreator())).toThrow();
     };
 
     dispatcher.register(store1);
 
-    dispatcher.dispatch(new TestAction());
+    dispatcher.dispatch(testActionCreator());
 });

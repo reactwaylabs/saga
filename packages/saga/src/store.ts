@@ -1,6 +1,6 @@
 import { Dispatcher, DispatcherRegisterHandler, AppDispatcher } from "./dispatcher";
 import { TinyEmitter, Callback } from "./emitter";
-import { FSA, isSagaAction, ClassAction } from "./actions";
+import { FSA } from "./actions";
 
 class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     constructor(
@@ -42,7 +42,7 @@ class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     }
 
     public getSubscribersCount(): number {
-        return this.emitter.getCount();
+        return this.emitter.getListenersCount();
     }
 
     private onDispatch: DispatcherRegisterHandler = payload => {
@@ -86,19 +86,6 @@ export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOp
     const dispatcher = options.dispatcher != null ? options.dispatcher : AppDispatcher;
 
     return new StoreClass<TState, TPayload>(options.initialState, dispatcher, options.reducer, areEqual);
-}
-
-export function handleClassAction<TState, TAction extends ClassAction>(
-    action: TAction,
-    callback: (state: TState, action: InstanceType<TAction>) => TState
-): StoreReduceHandler<TState> {
-    return (state, payload) => {
-        if (isSagaAction(payload) && payload.payload instanceof action) {
-            return callback(state, payload.payload as InstanceType<TAction>);
-        }
-
-        return state;
-    };
 }
 
 // tslint:disable-next-line:no-any

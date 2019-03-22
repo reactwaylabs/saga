@@ -1,5 +1,5 @@
-import { generateRandomString, instanceOfClass } from "./helpers";
-import { createSagaAction, FSA } from "./actions";
+import { generateRandomString } from "./helpers";
+import { FSA } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
@@ -9,8 +9,7 @@ export interface Dispatcher<TPayload extends FSA = FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
-    dispatchAction<TDPayload extends TPayload>(payload: TDPayload): void;
-    dispatch<TClassAction extends object>(classAction: TClassAction): void;
+    dispatch<TDPayload extends TPayload>(payload: TDPayload): void;
     isDispatching: boolean;
 }
 
@@ -62,9 +61,9 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
         }
     }
 
-    public dispatchAction(payload: TPayload): void {
+    public dispatch(payload: TPayload): void {
         if (this._isDispatching) {
-            throw new Error("Dispatch.dispatchAction(...): Cannot dispatch in the middle of dispatch.");
+            throw new Error("Dispatch.dispatch(...): Cannot dispatch in the middle of dispatch.");
         }
 
         this.startDispatching(payload);
@@ -80,18 +79,6 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
         } finally {
             this.stopDispatching();
         }
-    }
-
-    public dispatch<TClassAction extends object>(classAction: TClassAction): void {
-        if (!instanceOfClass(classAction)) {
-            throw new Error(
-                "Dispatcher.dispatch(...): Action must be initialized from a class. Use 'dispatchAction' method or create an action class."
-            );
-        }
-
-        const sagaAction = createSagaAction(classAction) as TPayload;
-
-        this.dispatchAction(sagaAction);
     }
 
     public get isDispatching(): boolean {
