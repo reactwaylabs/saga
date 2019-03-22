@@ -3,26 +3,26 @@ import { TinyEmitter } from "../emitter";
 it("add handlers and remove", () => {
     const emitter = new TinyEmitter();
 
-    expect(emitter.getCount()).toBe(0);
+    expect(emitter.getListenersCount()).toBe(0);
     const remove1 = emitter.addListener(jest.fn());
-    expect(emitter.getCount()).toBe(1);
+    expect(emitter.getListenersCount()).toBe(1);
     const remove2 = emitter.addListener(jest.fn());
     const remove3 = emitter.addListener(jest.fn());
-    expect(emitter.getCount()).toBe(3);
+    expect(emitter.getListenersCount()).toBe(3);
     remove1();
     remove2();
     remove3();
-    expect(emitter.getCount()).toBe(0);
+    expect(emitter.getListenersCount()).toBe(0);
 });
 
 it("add one handler and remove", () => {
     const emitter = new TinyEmitter();
 
-    expect(emitter.getCount()).toBe(0);
+    expect(emitter.getListenersCount()).toBe(0);
     const remove1 = emitter.addListener(jest.fn());
-    expect(emitter.getCount()).toBe(1);
+    expect(emitter.getListenersCount()).toBe(1);
     remove1();
-    expect(emitter.getCount()).toBe(0);
+    expect(emitter.getListenersCount()).toBe(0);
 });
 
 it("remove non existant handler", () => {
@@ -30,7 +30,7 @@ it("remove non existant handler", () => {
     const stub = jest.fn();
 
     emitter.removeListener(stub);
-    expect(emitter.getCount()).toBe(0);
+    expect(emitter.getListenersCount()).toBe(0);
 });
 
 it("emit when one handlers is added", () => {

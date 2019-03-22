@@ -51,7 +51,7 @@ export class TinyEmitter<THandler extends Callback> {
         }
     }
 
-    public getCount(): number {
+    public getListenersCount(): number {
         if (this.registry == null) {
             return 0;
         }
