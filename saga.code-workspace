@@ -8,6 +8,9 @@
 		},
 		{
 			"path": "packages\\saga-async"
+		},
+		{
+			"path": "packages\\saga-actions-bundle"
 		}
 	]
 }

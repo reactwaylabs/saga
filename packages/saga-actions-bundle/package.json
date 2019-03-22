@@ -1,13 +1,12 @@
 {
-    "name": "saga-async",
+    "name": "saga-actions-bundle",
     "version": "4.0.0-alpha.2",
     "description": "Helpers to handle promises in Saga",
     "repository": "github:reactway/saga",
     "bugs": "https://github.com/reactway/saga/issues",
     "keywords": [
         "flux",
-        "async",
-        "promise"
+        "saga"
     ],
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
