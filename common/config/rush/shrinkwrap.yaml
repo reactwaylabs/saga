@@ -1,5 +1,6 @@
 dependencies:
   '@rush-temp/saga': 'file:projects/saga.tgz'
+  '@rush-temp/saga-extra': 'file:projects/saga-extra.tgz'
   '@rush-temp/saga-react': 'file:projects/saga-react.tgz'
   '@types/jest': 24.0.11
   '@types/react': 16.8.8
@@ -1898,13 +1899,6 @@ packages:
     dev: false
     resolution:
       integrity: sha512-zJrrlfLqkegcP85HiZbbCRz+ivUc4byLrrq3F1etfhFfOSIIo7ckiWsk8wBLEzp45kaF+q7E0c77v7XX/Pf7gw==
-  /istanbul-azure-reporter/0.1.4/react@16.8.4:
-    dependencies:
-      react-dom: /react-dom/16.8.4/react@16.8.4
-    dev: false
-    id: registry.npmjs.org/istanbul-azure-reporter/0.1.4
-    resolution:
-      integrity: sha512-zJrrlfLqkegcP85HiZbbCRz+ivUc4byLrrq3F1etfhFfOSIIo7ckiWsk8wBLEzp45kaF+q7E0c77v7XX/Pf7gw==
   /istanbul-lib-coverage/2.0.3:
     dev: false
     engines:
@@ -3609,7 +3603,7 @@ packages:
   /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0:
     dependencies:
       change-case: 3.1.0
-      tslint: 5.14.0
+      tslint: /tslint/5.14.0/typescript@3.3.3333
     dev: false
     id: registry.npmjs.org/simplr-tslint/1.0.0-alpha.14
     peerDependencies:
@@ -4058,9 +4052,11 @@ packages:
       typescript: '>= 2.3.1 < 3'
     resolution:
       integrity: sha1-9UbcOEg5eeb7PPpZWErYUls61No=
-  /tslint-language-service/0.9.9/tslint@5.14.0:
+  /tslint-language-service/0.9.9/dcec1a78515fe3f1f0e8a7cb9e756a4b:
     dependencies:
-      tslint: 5.14.0
+      mock-require: 2.0.2
+      tslint: /tslint/5.14.0/typescript@3.3.4000
+      typescript: 3.3.4000
     dev: false
     id: registry.npmjs.org/tslint-language-service/0.9.9
     peerDependencies:
@@ -4134,6 +4130,31 @@ packages:
       typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev'
     resolution:
       integrity: sha512-IUla/ieHVnB8Le7LdQFRGlVJid2T/gaJe5VkjzRVSRR6pA2ODYrnfR1hmxi+5+au9l50jBwpbBL34txgv4NnTQ==
+  /tslint/5.14.0/typescript@3.3.4000:
+    dependencies:
+      babel-code-frame: 6.26.0
+      builtin-modules: 1.1.1
+      chalk: 2.4.2
+      commander: 2.19.0
+      diff: 3.5.0
+      glob: 7.1.3
+      js-yaml: 3.12.2
+      minimatch: 3.0.4
+      mkdirp: 0.5.1
+      resolve: 1.10.0
+      semver: 5.6.0
+      tslib: 1.9.3
+      tsutils: /tsutils/2.29.0/typescript@3.3.4000
+      typescript: 3.3.4000
+    dev: false
+    engines:
+      node: '>=4.8.0'
+    hasBin: true
+    id: registry.npmjs.org/tslint/5.14.0
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >=3.0.0-dev || >= 3.1.0-dev || >= 3.2.0-dev'
+    resolution:
+      integrity: sha512-IUla/ieHVnB8Le7LdQFRGlVJid2T/gaJe5VkjzRVSRR6pA2ODYrnfR1hmxi+5+au9l50jBwpbBL34txgv4NnTQ==
   /tsutils/2.29.0:
     dependencies:
       tslib: 1.9.3
@@ -4146,6 +4167,16 @@ packages:
     dependencies:
       tslib: 1.9.3
       typescript: 3.3.3333
+    dev: false
+    id: registry.npmjs.org/tsutils/2.29.0
+    peerDependencies:
+      typescript: '>=2.1.0 || >=2.1.0-dev || >=2.2.0-dev || >=2.3.0-dev || >=2.4.0-dev || >=2.5.0-dev || >=2.6.0-dev || >=2.7.0-dev || >=2.8.0-dev || >=2.9.0-dev || >= 3.0.0-dev || >= 3.1.0-dev'
+    resolution:
+      integrity: sha512-g5JVHCIJwzfISaXpXE1qvNalca5Jwob6FjI4AoPlqMusJ6ftFE7IkkFoMhVLRgK+4Kx3gkzb8UZK5t5yTTvEmA==
+  /tsutils/2.29.0/typescript@3.3.4000:
+    dependencies:
+      tslib: 1.9.3
+      typescript: 3.3.4000
     dev: false
     id: registry.npmjs.org/tsutils/2.29.0
     peerDependencies:
@@ -4177,6 +4208,13 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
+  /typescript/3.3.4000:
+    dev: false
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-jjOcCZvpkl2+z7JFn0yBOoLQyLoIkNZAs/fYJkUG6VKy6zLPHJGfQJYFHzibB6GJaF/8QrcECtlQ5cpvRHSMEA==
   /uglify-js/3.4.9:
     dependencies:
       commander: 2.17.1
@@ -4465,12 +4503,30 @@ packages:
     dev: false
     resolution:
       integrity: sha512-Lhz8TLaYnxq/2ObqHDql8dX8CJi97oHxrjUcYtzKbbykPtVW9WB+poxI+NM2UIzsMgNCZTIf0AQwsjK5yMAqZw==
+  'file:projects/saga-extra.tgz':
+    dependencies:
+      '@types/jest': 24.0.11
+      istanbul-azure-reporter: 0.1.4
+      jest: 24.5.0
+      jest-junit: 6.3.0
+      simplr-tslint: /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0
+      ts-jest: /ts-jest/24.0.0/jest@24.5.0
+      tslib: 1.9.3
+      tslint: /tslint/5.14.0/typescript@3.3.4000
+      tslint-language-service: /tslint-language-service/0.9.9/dcec1a78515fe3f1f0e8a7cb9e756a4b
+      typescript: 3.3.4000
+    dev: false
+    name: '@rush-temp/saga-extra'
+    resolution:
+      integrity: sha512-08KHfp5pZ9AIY8ggaSA5tWwI5RbW3Bodjx8ElJehgyBRTCG5z2dXZ82jFruTkX+Dfu/aewQAVOhdlXcgo9DHjA==
+      tarball: 'file:projects/saga-extra.tgz'
+    version: 0.0.0
   'file:projects/saga-react.tgz':
     dependencies:
       '@types/jest': 24.0.11
       '@types/react': 16.8.8
       '@types/react-dom': 16.8.2
-      istanbul-azure-reporter: /istanbul-azure-reporter/0.1.4/react@16.8.4
+      istanbul-azure-reporter: 0.1.4
       jest: 24.5.0
       jest-dom: 3.1.3
       jest-junit: 6.3.0
@@ -4498,10 +4554,10 @@ packages:
       jest-junit: 6.3.0
       jest-matcher-utils: 24.5.0
       simplr-tslint: /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0
-      ts-jest: 24.0.0
+      ts-jest: /ts-jest/24.0.0/jest@24.5.0
       tslib: 1.9.3
-      tslint: 5.14.0
-      tslint-language-service: /tslint-language-service/0.9.9/tslint@5.14.0
+      tslint: /tslint/5.14.0/typescript@3.3.3333
+      tslint-language-service: /tslint-language-service/0.9.9/6921bdfbb1407821bef8c0bfffda7652
       typescript: 3.3.3333
     dev: false
     name: '@rush-temp/saga'
@@ -4514,6 +4570,7 @@ shrinkwrapMinorVersion: 9
 shrinkwrapVersion: 3
 specifiers:
   '@rush-temp/saga': 'file:./projects/saga.tgz'
+  '@rush-temp/saga-extra': 'file:./projects/saga-extra.tgz'
   '@rush-temp/saga-react': 'file:./projects/saga-react.tgz'
   '@types/jest': ^24.0.9
   '@types/react': ^16.8.8
