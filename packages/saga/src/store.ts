@@ -89,11 +89,14 @@ export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOp
 }
 
 // tslint:disable-next-line:no-any
-export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TState, any>>): StoreReduceHandler<TState, any> {
+export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TState, any> | undefined>): StoreReduceHandler<TState, any> {
     return (state, payload) => {
         let nextState = state;
 
         for (const handler of handlers) {
+            if (handler == null) {
+                continue;
+            }
             nextState = handler(nextState, payload);
         }
 
