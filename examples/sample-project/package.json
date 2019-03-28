@@ -1,0 +1,36 @@
+{
+    "name": "sample-project",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "build": "webpack --config webpack.config.js",
+        "watch": "webpack-dev-server --config webpack.config.js"
+    },
+    "dependencies": {
+        "@reactway/webpack-builder": "^1.0.0-alpha",
+        "@reactway/webpack-builder-plugin-clean": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-html": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-images": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-styles": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-typescript": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-web-dev": "^1.0.0-alpha.5",
+        "@reactway/webpack-builder-plugin-write-file": "^1.0.0-alpha.5",
+        "copy-webpack-plugin": "^5.0.1",
+        "react": "^16.8.4",
+        "react-dom": "^16.8.4",
+        "webpack": "^4.29.6"
+    },
+    "devDependencies": {
+        "@types/react": "^16.8.8",
+        "@types/react-dom": "^16.8.2",
+        "@types/webpack": "^4.4.26",
+        "autoprefixer": "^9.5.0",
+        "node-sass": "^4.11.0",
+        "simplr-tslint": "^1.0.0-alpha.14",
+        "tslint": "^5.14.0",
+        "tslint-language-service": "^0.9.9",
+        "typescript": "^3.3.4000",
+        "webpack-cli": "^3.3.0",
+        "webpack-dev-server": "^3.2.1"
+    }
+}
