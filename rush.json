@@ -24,6 +24,12 @@
             "projectFolder": "packages/saga-extra",
             "versionPolicyName": "SagaPolicy",
             "shouldPublish": true
+        },
+        // Sample projects
+        {
+            "packageName": "sample-project",
+            "projectFolder": "examples/sample-project",
+            "shouldPublish": false
         }
     ]
 }

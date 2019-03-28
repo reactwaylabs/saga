@@ -18,7 +18,10 @@
         "copy-webpack-plugin": "^5.0.1",
         "react": "^16.8.4",
         "react-dom": "^16.8.4",
-        "webpack": "^4.29.6"
+        "webpack": "^4.29.6",
+        "saga": "4.0.0-alpha.2",
+        "saga-react": "4.0.0-alpha.2",
+        "saga-extra": "4.0.0-alpha.2"
     },
     "devDependencies": {
         "@types/react": "^16.8.8",
