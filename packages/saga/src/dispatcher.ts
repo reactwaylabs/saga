@@ -3,9 +3,9 @@ import { FSA } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
-export type DispatcherRegisterHandler<TPayload extends FSA = FSA> = (payload: TPayload) => void;
+export type DispatcherRegisterHandler<TPayload = FSA> = (payload: TPayload) => void;
 
-export interface Dispatcher<TPayload extends FSA = FSA> {
+export interface Dispatcher<TPayload = FSA> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
@@ -13,13 +13,13 @@ export interface Dispatcher<TPayload extends FSA = FSA> {
     isDispatching: boolean;
 }
 
-interface ListenerItem<TPayload extends FSA> {
+interface ListenerItem<TPayload> {
     callback: DispatcherRegisterHandler<TPayload>;
     isHandled: boolean;
     isPending: boolean;
 }
 
-class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
+class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
     private listeners: { [dispatchToken: string]: ListenerItem<TPayload> | undefined } = {};
     private _isDispatching: boolean = false;
     private pendingPayload?: TPayload;

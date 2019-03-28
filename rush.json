@@ -20,12 +20,24 @@
             "shouldPublish": true
         },
         {
+            "packageName": "saga-actions-bundle",
+            "projectFolder": "packages/saga-actions-bundle",
+            "versionPolicyName": "SagaPolicy",
+            "shouldPublish": true
+        },
+        {
+            "packageName": "saga-async",
+            "projectFolder": "packages/saga-async",
+            "versionPolicyName": "SagaPolicy",
+            "shouldPublish": true
+        },
+        {
             "packageName": "saga-extra",
             "projectFolder": "packages/saga-extra",
             "versionPolicyName": "SagaPolicy",
             "shouldPublish": true
         },
-        // Sample projects
+        // Examples
         {
             "packageName": "sample-project",
             "projectFolder": "examples/sample-project",

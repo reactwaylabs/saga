@@ -1,13 +1,19 @@
 {
-	"folders": [
-		{
-			"path": "packages\\saga"
-		},
-		{
-			"path": "packages\\saga-react"
-		},
-		{
-			"path": "packages\\saga-extra"
-		}
-	]
+    "folders": [
+        {
+            "path": "packages\\saga"
+        },
+        {
+            "path": "packages\\saga-react"
+        },
+        {
+            "path": "packages\\saga-extra"
+        },
+        {
+            "path": "packages\\saga-async"
+        },
+        {
+            "path": "packages\\saga-actions-bundle"
+        }
+    ]
 }

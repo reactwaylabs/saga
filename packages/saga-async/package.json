@@ -1,0 +1,63 @@
+{
+    "name": "saga-async",
+    "version": "4.0.0-alpha.2",
+    "description": "Helpers to handle promises in Saga",
+    "repository": "github:reactway/saga",
+    "bugs": "https://github.com/reactway/saga/issues",
+    "keywords": [
+        "flux",
+        "async",
+        "promise"
+    ],
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc -p .",
+        "watch": "tsc -p . -w",
+        "pretest": "tsc -p . --noEmit && tslint -p .",
+        "test": "jest"
+    },
+    "authors": [
+        "Martynas Žilinskas <martynas@quatrodev.com> (https://github.com/MartynasZilinskas)",
+        "Dovydas Navickas <dovydas@quatrodev.com> (https://github.com/DovydasNavickas)"
+    ],
+    "files": [
+        "dist",
+        "**/*.md"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "saga": "4.0.0-alpha.2",
+        "tslib": "^1.9.3"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.9",
+        "istanbul-azure-reporter": "^0.1.4",
+        "jest": "^24.1.0",
+        "jest-junit": "^6.3.0",
+        "simplr-tslint": "^1.0.0-alpha.14",
+        "ts-jest": "^24.0.0",
+        "tslint": "^5.13.1",
+        "tslint-language-service": "^0.9.9",
+        "typescript": "^3.3.3333"
+    },
+    "jest": {
+        "verbose": true,
+        "preset": "ts-jest",
+        "reporters": [
+            "default",
+            "jest-junit"
+        ],
+        "collectCoverage": true,
+        "testRegex": "/__tests__/.*\\.(test|spec).(ts|tsx)$",
+        "collectCoverageFrom": [
+            "src/**/*.{ts,tsx}",
+            "!src/**/__tests__/*",
+            "!src/index.ts"
+        ],
+        "coverageReporters": [
+            "cobertura",
+            "istanbul-azure-reporter"
+        ]
+    }
+}
