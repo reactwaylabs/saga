@@ -94,10 +94,6 @@ export function createMapStore<TItem>(options: MapStoreOptions<TItem>): MapStore
                             continue;
                         }
 
-                        // draft.items[key] = {
-                        //     value: item.value as Draft<TItem>,
-                        //     status: item.status
-                        // };
                         draft.items[key] = item as Draft<Item<TItem>>;
                     }
                 });
