@@ -1,5 +1,6 @@
 import { createDispatcher } from "../dispatcher";
-import { FSA, createAction } from "../actions";
+import { createFluxAction } from "../actions";
+import { FSA } from "../contracts";
 
 import "./test-utils";
 
@@ -12,7 +13,7 @@ interface TestAction extends FSA {
     };
 }
 
-const testActionCreator = () => createAction<TestAction>("TEST", { text: "string" });
+const testActionCreator = () => createFluxAction<TestAction>("TEST", { text: "string" });
 
 beforeEach(() => {
     dispatcher = createDispatcher();

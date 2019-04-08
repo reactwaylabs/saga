@@ -123,7 +123,7 @@ export function createDispatcher<TPayload = unknown>(
 }
 
 const classActionsMiddleware: DispatcherMiddleware<Dispatcher> = dispatcher => {
-    const originalDispatch = dispatcher.dispatch;
+    const originalDispatch = dispatcher.dispatch.bind(dispatcher);
 
     const classActionsDispatch = (payload: unknown) => {
         if (isClassAction(payload)) {

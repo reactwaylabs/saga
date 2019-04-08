@@ -1,13 +1,13 @@
 import { printReceived } from "jest-matcher-utils";
-import { isAction } from "../actions";
+import { isFluxAction } from "../actions";
 
 function toBeFSA(item: object) {
-    const isFluxAction = isAction(item);
+    const isFSA = isFluxAction(item);
 
     return {
-        pass: isFluxAction,
+        pass: isFSA,
         message: () => {
-            const is = isFluxAction ? "is" : "is not";
+            const is = isFSA ? "is" : "is not";
 
             // prettier-ignore
             return [

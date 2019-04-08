@@ -1,4 +1,5 @@
-import { createAction, FSA, isAction, isErrorAction } from "../actions";
+import { createFluxAction, isFluxAction, isFluxErrorAction } from "../actions";
+import { FSA } from "../contracts";
 
 jest.mock("../helpers", () => ({
     ...jest.requireActual("../helpers"),
@@ -10,26 +11,26 @@ interface TestFSA extends FSA {
 }
 
 it("creates FSA action", () => {
-    const fluxAction = createAction<TestFSA>("TEST", undefined);
+    const fluxAction = createFluxAction<TestFSA>("TEST", undefined);
 
     expect(fluxAction).toMatchSnapshot();
 });
 
 it("check if FSA object is FSA", () => {
-    const fluxAction = createAction<TestFSA>("TEST", undefined);
+    const fluxAction = createFluxAction<TestFSA>("TEST", undefined);
 
-    expect(isAction(fluxAction)).toBe(true);
+    expect(isFluxAction(fluxAction)).toBe(true);
 });
 
 it("check if FSA object is Error FSA", () => {
     const actionPayload = new Error("Test Error");
-    const fluxAction = createAction<TestFSA>("TEST", actionPayload);
+    const fluxAction = createFluxAction<TestFSA>("TEST", actionPayload);
 
-    expect(isErrorAction(fluxAction)).toBe(true);
+    expect(isFluxErrorAction(fluxAction)).toBe(true);
 });
 
 it("check if empty object is FSA", () => {
     const action = {};
 
-    expect(isAction(action)).toBe(false);
+    expect(isFluxAction(action)).toBe(false);
 });

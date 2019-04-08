@@ -1,6 +1,6 @@
 import { createStore, Store } from "../store";
 import { createDispatcher } from "../dispatcher";
-import { createAction } from "../actions";
+import { createFluxAction } from "../actions";
 
 import { handleActions } from "../store";
 import { FSA, Dispatcher } from "../contracts";
@@ -55,7 +55,7 @@ it("dispatched action updates store state", () => {
     store.subscribe(stub);
     expect(store.getState().counter).toBe(0);
 
-    dispatcher.dispatch(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
+    dispatcher.dispatch(createFluxAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(store.getState().counter).toBe(1);
     expect(store.hasChanged()).toBe(true);
@@ -68,7 +68,7 @@ it("dispatched action updates state and store emits change", () => {
     store.subscribe(stub);
     expect(store.getSubscribersCount()).toBe(1);
 
-    dispatcher.dispatch(createAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
+    dispatcher.dispatch(createFluxAction<IncrementAction>("COUNTER_INCREMENT", { plusCount: 1 }));
 
     expect(stub).toBeCalled();
     store.unsubscribe(stub);
