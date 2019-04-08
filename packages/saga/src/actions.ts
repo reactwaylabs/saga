@@ -1,6 +1,8 @@
 import { FSA, ErrorFSA } from "./contracts";
+import { getNameOfObject, generateRandomString } from "./helpers";
+import { CLASS_ACTION_NAME_SUFFIX } from "./constants";
 
-export function createAction<TAction extends FSA, TMeta = undefined>(
+export function createFluxAction<TAction extends FSA, TMeta = undefined>(
     type: TAction["type"],
     payload: TAction["payload"],
     meta?: TMeta
@@ -20,17 +22,42 @@ export function createAction<TAction extends FSA, TMeta = undefined>(
 }
 
 /**
+ * Returns `true` if `action` is Class action.
+ */
+export function isClassAction(action: any): action is object {
+    const name = getNameOfObject(action);
+
+    return name.substr(name.length - CLASS_ACTION_NAME_SUFFIX.length, CLASS_ACTION_NAME_SUFFIX.length) === CLASS_ACTION_NAME_SUFFIX;
+}
+
+const SAGA_ACTION_TYPE: string = `SAGA_${generateRandomString()}`;
+
+export function createSagaAction<TClassAction extends object, TMeta = undefined>(
+    action: TClassAction,
+    meta?: TMeta
+): FSA<TClassAction, TMeta> {
+    const isError = action instanceof Error;
+
+    return {
+        type: SAGA_ACTION_TYPE,
+        payload: action,
+        error: isError,
+        meta: meta
+    };
+}
+
+/**
  * Returns `true` if `action` is FSA compliant.
  */
-export function isAction<TPayload, TMeta = undefined>(action: any): action is FSA<TPayload, TMeta> {
+export function isFluxAction<TPayload, TMeta = undefined>(action: any): action is FSA<TPayload, TMeta> {
     return typeof action === "object" && typeof action.type === "string" && Object.keys(action).every(isValidKey);
 }
 
 /**
  * Returns `true` if `action` is FSA compliant error.
  */
-export function isErrorAction<TCustomError extends Error, TMeta = undefined>(action: any): action is ErrorFSA<TCustomError, TMeta> {
-    return isAction(action) && action.error === true;
+export function isFluxErrorAction<TCustomError extends Error, TMeta = undefined>(action: any): action is ErrorFSA<TCustomError, TMeta> {
+    return isFluxAction(action) && action.error === true;
 }
 
 function isValidKey(key: string): boolean {

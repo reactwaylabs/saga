@@ -17,3 +17,7 @@ export function instanceOfClass(obj: object): boolean {
         current = current.constructor;
     }
 }
+
+export function getNameOfObject(obj: object): string {
+    return (obj.constructor as any).name;
+}

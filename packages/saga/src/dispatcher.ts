@@ -1,15 +1,16 @@
 import { generateRandomString } from "./helpers";
-import { FSA, DispatcherRegisterHandler, Dispatcher } from "./contracts";
+import { DispatcherRegisterHandler, Dispatcher, DispatcherMiddleware } from "./contracts";
+import { isClassAction, createSagaAction } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
 
-interface ListenerItem<TPayload extends FSA> {
+interface ListenerItem<TPayload> {
     callback: DispatcherRegisterHandler<TPayload>;
     isHandled: boolean;
     isPending: boolean;
 }
 
-class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
+class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
     private listeners: { [dispatchToken: string]: ListenerItem<TPayload> | undefined } = {};
     private _isDispatching: boolean = false;
     private pendingPayload?: TPayload;
@@ -105,8 +106,37 @@ class DispatcherClass<TPayload extends FSA> implements Dispatcher<TPayload> {
     }
 }
 
-export function createDispatcher<TPayload extends FSA = FSA>(): Dispatcher<TPayload> {
-    return new DispatcherClass<TPayload>();
+export function createDispatcher<TPayload = unknown>(
+    middlewares?: Array<DispatcherMiddleware<Dispatcher<TPayload>>>
+): Dispatcher<TPayload> {
+    let dispatcher: Dispatcher<TPayload> = new DispatcherClass<TPayload>();
+
+    dispatcher = classActionsMiddleware(dispatcher);
+
+    if (middlewares != null) {
+        for (const middleware of middlewares) {
+            dispatcher = middleware(dispatcher);
+        }
+    }
+
+    return dispatcher;
 }
+
+const classActionsMiddleware: DispatcherMiddleware<Dispatcher> = dispatcher => {
+    const originalDispatch = dispatcher.dispatch;
+
+    const classActionsDispatch = (payload: unknown) => {
+        if (isClassAction(payload)) {
+            const sagaAction = createSagaAction(payload);
+            originalDispatch(sagaAction);
+        } else {
+            originalDispatch(payload);
+        }
+    };
+
+    dispatcher.dispatch = classActionsDispatch;
+
+    return dispatcher;
+};
 
 export const AppDispatcher = createDispatcher();

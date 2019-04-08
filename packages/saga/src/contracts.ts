@@ -49,14 +49,16 @@ export type ErrorFSA<TCustomError extends Error, TMeta = undefined> = ErrorFluxS
 
 // #region Dispatcher
 
-export type DispatcherRegisterHandler<TPayload extends FSA = FSA> = (payload: TPayload) => void;
+export type DispatcherRegisterHandler<TPayload = FSA> = (payload: TPayload) => void;
 
-export interface Dispatcher<TPayload extends FSA = FSA> {
+export interface Dispatcher<TPayload = any> {
     register(callback: DispatcherRegisterHandler<TPayload>): string;
     unregister(dispatchToken: string): void;
     waitFor(dispatchTokens: string[]): void;
     dispatch<TDPayload extends TPayload>(payload: TDPayload): void;
     isDispatching: boolean;
 }
+
+export type DispatcherMiddleware<TDispatcher extends Dispatcher<unknown>> = (dispatcher: TDispatcher) => TDispatcher;
 
 // #endergion
