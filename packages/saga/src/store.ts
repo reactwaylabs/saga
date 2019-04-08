@@ -1,6 +1,7 @@
-import { AppDispatcher } from "./dispatcher";
 import { TinyEmitter, Callback } from "@reactway/tiny-emitter";
-import { FSA, Dispatcher, DispatcherRegisterHandler } from "./contracts";
+
+import { AppDispatcher } from "./dispatcher";
+import { FSA, Dispatcher, DispatcherRegisterHandler, Store, StoreReduceHandler, StoreAreEqualHandler, StoreOptions } from "./contracts";
 
 class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     constructor(
@@ -58,27 +59,6 @@ class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
             this.emitter.emit();
         }
     };
-}
-
-export type StoreReduceHandler<TState, TPayload extends FSA = FSA> = (state: TState, payload: TPayload) => TState;
-export type StoreAreEqualHandler<TState> = (state: TState, nextState: TState) => boolean;
-
-export interface Store<TState> {
-    getState(): TState;
-    getDispatcher(): Dispatcher;
-    getDispatchToken(): string;
-    hasChanged(): boolean;
-    subscribe(callback: () => void): () => void;
-    unsubscribe(callback: () => void): void;
-    getSubscribersCount(): number;
-}
-
-export interface StoreOptions<TState, TPayload extends FSA = FSA> {
-    name: string;
-    initialState: TState;
-    dispatcher?: Dispatcher;
-    reducer: StoreReduceHandler<TState, TPayload>;
-    areEqual?: StoreAreEqualHandler<TState>;
 }
 
 export function createStore<TState, TPayload extends FSA = FSA>(options: StoreOptions<TState, TPayload>): Store<TState> {

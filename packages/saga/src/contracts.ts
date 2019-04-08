@@ -1,7 +1,6 @@
 // tslint:disable:no-any
 
 // #region Actions
-
 /**
  * @see @url https://github.com/redux-utilities/flux-standard-action
  */
@@ -46,11 +45,9 @@ export type FSA<TPayload = any, TMeta = any> = FluxStandardAction<TPayload, TMet
  * Alias for ErrorFluxStandardAction.
  */
 export type ErrorFSA<TCustomError extends Error, TMeta = undefined> = ErrorFluxStandardAction<TCustomError, TMeta>;
-
 // #endregion
 
 // #region Dispatcher
-
 export type DispatcherRegisterHandler<TPayload = FSA> = (payload: TPayload) => void;
 
 export interface Dispatcher<TPayload = any> {
@@ -67,10 +64,31 @@ export type DispatcherMiddleware = (next: DispatchHandler, dispatch: DispatchHan
 
 // #endergion
 
-// #region Utils
+// #region Store
+export type StoreReduceHandler<TState, TPayload extends FSA = FSA> = (state: TState, payload: TPayload) => TState;
+export type StoreAreEqualHandler<TState> = (state: TState, nextState: TState) => boolean;
 
+export interface Store<TState> {
+    getState(): TState;
+    getDispatcher(): Dispatcher;
+    getDispatchToken(): string;
+    hasChanged(): boolean;
+    subscribe(callback: () => void): () => void;
+    unsubscribe(callback: () => void): void;
+    getSubscribersCount(): number;
+}
+
+export interface StoreOptions<TState, TPayload extends FSA = FSA> {
+    name: string;
+    initialState: TState;
+    dispatcher?: Dispatcher;
+    reducer: StoreReduceHandler<TState, TPayload>;
+    areEqual?: StoreAreEqualHandler<TState>;
+}
+// #endregion
+
+// #region Utils
 export interface AnyObject {
     [key: string]: unknown | AnyObject | undefined;
 }
-
 // #endregion
