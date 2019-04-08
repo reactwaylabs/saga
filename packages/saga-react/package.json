@@ -70,6 +70,6 @@
         "tslint": "^5.13.1",
         "tslint-language-service": "^0.9.9",
         "tslint-react-hooks": "~2.0.0",
-        "typescript": "^3.3.3333"
+        "typescript": "^3.4.2"
     }
 }

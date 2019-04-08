@@ -1,6 +1,6 @@
-import { Dispatcher, DispatcherRegisterHandler, AppDispatcher } from "./dispatcher";
-import { TinyEmitter, Callback } from "./emitter";
-import { FSA } from "./actions";
+import { AppDispatcher } from "./dispatcher";
+import { TinyEmitter, Callback } from "@reactway/tiny-emitter";
+import { FSA, Dispatcher, DispatcherRegisterHandler } from "./contracts";
 
 class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     constructor(

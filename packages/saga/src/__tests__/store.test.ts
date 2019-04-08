@@ -1,8 +1,9 @@
 import { createStore, Store } from "../store";
-import { createDispatcher, Dispatcher } from "../dispatcher";
-import { FSA, createAction } from "../actions";
+import { createDispatcher } from "../dispatcher";
+import { createAction } from "../actions";
 
 import { handleActions } from "../store";
+import { FSA, Dispatcher } from "../contracts";
 
 interface IncrementAction extends FSA<{ plusCount: number }> {
     type: "COUNTER_INCREMENT";
