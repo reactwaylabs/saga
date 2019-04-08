@@ -8,7 +8,7 @@ export function createFluxAction<TAction extends FSA, TMeta = undefined>(
     meta?: TMeta
 ): TAction {
     if (payload != null && typeof payload !== "object") {
-        throw new Error("createAction(...): Payload can only be object or undefined/null.");
+        throw new Error("createFluxAction(...): Payload can only be object or undefined/null.");
     }
 
     const isError = (payload as object) instanceof Error;
@@ -39,6 +39,10 @@ export function createSagaAction<TClassAction extends object, TMeta = undefined>
     action: TClassAction,
     meta?: TMeta
 ): FSA<TClassAction, TMeta> {
+    if (!isClassAction(action)) {
+        throw new Error("createSagaAction(...): Payload can only be class with name suffix `Action`.");
+    }
+
     const isError = action instanceof Error;
 
     return {
