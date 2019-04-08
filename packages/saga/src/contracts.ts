@@ -1,3 +1,5 @@
+// tslint:disable:no-any
+
 // #region Actions
 
 /**
@@ -62,3 +64,11 @@ export interface Dispatcher<TPayload = any> {
 export type DispatcherMiddleware<TDispatcher extends Dispatcher<unknown>> = (dispatcher: TDispatcher) => TDispatcher;
 
 // #endergion
+
+// #region Utils
+
+export interface AnyObject {
+    [key: string]: unknown | AnyObject | undefined;
+}
+
+// #endregion
