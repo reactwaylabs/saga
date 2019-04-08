@@ -22,7 +22,7 @@ export function createFluxAction<TAction extends FSA, TMeta = undefined>(
 }
 
 /**
- * Returns `true` if `action` is Class action.
+ * Checks if object (class instance) is class action.
  */
 export function isClassAction(action: unknown): action is object {
     if (!isObject(action)) {

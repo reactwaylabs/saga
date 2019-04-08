@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`creates FSA action 1`] = `
+exports[`flux actions creates FSA action 1`] = `
 Object {
   "error": false,
   "meta": undefined,
