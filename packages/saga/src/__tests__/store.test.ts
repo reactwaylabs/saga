@@ -2,7 +2,7 @@ import { createStore } from "../store";
 import { createDispatcher } from "../dispatcher";
 import { createFluxAction } from "../actions";
 
-import { handleActions } from "../store";
+import { handleFluxActions } from "../store";
 import { FSA, Dispatcher, Store } from "../contracts";
 
 interface IncrementAction extends FSA<{ plusCount: number }> {
@@ -29,7 +29,7 @@ function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState> {
         initialState: {
             counter: 0
         },
-        reducer: handleActions<StoreState, StoreActions>({
+        reducer: handleFluxActions<StoreState, StoreActions>({
             COUNTER_INCREMENT: (state, action) => {
                 return {
                     counter: state.counter + 1

@@ -85,7 +85,7 @@ export type ActionsHandlersObject<TState, TActions extends FSA> = {
     [TType in TActions["type"]]: (state: TState, action: Extract<TActions, { type: TType }>) => TState
 };
 
-export function handleActions<TState, TActions extends FSA>(
+export function handleFluxActions<TState, TActions extends FSA>(
     handlers: ActionsHandlersObject<TState, TActions>
 ): StoreReduceHandler<TState, TActions> {
     return (state: TState, action: TActions): TState => {
