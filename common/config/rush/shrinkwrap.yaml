@@ -8,6 +8,8 @@ dependencies:
   '@reactway/webpack-builder-plugin-web-dev': 1.0.0-alpha.6
   '@reactway/webpack-builder-plugin-write-file': 1.0.0-alpha.6
   '@rush-temp/saga': 'file:projects/saga.tgz'
+  '@rush-temp/saga-actions-bundle': 'file:projects/saga-actions-bundle.tgz'
+  '@rush-temp/saga-async': 'file:projects/saga-async.tgz'
   '@rush-temp/saga-extra': 'file:projects/saga-extra.tgz'
   '@rush-temp/saga-react': 'file:projects/saga-react.tgz'
   '@rush-temp/sample-project': 'file:projects/sample-project.tgz'
@@ -8448,6 +8450,42 @@ packages:
     dev: false
     resolution:
       integrity: sha1-a6MY6xaWFyf10oT46gA+jWFU0Mg=
+  'file:projects/saga-actions-bundle.tgz':
+    dependencies:
+      '@types/jest': 24.0.11
+      istanbul-azure-reporter: 0.1.4
+      jest: 24.5.0
+      jest-junit: 6.3.0
+      simplr-tslint: /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0
+      ts-jest: /ts-jest/24.0.0/jest@24.5.0
+      tslib: 1.9.3
+      tslint: /tslint/5.14.0/typescript@3.3.4000
+      tslint-language-service: /tslint-language-service/0.9.9/dcec1a78515fe3f1f0e8a7cb9e756a4b
+      typescript: 3.3.4000
+    dev: false
+    name: '@rush-temp/saga-actions-bundle'
+    resolution:
+      integrity: sha512-7ls6c5jKBfoSw1MVMk2s4PeAoIJJZPZmsMxydMa1q/OxnT6AJnW03+ceY0MGVtJO8E8an7h82r2YIu/7mp3tag==
+      tarball: 'file:projects/saga-actions-bundle.tgz'
+    version: 0.0.0
+  'file:projects/saga-async.tgz':
+    dependencies:
+      '@types/jest': 24.0.11
+      istanbul-azure-reporter: 0.1.4
+      jest: 24.5.0
+      jest-junit: 6.3.0
+      simplr-tslint: /simplr-tslint/1.0.0-alpha.14/tslint@5.14.0
+      ts-jest: /ts-jest/24.0.0/jest@24.5.0
+      tslib: 1.9.3
+      tslint: /tslint/5.14.0/typescript@3.3.4000
+      tslint-language-service: /tslint-language-service/0.9.9/dcec1a78515fe3f1f0e8a7cb9e756a4b
+      typescript: 3.3.4000
+    dev: false
+    name: '@rush-temp/saga-async'
+    resolution:
+      integrity: sha512-qa8pyDVjo+BGdhoPbTeYyZFJUn0YnH+vZBeZlF5d//kzM7zwBHMh+KncUJA9c+u/v4dmcAS3w937lQGH7BD4eQ==
+      tarball: 'file:projects/saga-async.tgz'
+    version: 0.0.0
   'file:projects/saga-extra.tgz':
     dependencies:
       '@types/jest': 24.0.11
@@ -8541,7 +8579,7 @@ packages:
     dev: false
     name: '@rush-temp/sample-project'
     resolution:
-      integrity: sha512-i9wEZQwapJKLCokm0/QUXR/LPZFyzVmdo0i1JGhD5rUV8ohia4hBd952Xknz15JUET1jt66X6r5uHzShWSKbFg==
+      integrity: sha512-aEPdhbiLxvHCBfrziACEt1a4t+WhnR9JhBdOvasFdZYcpQtOuTn38cXDMilTqkDxILVnCV62dlAKImHMTbT88w==
       tarball: 'file:projects/sample-project.tgz'
     version: 0.0.0
 registry: 'https://registry.npmjs.org/'
@@ -8557,6 +8595,8 @@ specifiers:
   '@reactway/webpack-builder-plugin-web-dev': ^1.0.0-alpha.5
   '@reactway/webpack-builder-plugin-write-file': ^1.0.0-alpha.5
   '@rush-temp/saga': 'file:./projects/saga.tgz'
+  '@rush-temp/saga-actions-bundle': 'file:./projects/saga-actions-bundle.tgz'
+  '@rush-temp/saga-async': 'file:./projects/saga-async.tgz'
   '@rush-temp/saga-extra': 'file:./projects/saga-extra.tgz'
   '@rush-temp/saga-react': 'file:./projects/saga-react.tgz'
   '@rush-temp/sample-project': 'file:./projects/sample-project.tgz'
