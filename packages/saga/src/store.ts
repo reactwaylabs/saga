@@ -1,7 +1,17 @@
 import { TinyEmitter, Callback } from "@reactway/tiny-emitter";
 
 import { AppDispatcher } from "./dispatcher";
-import { FSA, Dispatcher, DispatcherRegisterHandler, Store, StoreReduceHandler, StoreAreEqualHandler, StoreOptions } from "./contracts";
+import { isSagaAction } from "./actions";
+import {
+    FSA,
+    Dispatcher,
+    DispatcherRegisterHandler,
+    Store,
+    StoreReduceHandler,
+    StoreAreEqualHandler,
+    StoreOptions,
+    ClassAction
+} from "./contracts";
 
 class StoreClass<TState, TPayload extends FSA = FSA> implements Store<TState> {
     constructor(
@@ -78,6 +88,19 @@ export function combineHandlers<TState>(handlers: Array<StoreReduceHandler<TStat
         }
 
         return nextState;
+    };
+}
+
+export function handleAction<TState, TAction extends ClassAction>(
+    action: TAction,
+    callback: (state: TState, action: InstanceType<TAction>) => TState
+): StoreReduceHandler<TState> {
+    return (state, payload) => {
+        if (isSagaAction(payload) && payload.payload instanceof action) {
+            return callback(state, payload.payload as InstanceType<TAction>);
+        }
+
+        return state;
     };
 }
 

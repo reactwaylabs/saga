@@ -49,6 +49,13 @@ export function createSagaAction<TClassAction extends object, TMeta = undefined>
     };
 }
 
+export function isSagaAction<TPayload>(action: unknown): action is FSA<TPayload> {
+    if (!isObject(action)) {
+        return false;
+    }
+    return action.type === SAGA_ACTION_TYPE;
+}
+
 /**
  * Returns `true` if `action` is FSA compliant.
  */

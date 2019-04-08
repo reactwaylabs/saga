@@ -88,6 +88,8 @@ export interface StoreOptions<TState, TPayload extends FSA = FSA> {
 // #endregion
 
 // #region Utils
+export type ClassAction = new (...args: any[]) => any;
+
 export interface AnyObject {
     [key: string]: unknown | AnyObject | undefined;
 }
