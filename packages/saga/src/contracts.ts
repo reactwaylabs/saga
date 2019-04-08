@@ -61,7 +61,9 @@ export interface Dispatcher<TPayload = any> {
     isDispatching: boolean;
 }
 
-export type DispatcherMiddleware<TDispatcher extends Dispatcher<unknown>> = (dispatcher: TDispatcher) => TDispatcher;
+export type DispatchHandler = (payload: unknown) => void;
+
+export type DispatcherMiddleware = (next: DispatchHandler, dispatch: DispatchHandler) => DispatchHandler;
 
 // #endergion
 

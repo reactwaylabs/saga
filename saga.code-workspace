@@ -6,5 +6,8 @@
 		{
 			"path": "packages\\saga-react"
 		}
-	]
+	],
+	"settings": {
+		"typescript.tsdk": "saga\\node_modules\\typescript\\lib"
+	}
 }

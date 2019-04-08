@@ -1,5 +1,5 @@
 import { generateRandomString } from "./helpers";
-import { DispatcherRegisterHandler, Dispatcher, DispatcherMiddleware } from "./contracts";
+import { DispatcherRegisterHandler, Dispatcher, DispatcherMiddleware, DispatchHandler } from "./contracts";
 import { isClassAction, createSagaAction } from "./actions";
 
 const RANDOM_ID: string = generateRandomString();
@@ -106,37 +106,36 @@ class DispatcherClass<TPayload> implements Dispatcher<TPayload> {
     }
 }
 
-export function createDispatcher<TPayload = unknown>(
-    middlewares?: Array<DispatcherMiddleware<Dispatcher<TPayload>>>
-): Dispatcher<TPayload> {
+export function createDispatcher<TPayload = unknown>(middlewares: DispatcherMiddleware[] = []): Dispatcher<TPayload> {
     let dispatcher: Dispatcher<TPayload> = new DispatcherClass<TPayload>();
+    dispatcher = applyDispatcherMiddleware(dispatcher, [classActionsMiddleware, ...middlewares]);
 
-    dispatcher = classActionsMiddleware(dispatcher);
+    return dispatcher;
+}
 
-    if (middlewares != null) {
-        for (const middleware of middlewares) {
-            dispatcher = middleware(dispatcher);
-        }
+export function applyDispatcherMiddleware<TDispatcher extends Dispatcher>(
+    dispatcher: TDispatcher,
+    middlewares: DispatcherMiddleware[]
+): TDispatcher {
+    const originalDispatch: DispatchHandler = dispatcher.dispatch.bind(dispatcher);
+    let next: DispatchHandler = originalDispatch;
+
+    for (const middleware of middlewares) {
+        next = middleware(next, originalDispatch);
     }
 
     return dispatcher;
 }
 
-const classActionsMiddleware: DispatcherMiddleware<Dispatcher> = dispatcher => {
-    const originalDispatch = dispatcher.dispatch.bind(dispatcher);
-
-    const classActionsDispatch = (payload: unknown) => {
+const classActionsMiddleware: DispatcherMiddleware = next => {
+    return payload => {
         if (isClassAction(payload)) {
             const sagaAction = createSagaAction(payload);
-            originalDispatch(sagaAction);
+            next(sagaAction);
         } else {
-            originalDispatch(payload);
+            next(payload);
         }
     };
-
-    dispatcher.dispatch = classActionsDispatch;
-
-    return dispatcher;
 };
 
 export const AppDispatcher = createDispatcher();
