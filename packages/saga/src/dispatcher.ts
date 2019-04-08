@@ -124,6 +124,8 @@ export function applyDispatcherMiddleware<TDispatcher extends Dispatcher>(
         next = middleware(next, originalDispatch);
     }
 
+    dispatcher.dispatch = next;
+
     return dispatcher;
 }
 

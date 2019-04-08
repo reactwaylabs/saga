@@ -13,6 +13,14 @@ interface TestAction extends FSA {
     };
 }
 
+class TestClassAction {
+    constructor(private _text: string) {}
+
+    public get text(): string {
+        return this._text;
+    }
+}
+
 const testActionCreator = () => createFluxAction<TestAction>("TEST", { text: "string" });
 
 beforeEach(() => {
@@ -111,7 +119,7 @@ it("waitFor bigger circular store", () => {
     });
 });
 
-it("dispatch in the middle of dispatch", () => {
+it("while dispatching in the middle of dispatch throws an error", () => {
     const store1 = () => {
         expect(() => dispatcher.dispatch(testActionCreator())).toThrow();
     };
@@ -119,4 +127,19 @@ it("dispatch in the middle of dispatch", () => {
     dispatcher.register(store1);
 
     dispatcher.dispatch(testActionCreator());
+});
+
+it("dispatch class action", () => {
+    const mock = jest.fn();
+    const classAction = new TestClassAction("text");
+
+    const dispatchToken = dispatcher.register(mock);
+    dispatcher.dispatch(classAction);
+
+    const actionFromCallback: FSA = mock.mock.calls[0][0];
+
+    expect(actionFromCallback).toBeFSA();
+    expect(actionFromCallback.payload).toBeInstanceOf(TestClassAction);
+
+    dispatcher.unregister(dispatchToken);
 });
