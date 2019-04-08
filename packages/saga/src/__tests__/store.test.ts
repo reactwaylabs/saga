@@ -32,12 +32,12 @@ function createTestStore(_dispatcher: Dispatcher<any>): Store<StoreState> {
         reducer: handleFluxActions<StoreState, StoreActions>({
             COUNTER_INCREMENT: (state, action) => {
                 return {
-                    counter: state.counter + 1
+                    counter: state.counter + action.payload.plusCount
                 };
             },
             COUNTER_DECREMENT: (state, action) => {
                 return {
-                    counter: state.counter - 1
+                    counter: state.counter - action.payload.minusCount
                 };
             }
         })
